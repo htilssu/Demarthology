@@ -1,36 +1,51 @@
+import axios from 'axios';
 import { ApiResponse, ApiError, ApiRequestConfig } from '../types';
 
 // Base API configuration
 class ApiClient {
-  private baseURL: string;
-  private defaultHeaders: Record<string, string>;
+  private axiosInstance: any; // Using any for the instance type to avoid type conflicts
 
   constructor() {
-    this.baseURL = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
-    this.defaultHeaders = {
-      'Content-Type': 'application/json',
-    };
+    this.axiosInstance = axios.create({
+      baseURL: process.env.REACT_APP_API_URL || 'http://localhost:3001/api',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    // Setup response interceptor for consistent error handling
+    this.axiosInstance.interceptors.response.use(
+      (response: any) => response,
+      (error: any) => {
+        const apiError: ApiError = {
+          message: error.response?.data?.message || error.message,
+          code: error.response?.status || 'NETWORK_ERROR',
+          details: error.response?.data,
+        };
+        return Promise.reject(apiError);
+      }
+    );
   }
 
   /**
    * Set authorization token for API requests
    */
   setAuthToken(token: string): void {
-    this.defaultHeaders.Authorization = `Bearer ${token}`;
+    this.axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${token}`;
   }
 
   /**
    * Remove authorization token
    */
   removeAuthToken(): void {
-    delete this.defaultHeaders.Authorization;
+    delete this.axiosInstance.defaults.headers.common['Authorization'];
   }
 
   /**
    * Set custom header
    */
   setHeader(key: string, value: string): void {
-    this.defaultHeaders[key] = value;
+    this.axiosInstance.defaults.headers.common[key] = value;
   }
 
   /**
@@ -40,49 +55,22 @@ class ApiClient {
     endpoint: string,
     config: ApiRequestConfig
   ): Promise<ApiResponse<T>> {
-    const url = `${this.baseURL}${endpoint}`;
-    
-    const headers = {
-      ...this.defaultHeaders,
-      ...config.headers,
-    };
-
-    const requestOptions: RequestInit = {
+    const axiosConfig: any = {
       method: config.method,
-      headers,
+      url: endpoint,
+      headers: config.headers,
     };
 
-    // Add body for non-GET requests
+    // Add data for non-GET requests
     if (config.body && config.method !== 'GET') {
-      requestOptions.body = JSON.stringify(config.body);
+      axiosConfig.data = config.body;
     }
 
     try {
-      const response = await fetch(url, requestOptions);
-      
-      // Handle HTTP errors
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        const error: ApiError = {
-          message: errorData.message || `HTTP Error: ${response.status}`,
-          code: response.status,
-          details: errorData,
-        };
-        throw error;
-      }
-
-      // Parse response
-      const data = await response.json();
-      return data;
+      const response = await this.axiosInstance.request(axiosConfig);
+      return response.data;
     } catch (error) {
-      // Handle network or other errors
-      if (error instanceof Error) {
-        const apiError: ApiError = {
-          message: error.message,
-          code: 'NETWORK_ERROR',
-        };
-        throw apiError;
-      }
+      // Error is already processed by the interceptor
       throw error;
     }
   }
@@ -156,14 +144,14 @@ class ApiClient {
    * Get current API URL
    */
   getBaseURL(): string {
-    return this.baseURL;
+    return this.axiosInstance.defaults.baseURL || '';
   }
 
   /**
    * Update API URL (useful for switching environments)
    */
   setBaseURL(url: string): void {
-    this.baseURL = url;
+    this.axiosInstance.defaults.baseURL = url;
   }
 }
 

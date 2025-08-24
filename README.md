@@ -7,6 +7,7 @@ Dự án React với TypeScript và Tailwind CSS được setup sẵn với cấ
 - **React 19** - Thư viện JavaScript cho UI
 - **TypeScript** - Typed JavaScript
 - **Tailwind CSS** - Utility-first CSS framework
+- **Axios** - HTTP client cho API requests
 - **PostCSS** - CSS processing tool
 - **Autoprefixer** - CSS vendor prefixing
 
@@ -108,7 +109,7 @@ REACT_APP_ENV=development
 ```
 
 ### API Client
-Dự án có sẵn API client để giao tiếp với backend:
+Dự án có sẵn API client sử dụng **Axios** để giao tiếp với backend:
 
 ```typescript
 import { apiClient } from './utils/api';
