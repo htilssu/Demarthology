@@ -1,5 +1,6 @@
 import React from 'react';
 import Button from './components/Button';
+import ApiDemo from './components/ApiDemo';
 
 function App() {
   return (
@@ -41,6 +42,10 @@ function App() {
               Typed JavaScript for better development experience
             </p>
           </div>
+        </div>
+
+        <div className="mt-8">
+          <ApiDemo />
         </div>
         
         <div className="mt-8 text-center space-x-4">
