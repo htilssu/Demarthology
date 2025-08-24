@@ -37,4 +37,7 @@ export interface ApiRequestConfig {
   method: HttpMethod;
   headers?: Record<string, string>;
   body?: any;
-} 
+}
+
+// Re-export model types for convenience
+export * from '../models'; 

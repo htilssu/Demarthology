@@ -1,105 +1,139 @@
-# React + Tailwind CSS + TypeScript Project
+# Demarthology - MVC Architecture Demo
 
-Dự án React với TypeScript và Tailwind CSS được setup sẵn với cấu trúc chuẩn.
+A comprehensive TypeScript React application demonstrating the **Model-View-Controller (MVC)** pattern with **Axios** integration and modern architecture.
 
-## 🚀 Công nghệ sử dụng
+## 🚀 Features
 
-- **React 19** - Thư viện JavaScript cho UI
-- **TypeScript** - Typed JavaScript
-- **Tailwind CSS** - Utility-first CSS framework
-- **Axios** - HTTP client cho API requests
-- **PostCSS** - CSS processing tool
-- **Autoprefixer** - CSS vendor prefixing
+### MVC Architecture Implementation
+- **📋 Models** - Data structures with business logic and validation
+- **🎨 Views** - React components for UI presentation
+- **🎮 Controllers** - Custom hooks and service classes for state management
 
-## 📁 Cấu trúc thư mục
+### Modern Tech Stack
+- ⚛️ **React 19** - Latest React with hooks and modern patterns
+- 📝 **TypeScript** - Fully typed for better development experience
+- 🌐 **Axios** - Modern HTTP client with interceptors and error handling
+- 🎨 **Tailwind CSS** - Utility-first CSS framework
+- 🏗️ **Clean Architecture** - Separation of concerns with MVC pattern
+
+### API Integration
+- ✅ **Axios-powered HTTP client** - Modern, feature-rich
+- ✅ **Environment configuration** - Reads from `REACT_APP_API_URL`
+- ✅ **Complete HTTP methods** - GET, POST, PUT, DELETE, PATCH
+- ✅ **Authentication support** - Token management
+- ✅ **Error handling** - Comprehensive with interceptors
+- ✅ **TypeScript support** - Fully typed responses
+
+## 📁 Project Structure
 
 ```
 src/
-├── components/     # Reusable components
-│   ├── Button.tsx  # Button component
-│   └── ApiDemo.tsx # API demo component
-├── pages/         # Page components
-├── hooks/         # Custom React hooks
-├── utils/         # Utility functions
-│   ├── helpers.ts # General utility functions
-│   ├── api.ts     # Base API client
-│   └── apiExample.ts # API usage examples
-├── types/         # TypeScript type definitions
-├── assets/        # Static assets (images, icons, etc.)
-├── App.tsx        # Main App component
-└── index.js       # Entry point
+├── models/           # Data models and business logic
+│   ├── User.ts      # User model with validation
+│   ├── Product.ts   # Product model with business logic
+│   └── index.ts     # Model exports and utilities
+├── services/         # API service classes (Controllers)
+│   ├── UserService.ts    # User API operations
+│   ├── ProductService.ts # Product API operations
+│   └── index.ts     # Service exports
+├── hooks/           # Custom React hooks (Controllers)
+│   ├── useUsers.ts  # User state management
+│   ├── useProducts.ts # Product state management
+│   └── index.ts     # Hook exports and utilities
+├── components/      # React components (Views)
+│   ├── UserList.tsx     # User management demo
+│   ├── ProductList.tsx  # Product management demo
+│   ├── MVCDemo.tsx      # Comprehensive MVC demo
+│   ├── ApiDemo.tsx      # API integration demo
+│   └── Button.tsx       # Reusable UI components
+├── utils/           # Utilities and configurations
+│   └── api.ts       # Axios client configuration
+└── types/           # TypeScript type definitions
+    └── index.ts     # Common types and interfaces
 ```
 
-## 🛠️ Cài đặt và chạy
+## 🏗️ MVC Architecture
 
-### Cài đặt dependencies
-```bash
-npm install
-```
+### Model Layer (`src/models/`)
+Data structures, validation, and business logic:
 
-### Chạy development server
-```bash
-npm start
-```
+```typescript
+// User model with business logic
+class UserModel {
+  get fullName(): string {
+    return `${this.user.firstName} ${this.user.lastName}`;
+  }
 
-Ứng dụng sẽ chạy tại [http://localhost:3000](http://localhost:3000)
+  get isAdmin(): boolean {
+    return this.user.role === UserRole.ADMIN;
+  }
 
-### Build production
-```bash
-npm run build
-```
-
-### Chạy tests
-```bash
-npm test
-```
-
-## 🎨 Sử dụng Tailwind CSS
-
-Dự án đã được cấu hình sẵn Tailwind CSS. Bạn có thể sử dụng các utility classes trực tiếp trong JSX:
-
-```tsx
-<div className="bg-blue-500 text-white p-4 rounded-lg hover:bg-blue-600">
-  Hello Tailwind!
-</div>
-```
-
-## 📝 TypeScript
-
-Dự án sử dụng TypeScript để type safety. Các file có đuôi `.tsx` cho React components và `.ts` cho utility functions.
-
-### Ví dụ component với TypeScript:
-
-```tsx
-interface ButtonProps {
-  children: React.ReactNode;
-  onClick?: () => void;
-  variant?: 'primary' | 'secondary';
+  static validateCreateRequest(request: CreateUserRequest): string[] {
+    // Validation logic
+  }
 }
+```
 
-const Button: React.FC<ButtonProps> = ({ children, onClick, variant = 'primary' }) => {
-  return (
-    <button 
-      onClick={onClick}
-      className={`btn btn-${variant}`}
-    >
-      {children}
-    </button>
-  );
+### View Layer (`src/components/`)
+React components for UI presentation:
+
+```typescript
+// React component using MVC pattern
+const UserList: React.FC = () => {
+  const { users, loading, error, createUser } = useUsers();
+  // Component UI logic
 };
 ```
 
-## 🔧 Cấu hình
+### Controller Layer (`src/hooks/` + `src/services/`)
+State management and API operations:
 
-### Environment Variables
-Dự án sử dụng các biến môi trường để cấu hình:
+```typescript
+// Custom hook for user management
+export function useUsers() {
+  const [users, setUsers] = useState([]);
+  
+  const createUser = useCallback(async (userData) => {
+    const newUser = await userService.createUser(userData);
+    // Update local state
+  }, []);
 
-1. Copy `.env.example` thành `.env`:
-```bash
-cp .env.example .env
+  return { users, createUser, ... };
+}
+
+// Service class for API operations
+class UserService {
+  async createUser(userData: CreateUserRequest): Promise<UserModel> {
+    const response = await apiClient.post('/users', userData);
+    return new UserModel(response.data);
+  }
+}
 ```
 
-2. Cấu hình các biến môi trường trong file `.env`:
+## 🌐 API Integration with Axios
+
+### Base API Client
+
+```typescript
+import { apiClient } from './utils/api';
+
+// GET request
+const users = await apiClient.get('/users');
+
+// POST request with data
+const newUser = await apiClient.post('/users', { 
+  name: 'John', 
+  email: 'john@example.com' 
+});
+
+// Authentication support
+apiClient.setAuthToken('your-jwt-token');
+```
+
+### Environment Configuration
+
+Create a `.env` file:
+
 ```bash
 # API Configuration
 REACT_APP_API_URL=http://localhost:3001/api
@@ -108,81 +142,111 @@ REACT_APP_API_URL=http://localhost:3001/api
 REACT_APP_ENV=development
 ```
 
-### API Client
-Dự án có sẵn API client sử dụng **Axios** để giao tiếp với backend:
+### Service Layer Pattern
 
 ```typescript
-import { apiClient } from './utils/api';
+// Example API call through service
+import { userService } from './services';
 
-// GET request
-const users = await apiClient.get('/users');
+// Get users with filtering
+const users = await userService.getUsers({
+  page: 1,
+  limit: 10,
+  role: 'user'
+});
 
-// POST request
-const newUser = await apiClient.post('/users', userData);
-
-// PUT request
-const updatedUser = await apiClient.put('/users/1', userData);
-
-// DELETE request
-await apiClient.delete('/users/1');
-
-// Set auth token
-apiClient.setAuthToken('your-jwt-token');
+// Create new user with validation
+const newUser = await userService.createUser({
+  username: 'john_doe',
+  email: 'john@example.com',
+  firstName: 'John',
+  lastName: 'Doe',
+  password: 'secure123'
+});
 ```
 
-### Tailwind CSS
-File cấu hình: `tailwind.config.js`
-- Content paths đã được setup cho React
-- Có thể extend theme và plugins
+## 🚀 Getting Started
 
-### TypeScript
-File cấu hình: `tsconfig.json`
-- Strict mode enabled
-- JSX support
-- Module resolution cho Node.js
+### Prerequisites
+- Node.js (v14 or higher)
+- npm or yarn
 
-### PostCSS
-File cấu hình: `postcss.config.js`
-- Tailwind CSS plugin
-- Autoprefixer plugin
+### Installation
 
-## 📦 Components có sẵn
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/htilssu/Demarthology.git
+   cd Demarthology
+   ```
 
-### Button Component
-Component Button với nhiều variants và sizes:
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
 
-```tsx
-import Button from './components/Button';
+3. Create environment file:
+   ```bash
+   cp .env.example .env
+   ```
 
-<Button variant="primary" size="lg">
-  Click me
-</Button>
+4. Update the `.env` file with your API URL:
+   ```bash
+   REACT_APP_API_URL=http://localhost:3001/api
+   ```
+
+5. Start the development server:
+   ```bash
+   npm start
+   ```
+
+6. Open [http://localhost:3000](http://localhost:3000) to view the application.
+
+### Building for Production
+
+```bash
+npm run build
 ```
 
-## 🎯 Custom Hooks
+The build folder will contain the optimized production files.
 
-### useLocalStorage
-Hook để quản lý localStorage với TypeScript:
+## 📚 Available Scripts
 
-```tsx
-import useLocalStorage from './hooks/useLocalStorage';
+- `npm start` - Runs the app in development mode
+- `npm run build` - Builds the app for production
+- `npm test` - Launches the test runner
+- `npm run eject` - Ejects from Create React App (one-way operation)
 
-const [user, setUser] = useLocalStorage('user', null);
-```
+## 🎯 Demo Features
 
-## 🛠️ Development
+### User Management Demo
+- ✅ Create, read, update, delete users
+- ✅ User search and filtering
+- ✅ Role management (Admin, Moderator, User)
+- ✅ Form validation with business logic
+- ✅ Real-time state updates
 
-### Linting
-Dự án sử dụng ESLint với cấu hình React và TypeScript.
+### Product Management Demo
+- ✅ Product CRUD operations
+- ✅ Stock management
+- ✅ Category filtering
+- ✅ Price updates
+- ✅ Search functionality
 
-### Formatting
-Sử dụng Prettier để format code (nếu cài đặt).
+### API Integration Demo
+- ✅ Live API connection testing
+- ✅ Environment configuration display
+- ✅ Error handling demonstration
+- ✅ HTTP methods showcase
 
-## 📚 Tài liệu tham khảo
+## 🏆 Best Practices Implemented
 
-- [React Documentation](https://react.dev/)
-- [Tailwind CSS Documentation](https://tailwindcss.com/docs)
-- [TypeScript Documentation](https://www.typescriptlang.org/docs/)
+- **Separation of Concerns** - Clear separation between Models, Views, and Controllers
+- **TypeScript** - Full type safety throughout the application
+- **Error Handling** - Comprehensive error handling with user feedback
+- **State Management** - Centralized state management with custom hooks
+- **Code Reusability** - Reusable components and services
+- **Validation** - Client-side validation with business logic
+- **Responsive Design** - Mobile-friendly UI with Tailwind CSS
 
 ## 🤝 Contributing
 
@@ -194,4 +258,12 @@ Sử dụng Prettier để format code (nếu cài đặt).
 
 ## 📄 License
 
-This project is licensed under the MIT License.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 📞 Support
+
+If you have any questions or need help, please open an issue on GitHub.
+
+---
+
+**Built with ❤️ using React, TypeScript, and Axios**
