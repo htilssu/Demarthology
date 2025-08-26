@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Menu, Bell, ChevronDown, LogOut, Settings, User, History } from "lucide-react";
+import { Menu, Bell, ChevronDown, LogOut, User, History } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const Navbar: React.FC = () => {
