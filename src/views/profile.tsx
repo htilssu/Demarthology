@@ -1,10 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Edit3, Save, X, Heart, Pill, AlertTriangle, Activity, Users, FileText } from 'lucide-react';
-import Navbar from '../components/navbar';
-import Footer from '../components/footer';
 import useProfileController from '../controllers/useProfileController';
 import useMedicalHistoryController from '../controllers/useMedicalHistoryController';
-import { UserMedical } from '../models/user-medical';
 
 function Profile() {
     const { 
@@ -18,11 +15,25 @@ function Profile() {
     } = useProfileController();
 
     const { medicalHistory, loadMedicalHistory } = useMedicalHistoryController();
-    const [selectedRecord, setSelectedRecord] = useState<UserMedical | null>(null);
+    const [selectedRecords, setSelectedRecords] = useState<string[]>([]);
 
     useEffect(() => {
         loadMedicalHistory();
     }, [loadMedicalHistory]);
+
+    const toggleRecordSelection = (recordId: string) => {
+        setSelectedRecords(prev => {
+            if (prev.includes(recordId)) {
+                return prev.filter(id => id !== recordId);
+            } else {
+                return [...prev, recordId];
+            }
+        });
+    };
+
+    const getSelectedRecordsInOrder = () => {
+        return medicalHistory.filter(record => selectedRecords.includes(record.id));
+    };
 
     const formatDate = (dateString: string) => {
         return new Date(dateString).toLocaleDateString('vi-VN');
@@ -44,6 +55,7 @@ function Profile() {
                             <div className="bg-white rounded-lg shadow-md overflow-hidden">
                                 <div className="bg-gradient-to-r from-[#145566] to-[#145569] text-white p-4">
                                     <h2 className="font-semibold">Danh sách bệnh án</h2>
+                                    <p className="text-xs text-gray-200 mt-1">Chọn nhiều bệnh án để xem</p>
                                 </div>
                                 
                                 <div className="p-4">
@@ -63,18 +75,31 @@ function Profile() {
                                             {medicalHistory.map((record) => (
                                                 <button
                                                     key={record.id}
-                                                    onClick={() => setSelectedRecord(record)}
-                                                    className={`w-full text-left p-3 rounded-lg border transition-colors ${
-                                                        selectedRecord?.id === record.id
+                                                    onClick={() => toggleRecordSelection(record.id)}
+                                                    className={`w-full text-left p-3 rounded-lg border transition-colors relative ${
+                                                        selectedRecords.includes(record.id)
                                                             ? 'bg-[#145566] text-white border-[#145566]'
                                                             : 'bg-gray-50 hover:bg-gray-100 border-gray-200'
                                                     }`}
                                                 >
-                                                    <div className="font-medium text-sm">Bệnh án #{record.id}</div>
-                                                    <div className={`text-xs mt-1 ${
-                                                        selectedRecord?.id === record.id ? 'text-gray-200' : 'text-gray-500'
-                                                    }`}>
-                                                        {formatDate(record.lastUpdated)}
+                                                    <div className="flex items-center justify-between">
+                                                        <div className="flex-1">
+                                                            <div className="font-medium text-sm">Bệnh án #{record.id}</div>
+                                                            <div className={`text-xs mt-1 ${
+                                                                selectedRecords.includes(record.id) ? 'text-gray-200' : 'text-gray-500'
+                                                            }`}>
+                                                                {formatDate(record.lastUpdated)}
+                                                            </div>
+                                                        </div>
+                                                        <div className={`w-4 h-4 rounded border-2 flex items-center justify-center ${
+                                                            selectedRecords.includes(record.id)
+                                                                ? 'bg-white border-white'
+                                                                : 'bg-transparent border-gray-400'
+                                                        }`}>
+                                                            {selectedRecords.includes(record.id) && (
+                                                                <div className="w-2 h-2 bg-[#145566] rounded-sm"></div>
+                                                            )}
+                                                        </div>
                                                     </div>
                                                 </button>
                                             ))}
@@ -212,9 +237,9 @@ function Profile() {
                                 </div>
                             </div>
 
-                            {/* Selected Medical Record */}
-                            {selectedRecord && (
-                                <div className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200">
+                            {/* Selected Medical Records */}
+                            {getSelectedRecordsInOrder().map((selectedRecord) => (
+                                <div key={selectedRecord.id} className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200">
                                     {/* Medical Record Header */}
                                     <div className="bg-gradient-to-r from-[#145566] to-[#145569] text-white p-4">
                                         <div className="flex items-center justify-between">
@@ -351,14 +376,14 @@ function Profile() {
                                         </div>
                                     </div>
                                 </div>
-                            )}
+                            ))}
 
                             {/* Instructions when no record selected */}
-                            {!selectedRecord && medicalHistory.length > 0 && (
+                            {selectedRecords.length === 0 && medicalHistory.length > 0 && (
                                 <div className="bg-white rounded-lg shadow-md p-8 text-center border border-gray-200">
                                     <FileText size={48} className="mx-auto text-gray-400 mb-4" />
                                     <h3 className="text-lg font-semibold text-gray-700 mb-2">Chọn bệnh án để xem chi tiết</h3>
-                                    <p className="text-gray-500">Nhấp vào một bệnh án trong danh sách bên trái để xem thông tin chi tiết</p>
+                                    <p className="text-gray-500">Nhấp vào các bệnh án trong danh sách bên trái để xem thông tin chi tiết. Bạn có thể chọn nhiều bệnh án cùng lúc.</p>
                                 </div>
                             )}
                         </div>
