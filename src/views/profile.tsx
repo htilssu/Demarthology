@@ -5,6 +5,9 @@ import Footer from '../components/footer';
 import useProfileController from '../controllers/useProfileController';
 import useMedicalHistoryController from '../controllers/useMedicalHistoryController';
 import { UserMedical } from '../models/user-medical';
+import MotionWrapper from '../components/MotionWrapper';
+import MedicalParticles from '../components/MedicalParticles';
+import '../styles/motion.css';
 
 function Profile() {
     const { 
@@ -29,62 +32,68 @@ function Profile() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-gray-50 relative">
+            <MedicalParticles density="light" />
             <Navbar />
             
-            <div className="container mx-auto px-4 py-8">
+            <div className="container mx-auto px-4 py-8 relative z-10">
                 <div className="max-w-7xl mx-auto">
                     {/* Header */}
-                    <div className="mb-6">
-                        <h1 className="text-3xl font-bold text-[#145566]">Hồ sơ bệnh án</h1>
-                        <p className="text-gray-600 mt-1">Quản lý thông tin cá nhân và lịch sử sức khỏe</p>
-                    </div>
+                    <MotionWrapper animation="slideUp" delay={0.1}>
+                        <div className="mb-6">
+                            <h1 className="text-3xl font-bold text-[#145566]">Hồ sơ bệnh án</h1>
+                            <p className="text-gray-600 mt-1">Quản lý thông tin cá nhân và lịch sử sức khỏe</p>
+                        </div>
+                    </MotionWrapper>
 
                     <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
                         {/* Left Sidebar - Medical Records Navigation */}
-                        <div className="lg:col-span-1">
-                            <div className="bg-white rounded-lg shadow-md overflow-hidden">
-                                <div className="bg-gradient-to-r from-[#145566] to-[#145569] text-white p-4">
-                                    <h2 className="font-semibold">Danh sách bệnh án</h2>
-                                </div>
+                        <MotionWrapper animation="slideLeft" delay={0.2}>
+                            <div className="lg:col-span-1">
+                                <div className="bg-white rounded-lg shadow-md overflow-hidden motion-card">
+                                    <div className="bg-gradient-to-r from-[#145566] to-[#145569] text-white p-4">
+                                        <h2 className="font-semibold">Danh sách bệnh án</h2>
+                                    </div>
                                 
-                                <div className="p-4">
-                                    {medicalHistory.length === 0 ? (
-                                        <div className="text-center py-4">
-                                            <FileText size={32} className="mx-auto text-gray-400 mb-2" />
-                                            <p className="text-gray-500 text-sm mb-3">Chưa có bệnh án</p>
-                                            <button 
-                                                onClick={loadMedicalHistory}
-                                                className="bg-[#145566] text-white text-xs px-3 py-2 rounded hover:bg-[#0f3f44] transition-colors"
-                                            >
-                                                Tải dữ liệu mẫu
-                                            </button>
-                                        </div>
-                                    ) : (
-                                        <div className="space-y-2">
-                                            {medicalHistory.map((record) => (
-                                                <button
-                                                    key={record.id}
-                                                    onClick={() => setSelectedRecord(record)}
-                                                    className={`w-full text-left p-3 rounded-lg border transition-colors ${
-                                                        selectedRecord?.id === record.id
-                                                            ? 'bg-[#145566] text-white border-[#145566]'
-                                                            : 'bg-gray-50 hover:bg-gray-100 border-gray-200'
-                                                    }`}
+                                    <div className="p-4">
+                                        {medicalHistory.length === 0 ? (
+                                            <div className="text-center py-4">
+                                                <FileText size={32} className="mx-auto text-gray-400 mb-2" />
+                                                <p className="text-gray-500 text-sm mb-3">Chưa có bệnh án</p>
+                                                <button 
+                                                    onClick={loadMedicalHistory}
+                                                    className="bg-[#145566] text-white text-xs px-3 py-2 rounded hover:bg-[#0f3f44] transition-colors motion-button"
                                                 >
-                                                    <div className="font-medium text-sm">Bệnh án #{record.id}</div>
-                                                    <div className={`text-xs mt-1 ${
-                                                        selectedRecord?.id === record.id ? 'text-gray-200' : 'text-gray-500'
-                                                    }`}>
-                                                        {formatDate(record.lastUpdated)}
-                                                    </div>
+                                                    Tải dữ liệu mẫu
                                                 </button>
-                                            ))}
-                                        </div>
-                                    )}
+                                            </div>
+                                        ) : (
+                                            <div className="space-y-2">
+                                                {medicalHistory.map((record, index) => (
+                                                    <MotionWrapper key={record.id} animation="slideUp" delay={0.3 + index * 0.1}>
+                                                        <button
+                                                            onClick={() => setSelectedRecord(record)}
+                                                            className={`w-full text-left p-3 rounded-lg border transition-colors motion-card ${
+                                                                selectedRecord?.id === record.id
+                                                                    ? 'bg-[#145566] text-white border-[#145566]'
+                                                                    : 'bg-gray-50 hover:bg-gray-100 border-gray-200'
+                                                            }`}
+                                                        >
+                                                            <div className="font-medium text-sm">Bệnh án #{record.id}</div>
+                                                            <div className={`text-xs mt-1 ${
+                                                                selectedRecord?.id === record.id ? 'text-gray-200' : 'text-gray-500'
+                                                            }`}>
+                                                                {formatDate(record.lastUpdated)}
+                                                            </div>
+                                                        </button>
+                                                    </MotionWrapper>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                                        </MotionWrapper>
 
                         {/* Right Content - Profile and Selected Medical Record */}
                         <div className="lg:col-span-3 space-y-6">

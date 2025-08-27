@@ -3,6 +3,9 @@ import { Heart, Pill, AlertTriangle, Activity, Users, Calendar, FileText, Plus }
 import Navbar from '../components/navbar';
 import Footer from '../components/footer';
 import useMedicalHistoryController from "../controllers/useMedicalHistoryController";
+import MotionWrapper from '../components/MotionWrapper';
+import MedicalParticles from '../components/MedicalParticles';
+import '../styles/motion.css';
 
 export default function MedicalHistory() {
    const { medicalHistory, loadMedicalHistory } =  useMedicalHistoryController();
@@ -16,39 +19,49 @@ export default function MedicalHistory() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-gray-50 relative">
+            <MedicalParticles density="light" />
             <Navbar />
             
-            <div className="container mx-auto px-4 py-8">
+            <div className="container mx-auto px-4 py-8 relative z-10">
                 <div className="max-w-6xl mx-auto">
                     {/* Header */}
-                    <div className="flex items-center justify-between mb-6">
-                        <div>
-                            <h1 className="text-3xl font-bold text-[#145566]">Lịch sử bệnh án</h1>
-                            <p className="text-gray-600 mt-1">Quản lý thông tin sức khỏe và lịch sử điều trị</p>
-                        </div>
-                        <button className="flex items-center space-x-2 bg-[#145566] text-white px-4 py-2 rounded-lg hover:bg-[#0f3f44] transition-colors">
-                            <Plus size={16} />
-                            <span>Thêm bệnh án</span>
-                        </button>
-                    </div>
-
-                    {medicalHistory.length === 0 ? (
-                        <div className="bg-white rounded-lg shadow-md p-8 text-center">
-                            <FileText size={48} className="mx-auto text-gray-400 mb-4" />
-                            <h3 className="text-xl font-semibold text-gray-700 mb-2">Chưa có bệnh án nào</h3>
-                            <p className="text-gray-500 mb-4">Bắt đầu bằng cách thêm thông tin sức khỏe của bạn</p>
-                            <button 
-                                onClick={loadMedicalHistory}
-                                className="bg-[#145566] text-white px-6 py-3 rounded-lg hover:bg-[#0f3f44] transition-colors"
-                            >
-                                Tải dữ liệu mẫu
+                    <MotionWrapper animation="slideUp" delay={0.1}>
+                        <div className="flex items-center justify-between mb-6">
+                            <div>
+                                <h1 className="text-3xl font-bold text-[#145566]">Lịch sử bệnh án</h1>
+                                <p className="text-gray-600 mt-1">Quản lý thông tin sức khỏe và lịch sử điều trị</p>
+                            </div>
+                            <button className="flex items-center space-x-2 bg-[#145566] text-white px-4 py-2 rounded-lg hover:bg-[#0f3f44] transition-colors motion-button">
+                                <Plus size={16} />
+                                <span>Thêm bệnh án</span>
                             </button>
                         </div>
+                    </MotionWrapper>
+
+                    {medicalHistory.length === 0 ? (
+                        <MotionWrapper animation="zoomIn" delay={0.3}>
+                            <div className="bg-white rounded-lg shadow-md p-8 text-center motion-card">
+                                <FileText size={48} className="mx-auto text-gray-400 mb-4" />
+                                <h3 className="text-xl font-semibold text-gray-700 mb-2">Chưa có bệnh án nào</h3>
+                                <p className="text-gray-500 mb-4">Bắt đầu bằng cách thêm thông tin sức khỏe của bạn</p>
+                                <button 
+                                    onClick={loadMedicalHistory}
+                                    className="bg-[#145566] text-white px-6 py-3 rounded-lg hover:bg-[#0f3f44] transition-colors motion-button"
+                                >
+                                    Tải dữ liệu mẫu
+                                </button>
+                            </div>
+                        </MotionWrapper>
                     ) : (
                         <div className="space-y-6">
-                            {medicalHistory.map((record) => (
-                                <div key={record.id} className="bg-white rounded-lg shadow-md overflow-hidden">
+                            {medicalHistory.map((record, index) => (
+                                <MotionWrapper 
+                                    key={record.id} 
+                                    animation="slideUp" 
+                                    delay={0.2 + index * 0.1}
+                                >
+                                    <div className="bg-white rounded-lg shadow-md overflow-hidden motion-card">
                                     {/* Header của bệnh án */}
                                     <div className="bg-gradient-to-r from-[#145566] to-[#145569] text-white p-4">
                                         <div className="flex items-center justify-between">
@@ -162,53 +175,64 @@ export default function MedicalHistory() {
 
                                         {/* Action buttons */}
                                         <div className="mt-6 pt-6 border-t border-gray-200 flex space-x-3">
-                                            <button className="bg-[#145566] text-white px-4 py-2 rounded-lg hover:bg-[#0f3f44] transition-colors">
+                                            <button className="bg-[#145566] text-white px-4 py-2 rounded-lg hover:bg-[#0f3f44] transition-colors motion-button">
                                                 Chỉnh sửa
                                             </button>
-                                            <button className="border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors">
+                                            <button className="border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors motion-button">
                                                 Xuất PDF
                                             </button>
-                                            <button className="text-red-600 hover:text-red-700 px-4 py-2 transition-colors">
+                                            <button className="text-red-600 hover:text-red-700 px-4 py-2 transition-colors motion-button">
                                                 Xóa
                                             </button>
                                         </div>
                                     </div>
                                 </div>
+                                </MotionWrapper>
                             ))}
                         </div>
                     )}
 
                     {/* Summary Statistics */}
                     {medicalHistory.length > 0 && (
-                        <div className="mt-8 bg-white rounded-lg shadow-md p-6">
-                            <h2 className="text-xl font-semibold text-[#145566] mb-4">Tổng quan</h2>
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                <div className="text-center p-4 bg-red-50 rounded-lg">
-                                    <div className="text-2xl font-bold text-red-600">
-                                        {medicalHistory.reduce((acc, record) => acc + record.conditions.length, 0)}
-                                    </div>
-                                    <div className="text-sm text-red-700">Tình trạng</div>
-                                </div>
-                                <div className="text-center p-4 bg-blue-50 rounded-lg">
-                                    <div className="text-2xl font-bold text-blue-600">
-                                        {medicalHistory.reduce((acc, record) => acc + record.medications.length, 0)}
-                                    </div>
-                                    <div className="text-sm text-blue-700">Thuốc</div>
-                                </div>
-                                <div className="text-center p-4 bg-yellow-50 rounded-lg">
-                                    <div className="text-2xl font-bold text-yellow-600">
-                                        {medicalHistory.reduce((acc, record) => acc + record.allergies.length, 0)}
-                                    </div>
-                                    <div className="text-sm text-yellow-700">Dị ứng</div>
-                                </div>
-                                <div className="text-center p-4 bg-green-50 rounded-lg">
-                                    <div className="text-2xl font-bold text-green-600">
-                                        {medicalHistory.reduce((acc, record) => acc + record.familyHistory.length, 0)}
-                                    </div>
-                                    <div className="text-sm text-green-700">Tiền sử gia đình</div>
+                        <MotionWrapper animation="slideUp" delay={0.5}>
+                            <div className="mt-8 bg-white rounded-lg shadow-md p-6 motion-card">
+                                <h2 className="text-xl font-semibold text-[#145566] mb-4">Tổng quan</h2>
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 motion-stagger">
+                                    <MotionWrapper animation="zoomIn" delay={0.6}>
+                                        <div className="text-center p-4 bg-red-50 rounded-lg motion-card">
+                                            <div className="text-2xl font-bold text-red-600">
+                                                {medicalHistory.reduce((acc, record) => acc + record.conditions.length, 0)}
+                                            </div>
+                                            <div className="text-sm text-red-700">Tình trạng</div>
+                                        </div>
+                                    </MotionWrapper>
+                                    <MotionWrapper animation="zoomIn" delay={0.7}>
+                                        <div className="text-center p-4 bg-blue-50 rounded-lg motion-card">
+                                            <div className="text-2xl font-bold text-blue-600">
+                                                {medicalHistory.reduce((acc, record) => acc + record.medications.length, 0)}
+                                            </div>
+                                            <div className="text-sm text-blue-700">Thuốc</div>
+                                        </div>
+                                    </MotionWrapper>
+                                    <MotionWrapper animation="zoomIn" delay={0.8}>
+                                        <div className="text-center p-4 bg-yellow-50 rounded-lg motion-card">
+                                            <div className="text-2xl font-bold text-yellow-600">
+                                                {medicalHistory.reduce((acc, record) => acc + record.allergies.length, 0)}
+                                            </div>
+                                            <div className="text-sm text-yellow-700">Dị ứng</div>
+                                        </div>
+                                    </MotionWrapper>
+                                    <MotionWrapper animation="zoomIn" delay={0.9}>
+                                        <div className="text-center p-4 bg-green-50 rounded-lg motion-card">
+                                            <div className="text-2xl font-bold text-green-600">
+                                                {medicalHistory.reduce((acc, record) => acc + record.familyHistory.length, 0)}
+                                            </div>
+                                            <div className="text-sm text-green-700">Tiền sử gia đình</div>
+                                        </div>
+                                    </MotionWrapper>
                                 </div>
                             </div>
-                        </div>
+                        </MotionWrapper>
                     )}
                 </div>
             </div>

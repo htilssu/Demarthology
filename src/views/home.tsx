@@ -2,7 +2,9 @@ import React, { useState } from 'react';
 import Navbar from '../components/navbar';
 import Footer from '../components/footer';
 import Medical3D from '../components/Medical3D';
+import MotionWrapper from '../components/MotionWrapper';
 import '../styles/medical3d.css';
+import '../styles/motion.css';
 
 const HomeView: React.FC = () => {
   const [activeFAQ, setActiveFAQ] = useState(0);
@@ -28,96 +30,87 @@ const HomeView: React.FC = () => {
     </section>
 
     <section id="about" className="py-20 bg-white">
-  <div className="container mx-auto px-4">
-    <div className="grid md:grid-cols-2 gap-16 items-center">
-      
-      <div className="relative">
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-4">
-            <div className="bg-gray-200 h-64 rounded-lg">
-              <img src="image2.jpg" alt="about" className="w-full h-full object-cover" />
+  <MotionWrapper animation="fadeIn" delay={0.2}>
+    <div className="container mx-auto px-4">
+      <div className="grid md:grid-cols-2 gap-16 items-center">
+        
+        <MotionWrapper animation="slideLeft" delay={0.4}>
+          <div className="relative">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-4">
+                <div className="bg-gray-200 h-64 rounded-lg motion-card">
+                  <img src="image2.jpg" alt="about" className="w-full h-full object-cover" />
+                </div>
+                <div className="bg-gray-300 h-32 rounded-lg motion-card">
+                  <img src="image3.jpg" alt="about" className="w-full h-full object-cover" />
+                </div>
+              </div>
+              <div className="space-y-4 pt-8">
+                <div className="bg-gray-300 h-32 rounded-lg motion-card">
+                  <img src="image4.png" alt="about" className="w-full h-full object-cover" />
+                </div>
+                <div className="bg-gray-200 h-64 rounded-lg motion-card">
+                  <img src="image5.webp" alt="about" className="w-full h-full object-cover" />
+                </div>
+              </div>
             </div>
-            <div className="bg-gray-300 h-32 rounded-lg">
-              <img src="image3.jpg" alt="about" className="w-full h-full object-cover" />
+            <div className="absolute bottom-4 left-4 bg-[#145566] text-white p-4 rounded-lg motion-float">
+              <div className="text-2xl font-bold">AI</div>
+              <div className="text-sm">Dermatology</div>
             </div>
           </div>
-          <div className="space-y-4 pt-8">
-            <div className="bg-gray-300 h-32 rounded-lg">
-              <img src="image4.png" alt="about" className="w-full h-full object-cover" />
-            </div>
-            <div className="bg-gray-200 h-64 rounded-lg">
-              <img src="image5.webp" alt="about" className="w-full h-full object-cover" />
-            </div>
-          </div>
-        </div>
-        <div className="absolute bottom-4 left-4 bg-[#145566] text-white p-4 rounded-lg">
-          <div className="text-2xl font-bold">AI</div>
-          <div className="text-sm">Dermatology</div>
-        </div>
-      </div>
+        </MotionWrapper>
       
       {/* Nội dung */}
-      <div>
-        <p className="text-[#145566] font-semibold mb-2">Công nghệ chẩn đoán thông minh</p>
-        <h2 className="text-4xl font-bold text-gray-800 mb-6">
-          HỆ THỐNG CHẨN ĐOÁN DA LIỄU AI ĐA MÔ HÌNH
-        </h2>
-        <p className="text-gray-600 mb-8">
-          Chúng tôi phát triển hệ thống chẩn đoán dựa trên công nghệ AI đa mô hình (Multiple Models) 
-          kết hợp với RAG (Retrieval-Augmented Generation) và tích hợp Gemini để mô tả bệnh, gợi ý 
-          câu hỏi, cũng như hỗ trợ phân biệt bệnh tương tự một cách toàn diện.
-        </p>
-        
-        <div className="grid md:grid-cols-2 gap-6 mb-8">
-          <div className="flex items-center space-x-3">
-            <div className="w-6 h-6 bg-[#145566] rounded-full flex items-center justify-center">
-              <span className="text-white text-sm">✓</span>
-            </div>
-            <span className="text-gray-700">Pipeline chẩn đoán đa tầng</span>
+      <MotionWrapper animation="slideRight" delay={0.6}>
+        <div>
+          <p className="text-[#145566] font-semibold mb-2">Công nghệ chẩn đoán thông minh</p>
+          <h2 className="text-4xl font-bold text-gray-800 mb-6">
+            HỆ THỐNG CHẨN ĐOÁN DA LIỄU AI ĐA MÔ HÌNH
+          </h2>
+          <p className="text-gray-600 mb-8">
+            Chúng tôi phát triển hệ thống chẩn đoán dựa trên công nghệ AI đa mô hình (Multiple Models) 
+            kết hợp với RAG (Retrieval-Augmented Generation) và tích hợp Gemini để mô tả bệnh, gợi ý 
+            câu hỏi, cũng như hỗ trợ phân biệt bệnh tương tự một cách toàn diện.
+          </p>
+          
+          <div className="grid md:grid-cols-2 gap-6 mb-8">
+            {[
+              "Pipeline chẩn đoán đa tầng",
+              "Tích hợp Gemini & RAG",
+              "Kết nối tri thức y khoa (Medline...)",
+              "Theo dõi & cảnh báo thông minh",
+              "Bảo mật dữ liệu tuyệt đối",
+              "Thử nghiệm trên 5 bộ dữ liệu lớn"
+            ].map((feature, index) => (
+              <MotionWrapper key={index} animation="slideUp" delay={0.8 + index * 0.1}>
+                <div className="flex items-center space-x-3">
+                  <div className="w-6 h-6 bg-[#145566] rounded-full flex items-center justify-center motion-pulse">
+                    <span className="text-white text-sm">✓</span>
+                  </div>
+                  <span className="text-gray-700">{feature}</span>
+                </div>
+              </MotionWrapper>
+            ))}
           </div>
-          <div className="flex items-center space-x-3">
-            <div className="w-6 h-6 bg-[#145566] rounded-full flex items-center justify-center">
-              <span className="text-white text-sm">✓</span>
+          
+          <MotionWrapper animation="slideUp" delay={1.4}>
+            <div className="flex items-center space-x-4 mb-8">
+              <div className="text-3xl font-bold text-[#145566]">200,000+</div>
+              <div className="text-gray-600">Hình ảnh da liễu trong dataset</div>
             </div>
-            <span className="text-gray-700">Tích hợp Gemini & RAG</span>
-          </div>
-          <div className="flex items-center space-x-3">
-            <div className="w-6 h-6 bg-[#145566] rounded-full flex items-center justify-center">
-              <span className="text-white text-sm">✓</span>
-            </div>
-            <span className="text-gray-700">Kết nối tri thức y khoa (Medline...)</span>
-          </div>
-          <div className="flex items-center space-x-3">
-            <div className="w-6 h-6 bg-[#145566] rounded-full flex items-center justify-center">
-              <span className="text-white text-sm">✓</span>
-            </div>
-            <span className="text-gray-700">Theo dõi & cảnh báo thông minh</span>
-          </div>
-          <div className="flex items-center space-x-3">
-            <div className="w-6 h-6 bg-[#145566] rounded-full flex items-center justify-center">
-              <span className="text-white text-sm">✓</span>
-            </div>
-            <span className="text-gray-700">Bảo mật dữ liệu tuyệt đối</span>
-          </div>
-          <div className="flex items-center space-x-3">
-            <div className="w-6 h-6 bg-[#145566] rounded-full flex items-center justify-center">
-              <span className="text-white text-sm">✓</span>
-            </div>
-            <span className="text-gray-700">Thử nghiệm trên 5 bộ dữ liệu lớn</span>
-          </div>
+          </MotionWrapper>
+          
+          <MotionWrapper animation="slideUp" delay={1.6}>
+            <button className="bg-[#145566] text-white px-6 py-3 rounded-lg hover:bg-[#0f3f44] transition-colors motion-button">
+              Tìm hiểu thêm
+            </button>
+          </MotionWrapper>
         </div>
-        
-        <div className="flex items-center space-x-4 mb-8">
-          <div className="text-3xl font-bold text-[#145566]">200,000+</div>
-          <div className="text-gray-600">Hình ảnh da liễu trong dataset</div>
-        </div>
-        
-        <button className="bg-[#145566] text-white px-6 py-3 rounded-lg hover:bg-[#0f3f44] transition-colors">
-          Tìm hiểu thêm
-        </button>
+      </MotionWrapper>
       </div>
     </div>
-  </div>
+  </MotionWrapper>
     </section>
 
     <section id="diagnosis">

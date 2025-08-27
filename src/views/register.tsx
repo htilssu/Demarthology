@@ -4,6 +4,9 @@ import { Eye, EyeOff, Mail, Lock, User, MapPin, Calendar, ArrowRight } from 'luc
 import { useRegisterController } from '../controllers/useRegisterController';
 import Navbar from '../components/navbar';
 import Footer from '../components/footer';
+import MotionWrapper from '../components/MotionWrapper';
+import MedicalParticles from '../components/MedicalParticles';
+import '../styles/motion.css';
 
 const Register: React.FC = () => {
     const { formData, errors, isLoading, updateField, handleSubmit } = useRegisterController();
@@ -29,34 +32,44 @@ const Register: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-gray-50 relative">
+            <MedicalParticles density="light" />
             <Navbar />
             
             {/* Hero Section */}
-            <section className="pt-20 pb-16 bg-gradient-to-r from-[#145566] to-[#0e3e46]">
-                <div className="container mx-auto px-6">
-                    <div className="text-center text-white">
-                        <h1 className="text-4xl md:text-5xl font-bold mb-4">Đăng Ký</h1>
-                        <p className="text-lg md:text-xl opacity-90">
-                            Tạo tài khoản để trải nghiệm hệ thống chẩn đoán da liễu AI
-                        </p>
+            <MotionWrapper animation="fadeIn" duration={0.8}>
+                <section className="pt-20 pb-16 bg-gradient-to-r from-[#145566] to-[#0e3e46] relative">
+                    <div className="container mx-auto px-6">
+                        <div className="text-center text-white">
+                            <MotionWrapper animation="slideUp" delay={0.2}>
+                                <h1 className="text-4xl md:text-5xl font-bold mb-4">Đăng Ký</h1>
+                            </MotionWrapper>
+                            <MotionWrapper animation="slideUp" delay={0.4}>
+                                <p className="text-lg md:text-xl opacity-90">
+                                    Tạo tài khoản để trải nghiệm hệ thống chẩn đoán da liễu AI
+                                </p>
+                            </MotionWrapper>
+                        </div>
                     </div>
-                </div>
-            </section>
+                </section>
+            </MotionWrapper>
 
             {/* Register Form Section */}
-            <section className="py-16">
+            <section className="py-16 relative z-10">
                 <div className="container mx-auto px-6">
-                    <div className="max-w-lg mx-auto">
-                        <div className="bg-white rounded-2xl shadow-lg p-8">
-                            {/* Logo */}
-                            <div className="text-center mb-8">
-                                <div className="w-16 h-16 bg-[#145566] rounded-full mx-auto mb-4 flex items-center justify-center">
-                                    <span className="text-white text-2xl font-bold">AI</span>
-                                </div>
-                                <h2 className="text-2xl font-bold text-gray-800">Tạo tài khoản mới</h2>
-                                <p className="text-gray-600 mt-2">Trở thành thành viên của chúng tôi</p>
-                            </div>
+                    <MotionWrapper animation="zoomIn" delay={0.3}>
+                        <div className="max-w-lg mx-auto">
+                            <div className="bg-white rounded-2xl shadow-lg p-8 motion-card">
+                                {/* Logo */}
+                                <MotionWrapper animation="bounceIn" delay={0.5}>
+                                    <div className="text-center mb-8">
+                                        <div className="w-16 h-16 bg-[#145566] rounded-full mx-auto mb-4 flex items-center justify-center motion-pulse">
+                                            <span className="text-white text-2xl font-bold">AI</span>
+                                        </div>
+                                        <h2 className="text-2xl font-bold text-gray-800">Tạo tài khoản mới</h2>
+                                        <p className="text-gray-600 mt-2">Trở thành thành viên của chúng tôi</p>
+                                    </div>
+                                </MotionWrapper>
 
                             {/* Message Display */}
                             {message && (
@@ -308,6 +321,7 @@ const Register: React.FC = () => {
                             </div>
                         </div>
                     </div>
+                    </MotionWrapper>
                 </div>
             </section>
 
