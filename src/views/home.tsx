@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import Navbar from '../components/navbar';
 import Footer from '../components/footer';
+import Medical3D from '../components/Medical3D';
+import '../styles/medical3d.css';
 
 const HomeView: React.FC = () => {
   const [activeFAQ, setActiveFAQ] = useState(0);
@@ -13,21 +15,12 @@ const HomeView: React.FC = () => {
     <div className="min-h-screen bg-white">
       <Navbar />
     <section id="home" className="relative w-full h-screen overflow-hidden">
-      <video 
-        className="absolute top-0 left-0 w-full h-full object-cover"
-        autoPlay
-        loop
-        muted
-        playsInline
-      >
-        <source src="v1.mp4" type="video/mp4" />
-        Your browser does not support the video tag.
-      </video>
-       <div className="absolute top-0 left-0 w-full h-full bg-black/40 flex items-center justify-center">
-         <div className="text-center text-white px-4">
-           <h1 className="text-4xl md:text-6xl font-bold mb-4">Chẩn Đoán Da Liễu AI</h1>
-           <p className="text-lg md:text-2xl mb-8">Chăm sóc sức khỏe thông minh, giải pháp nhanh chóng</p>
-           <button className="bg-[#145566] text-white px-6 py-3 rounded-lg hover:bg-[#0f3f44]">
+      <Medical3D />
+       <div className="absolute top-0 left-0 w-full h-full bg-black/20 flex items-center justify-center">
+         <div className="text-center text-white px-4 z-10">
+           <h1 className="text-4xl md:text-6xl font-bold mb-4 drop-shadow-lg">Chẩn Đoán Da Liễu AI</h1>
+           <p className="text-lg md:text-2xl mb-8 drop-shadow-md">Chăm sóc sức khỏe thông minh, giải pháp nhanh chóng</p>
+           <button className="bg-[#145566] text-white px-6 py-3 rounded-lg hover:bg-[#0f3f44] shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
              Bắt đầu chẩn đoán
            </button>
          </div>
