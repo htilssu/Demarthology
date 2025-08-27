@@ -1,9 +1,14 @@
 import { AppInfo, AppStats } from '../models/app';
+import { ApiService } from './api';
+import { ApiResponse } from '../types/api';
 
 export class AppService {
   private static instance: AppService;
+  private apiService: ApiService;
   
-  private constructor() {}
+  private constructor() {
+    this.apiService = ApiService.getInstance();
+  }
   
   static getInstance(): AppService {
     if (!AppService.instance) {
@@ -13,26 +18,76 @@ export class AppService {
   }
 
   async getAppInfo(): Promise<AppInfo> {
-    // Simulate API call
+    try {
+      // Try to get from API first
+      const response = await this.apiService.get<ApiResponse<AppInfo>>(
+        '/app/info',
+        {},
+        { skipAuth: true } // Public endpoint
+      );
+      return response.data;
+    } catch (error) {
+      // Fallback to mock data if API is not available
+      console.warn('API not available, using mock data:', error);
+      return this.getMockAppInfo();
+    }
+  }
+
+  async getStats(): Promise<AppStats> {
+    try {
+      // Try to get from API first
+      const response = await this.apiService.get<ApiResponse<AppStats>>(
+        '/app/stats',
+        {},
+        { skipAuth: true }
+      );
+      return response.data;
+    } catch (error) {
+      // Fallback to getting stats from app info
+      console.warn('Stats API not available, calculating from app info');
+      const appInfo = await this.getAppInfo();
+      return appInfo.stats;
+    }
+  }
+
+  /**
+   * Get mock app info for development/fallback
+   */
+  private getMockAppInfo(): Promise<AppInfo> {
     return new Promise((resolve) => {
       setTimeout(() => {
         resolve({
-          name: 'MVC Demo App',
+          name: 'Demarthology App',
           version: '1.0.0',
-          description: 'A simple React TypeScript application demonstrating MVC architecture',
+          description: 'A dermatology application with React TypeScript and modern API architecture',
           stats: {
-            components: 5,
-            routes: 2,
-            services: 1,
-            models: 1
+            components: 8,
+            routes: 6,
+            services: 4,
+            models: 3
           }
         });
       }, 500);
     });
   }
 
-  async getStats(): Promise<AppStats> {
-    const appInfo = await this.getAppInfo();
-    return appInfo.stats;
+  /**
+   * Update app configuration via API
+   */
+  async updateAppConfig(config: Partial<AppInfo>): Promise<AppInfo> {
+    const response = await this.apiService.put<ApiResponse<AppInfo>>('/app/config', config);
+    return response.data;
+  }
+
+  /**
+   * Get app health status
+   */
+  async getHealthStatus(): Promise<{ status: string; timestamp: string; version: string }> {
+    const response = await this.apiService.get<ApiResponse<{
+      status: string;
+      timestamp: string;
+      version: string;
+    }>>('/app/health', {}, { skipAuth: true });
+    return response.data;
   }
 }
