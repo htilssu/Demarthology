@@ -1,5 +1,5 @@
 import { AppInfo, AppStats } from '../models/app';
-import { ApiService } from './api';
+import { ApiService } from '../utils/api';
 import { ApiResponse } from '../types/api';
 
 export class AppService {

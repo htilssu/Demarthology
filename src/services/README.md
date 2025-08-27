@@ -18,15 +18,15 @@ The API service provides:
 ### Importing Services
 
 ```typescript
-import { ApiService, AuthService, UserService } from '../services';
-import { AuthUtils } from '../utils';
+import { AuthService, UserService } from '../services';
+import { apiService, AuthUtils } from '../utils';
 ```
 
 ### Using the Main API Service
 
 ```typescript
-// Get singleton instance
-const apiService = ApiService.getInstance();
+// Import the singleton instance
+import { apiService } from '../utils';
 
 // Basic requests
 const users = await apiService.get('/users');
@@ -49,7 +49,8 @@ const uploadResult = await apiService.uploadFile('/users/1/avatar', file, 'avata
 ### Authentication Examples
 
 ```typescript
-import { authService, AuthUtils } from '../services';
+import { authService } from '../services';
+import { AuthUtils } from '../utils';
 
 // Login
 const loginResult = await authService.login({
@@ -70,7 +71,8 @@ await authService.logout();
 
 ```typescript
 // Update API configuration
-const apiService = ApiService.getInstance();
+import { apiService } from '../utils';
+
 apiService.updateConfig({
   baseURL: 'https://api.example.com/v1',
   timeout: 15000,
@@ -132,7 +134,7 @@ const loginResult = await apiService.post('/auth/login', credentials, { skipAuth
 
 ```typescript
 import React, { useState, useEffect } from 'react';
-import { apiService, AuthUtils } from '../services';
+import { apiService, AuthUtils } from '../utils';
 
 const UserProfile: React.FC = () => {
   const [user, setUser] = useState(null);

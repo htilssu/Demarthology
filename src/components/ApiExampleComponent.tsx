@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { apiService, authService } from '../services';
-import { AuthUtils } from '../utils';
+import { authService } from '../services';
+import { apiService, AuthUtils } from '../utils';
 import { AuthUser } from '../types';
 
 /**

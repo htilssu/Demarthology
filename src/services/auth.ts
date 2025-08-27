@@ -1,4 +1,4 @@
-import { ApiService } from './api';
+import { ApiService } from '../utils/api';
 import { 
   ApiResponse, 
   LoginCredentials, 
