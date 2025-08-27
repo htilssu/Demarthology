@@ -1,0 +1,155 @@
+/* 3D Medical Animations */
+.perspective-1000 {
+  perspective: 1000px;
+}
+
+.transform-gpu {
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+.translate-z-0 {
+  transform: translateZ(0px);
+}
+
+.translate-z-4 {
+  transform: translateZ(4px);
+}
+
+.translate-z-8 {
+  transform: translateZ(8px);
+}
+
+/* Custom Animations */
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes spin-reverse {
+  from {
+    transform: rotate(360deg);
+  }
+  to {
+    transform: rotate(0deg);
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px) rotateX(0deg);
+  }
+  50% {
+    transform: translateY(-10px) rotateX(10deg);
+  }
+}
+
+@keyframes float-slow {
+  0%, 100% {
+    transform: translateY(0px) scale(1);
+  }
+  50% {
+    transform: translateY(-15px) scale(1.05);
+  }
+}
+
+@keyframes bounce-slow {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes sway {
+  0%, 100% {
+    transform: rotate(0deg) translateY(0px);
+  }
+  33% {
+    transform: rotate(5deg) translateY(-3px);
+  }
+  66% {
+    transform: rotate(-5deg) translateY(-3px);
+  }
+}
+
+@keyframes layer-shift {
+  0%, 100% {
+    transform: perspective(100px) rotateX(0deg) rotateY(0deg);
+  }
+  25% {
+    transform: perspective(100px) rotateX(10deg) rotateY(10deg);
+  }
+  50% {
+    transform: perspective(100px) rotateX(0deg) rotateY(20deg);
+  }
+  75% {
+    transform: perspective(100px) rotateX(-10deg) rotateY(10deg);
+  }
+}
+
+@keyframes float-particle {
+  0%, 100% {
+    transform: translateY(0px) translateX(0px) scale(1);
+    opacity: 0.2;
+  }
+  33% {
+    transform: translateY(-20px) translateX(10px) scale(1.2);
+    opacity: 0.4;
+  }
+  66% {
+    transform: translateY(-10px) translateX(-5px) scale(0.8);
+    opacity: 0.6;
+  }
+}
+
+/* Apply animations */
+.animate-spin-slow {
+  animation: spin-slow 8s linear infinite;
+}
+
+.animate-spin-reverse {
+  animation: spin-reverse 6s linear infinite;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-float-slow {
+  animation: float-slow 4s ease-in-out infinite;
+}
+
+.animate-bounce-slow {
+  animation: bounce-slow 2s ease-in-out infinite;
+}
+
+.animate-sway {
+  animation: sway 3s ease-in-out infinite;
+}
+
+.animate-layer-shift {
+  animation: layer-shift 5s ease-in-out infinite;
+}
+
+.animate-float-particle {
+  animation: float-particle 3s ease-in-out infinite;
+}
+
+/* 3D Transform utilities */
+.rotate-x-45 {
+  transform: rotateX(45deg);
+}
+
+.rotate-y-45 {
+  transform: rotateY(45deg);
+}
+
+.rotate-z-45 {
+  transform: rotateZ(45deg);
+}
