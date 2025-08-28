@@ -6,7 +6,7 @@ import Navbar from '../components/navbar';
 import Footer from '../components/footer';
 import MotionWrapper from '../components/MotionWrapper';
 import MedicalParticles from '../components/MedicalParticles';
-import '../styles/motion.css';
+import { MotionCard, MotionButton, MotionPulse } from '../components/MotionComponents';
 
 const Login: React.FC = () => {
     const { formData, errors, isLoading, updateField, handleSubmit } = useLoginController();
@@ -58,12 +58,12 @@ const Login: React.FC = () => {
                 <div className="container mx-auto px-6">
                     <div className="max-w-md mx-auto">
                         <MotionWrapper animation="zoomIn" delay={0.3}>
-                            <div className="bg-white rounded-2xl shadow-lg p-8 motion-card">
+                            <MotionCard className="bg-white rounded-2xl shadow-lg p-8">
                                 {/* Logo */}
                                 <div className="text-center mb-8">
-                                    <div className="w-16 h-16 bg-[#145566] rounded-full mx-auto mb-4 flex items-center justify-center motion-pulse">
+                                    <MotionPulse className="w-16 h-16 bg-[#145566] rounded-full mx-auto mb-4 flex items-center justify-center">
                                         <span className="text-white text-2xl font-bold">AI</span>
-                                    </div>
+                                    </MotionPulse>
                                     <h2 className="text-2xl font-bold text-gray-800">Đăng nhập tài khoản</h2>
                                     <p className="text-gray-600 mt-2">Truy cập vào hệ thống chẩn đoán</p>
                                 </div>
@@ -161,10 +161,10 @@ const Login: React.FC = () => {
                                 </div>
 
                                 {/* Submit Button */}
-                                <button
+                                <MotionButton
                                     type="submit"
                                     disabled={isLoading}
-                                    className="w-full bg-[#145566] text-white py-3 px-4 rounded-lg font-medium hover:bg-[#0f3f44] focus:outline-none focus:ring-2 focus:ring-[#145566] focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2 motion-button"
+                                    className="w-full bg-[#145566] text-white py-3 px-4 rounded-lg font-medium hover:bg-[#0f3f44] focus:outline-none focus:ring-2 focus:ring-[#145566] focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
                                 >
                                     {isLoading ? (
                                         <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
@@ -174,7 +174,7 @@ const Login: React.FC = () => {
                                             <ArrowRight className="w-4 h-4" />
                                         </>
                                     )}
-                                </button>
+                                </MotionButton>
 
                                 {/* Divider */}
                                 <div className="relative">
@@ -196,20 +196,20 @@ const Login: React.FC = () => {
                                     </p>
                                 </div>
                                 </form>
-                            </div>
+                            </MotionCard>
                         </MotionWrapper>
 
                         {/* Additional Info */}
                         <MotionWrapper animation="fadeIn" delay={0.8}>
                             <div className="mt-8 text-center">
-                                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 motion-card">
+                                <MotionCard className="bg-white/10 backdrop-blur-sm rounded-lg p-6">
                                     <h3 className="text-lg font-semibold text-[#145566] mb-2">
                                         Hệ thống chẩn đoán da liễu AI
                                     </h3>
                                     <p className="text-gray-600 text-sm">
                                         Công nghệ AI tiên tiến với độ chính xác cao, hỗ trợ chẩn đoán nhanh chóng và hiệu quả.
                                     </p>
-                                </div>
+                                </MotionCard>
                             </div>
                         </MotionWrapper>
                     </div>

@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 
 interface MedicalParticlesProps {
   density?: 'light' | 'medium' | 'heavy';
@@ -21,6 +22,7 @@ const MedicalParticles: React.FC<MedicalParticlesProps> = ({
   const particles = Array.from({ length: getParticleCount() }, (_, i) => {
     const delay = Math.random() * 10;
     const duration = 15 + Math.random() * 10;
+    const rotateDuration = 8 + Math.random() * 4;
     const size = 20 + Math.random() * 30;
     const left = Math.random() * 100;
     const opacity = 0.1 + Math.random() * 0.2;
@@ -30,67 +32,48 @@ const MedicalParticles: React.FC<MedicalParticlesProps> = ({
     const icon = medicalIcons[Math.floor(Math.random() * medicalIcons.length)];
 
     return (
-      <div
+      <motion.div
         key={i}
         className="absolute pointer-events-none select-none"
         style={{
           left: `${left}%`,
           fontSize: `${size}px`,
           opacity,
-          animation: `medicalFloat ${duration}s linear infinite`,
-          animationDelay: `${delay}s`,
+        }}
+        initial={{ 
+          y: '100vh', 
+          scale: 0 
+        }}
+        animate={{ 
+          y: '-20vh', 
+          scale: [0, 1, 1, 0] 
+        }}
+        transition={{
+          duration,
+          delay,
+          repeat: Infinity,
+          ease: "linear",
+          times: [0, 0.1, 0.9, 1]
         }}
       >
-        <div
-          style={{
-            animation: `medicalRotate ${8 + Math.random() * 4}s linear infinite`,
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{
+            duration: rotateDuration,
+            repeat: Infinity,
+            ease: "linear"
           }}
         >
           {icon}
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
     );
   });
 
   return (
-    <>
-      <style>
-        {`
-          @keyframes medicalFloat {
-            0% {
-              transform: translateY(100vh) scale(0);
-            }
-            10% {
-              transform: translateY(90vh) scale(1);
-            }
-            90% {
-              transform: translateY(-10vh) scale(1);
-            }
-            100% {
-              transform: translateY(-20vh) scale(0);
-            }
-          }
-          
-          @keyframes medicalRotate {
-            from {
-              transform: rotate(0deg);
-            }
-            to {
-              transform: rotate(360deg);
-            }
-          }
-          
-          @media (prefers-reduced-motion: reduce) {
-            .medical-particles * {
-              animation: none !important;
-            }
-          }
-        `}
-      </style>
-      <div className={`fixed inset-0 overflow-hidden pointer-events-none z-0 medical-particles ${className}`}>
-        {particles}
-      </div>
-    </>
+    <div className={`fixed inset-0 overflow-hidden pointer-events-none z-0 ${className}`}>
+      {particles}
+    </div>
   );
 };
 

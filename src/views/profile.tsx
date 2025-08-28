@@ -7,7 +7,7 @@ import useMedicalHistoryController from '../controllers/useMedicalHistoryControl
 import { UserMedical } from '../models/user-medical';
 import MotionWrapper from '../components/MotionWrapper';
 import MedicalParticles from '../components/MedicalParticles';
-import '../styles/motion.css';
+import { MotionCard, MotionButton } from '../components/MotionComponents';
 
 function Profile() {
     const { 
@@ -50,7 +50,7 @@ function Profile() {
                         {/* Left Sidebar - Medical Records Navigation */}
                         <MotionWrapper animation="slideLeft" delay={0.2}>
                             <div className="lg:col-span-1">
-                                <div className="bg-white rounded-lg shadow-md overflow-hidden motion-card">
+                                <MotionCard className="bg-white rounded-lg shadow-md overflow-hidden">
                                     <div className="bg-gradient-to-r from-[#145566] to-[#145569] text-white p-4">
                                         <h2 className="font-semibold">Danh sách bệnh án</h2>
                                     </div>
@@ -60,38 +60,40 @@ function Profile() {
                                             <div className="text-center py-4">
                                                 <FileText size={32} className="mx-auto text-gray-400 mb-2" />
                                                 <p className="text-gray-500 text-sm mb-3">Chưa có bệnh án</p>
-                                                <button 
+                                                <MotionButton 
                                                     onClick={loadMedicalHistory}
-                                                    className="bg-[#145566] text-white text-xs px-3 py-2 rounded hover:bg-[#0f3f44] transition-colors motion-button"
+                                                    className="bg-[#145566] text-white text-xs px-3 py-2 rounded hover:bg-[#0f3f44] transition-colors"
                                                 >
                                                     Tải dữ liệu mẫu
-                                                </button>
+                                                </MotionButton>
                                             </div>
                                         ) : (
                                             <div className="space-y-2">
                                                 {medicalHistory.map((record, index) => (
                                                     <MotionWrapper key={record.id} animation="slideUp" delay={0.3 + index * 0.1}>
-                                                        <button
-                                                            onClick={() => setSelectedRecord(record)}
-                                                            className={`w-full text-left p-3 rounded-lg border transition-colors motion-card ${
+                                                        <MotionCard className={`w-full text-left p-3 rounded-lg border transition-colors ${
                                                                 selectedRecord?.id === record.id
                                                                     ? 'bg-[#145566] text-white border-[#145566]'
                                                                     : 'bg-gray-50 hover:bg-gray-100 border-gray-200'
-                                                            }`}
-                                                        >
+                                                            }`}>
+                                                            <button
+                                                                onClick={() => setSelectedRecord(record)}
+                                                                className="w-full text-left"
+                                                            >
                                                             <div className="font-medium text-sm">Bệnh án #{record.id}</div>
                                                             <div className={`text-xs mt-1 ${
                                                                 selectedRecord?.id === record.id ? 'text-gray-200' : 'text-gray-500'
                                                             }`}>
                                                                 {formatDate(record.lastUpdated)}
                                                             </div>
-                                                        </button>
+                                                            </button>
+                                                        </MotionCard>
                                                     </MotionWrapper>
                                                 ))}
                                             </div>
                                         )}
                                     </div>
-                                </div>
+                                </MotionCard>
                             </div>
                                         </MotionWrapper>
 

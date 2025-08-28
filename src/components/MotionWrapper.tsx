@@ -1,4 +1,6 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React from 'react';
+import { motion, useInView } from 'framer-motion';
+import { useRef } from 'react';
 
 interface MotionWrapperProps {
   children: React.ReactNode;
@@ -15,61 +17,80 @@ const MotionWrapper: React.FC<MotionWrapperProps> = ({
   duration = 0.6,
   className = ''
 }) => {
-  const [isVisible, setIsVisible] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: "-10%" });
 
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setTimeout(() => {
-            setIsVisible(true);
-          }, delay * 1000);
-          observer.unobserve(entry.target);
+  const getAnimationVariants = () => {
+    const baseVariants = {
+      hidden: {},
+      visible: {
+        transition: {
+          duration,
+          delay,
+          ease: "easeOut" as const
         }
-      },
-      { threshold: 0.1 }
-    );
+      }
+    };
 
-    if (ref.current) {
-      observer.observe(ref.current);
-    }
-
-    return () => observer.disconnect();
-  }, [delay]);
-
-  const getAnimationClass = () => {
-    if (!isVisible) return 'motion-hidden';
-    
     switch (animation) {
       case 'fadeIn':
-        return 'motion-fade-in';
+        return {
+          hidden: { opacity: 0 },
+          visible: { opacity: 1, ...baseVariants.visible }
+        };
       case 'slideUp':
-        return 'motion-slide-up';
+        return {
+          hidden: { opacity: 0, y: 30 },
+          visible: { opacity: 1, y: 0, ...baseVariants.visible }
+        };
       case 'slideLeft':
-        return 'motion-slide-left';
+        return {
+          hidden: { opacity: 0, x: 30 },
+          visible: { opacity: 1, x: 0, ...baseVariants.visible }
+        };
       case 'slideRight':
-        return 'motion-slide-right';
+        return {
+          hidden: { opacity: 0, x: -30 },
+          visible: { opacity: 1, x: 0, ...baseVariants.visible }
+        };
       case 'zoomIn':
-        return 'motion-zoom-in';
+        return {
+          hidden: { opacity: 0, scale: 0.95 },
+          visible: { opacity: 1, scale: 1, ...baseVariants.visible }
+        };
       case 'bounceIn':
-        return 'motion-bounce-in';
+        return {
+          hidden: { opacity: 0, scale: 0.3 },
+          visible: { 
+            opacity: 1, 
+            scale: 1,
+            transition: {
+              duration,
+              delay,
+              type: "spring" as const,
+              damping: 10,
+              stiffness: 100
+            }
+          }
+        };
       default:
-        return 'motion-fade-in';
+        return {
+          hidden: { opacity: 0 },
+          visible: { opacity: 1, ...baseVariants.visible }
+        };
     }
   };
 
   return (
-    <div
+    <motion.div
       ref={ref}
-      className={`${getAnimationClass()} ${className}`}
-      style={{ 
-        animationDuration: `${duration}s`,
-        animationFillMode: 'both'
-      }}
+      className={className}
+      initial="hidden"
+      animate={isInView ? "visible" : "hidden"}
+      variants={getAnimationVariants()}
     >
       {children}
-    </div>
+    </motion.div>
   );
 };
 

@@ -3,7 +3,7 @@ import Navbar from "../components/navbar";
 import Footer from "../components/footer";
 import MotionWrapper from "../components/MotionWrapper";
 import MedicalParticles from "../components/MedicalParticles";
-import "../styles/motion.css";
+import { MotionCard, MotionButton } from "../components/MotionComponents";
 
 const Introduce: React.FC = () => {
   return (
@@ -31,11 +31,13 @@ const Introduce: React.FC = () => {
         <MotionWrapper animation="slideUp" delay={0.2}>
           <div className="grid md:grid-cols-2 gap-8 items-center">
             <MotionWrapper animation="slideLeft" delay={0.4}>
-              <img
-                src="image6.png"
-                alt="dermatology-check"
-                className="rounded-lg shadow-md motion-card"
-              />
+              <MotionCard className="rounded-lg shadow-md overflow-hidden">
+                <img
+                  src="image6.png"
+                  alt="dermatology-check"
+                  className="w-full h-full object-cover"
+                />
+              </MotionCard>
             </MotionWrapper>
             <MotionWrapper animation="slideRight" delay={0.6}>
               <div>
@@ -56,9 +58,9 @@ const Introduce: React.FC = () => {
                 trong việc sàng lọc và theo dõi tiến triển bệnh, đồng thời mang lại cho bệnh nhân 
                 sự an tâm nhờ việc được cảnh báo sớm các vấn đề tiềm ẩn. 
                 </p>
-                <button className="bg-[#145566] text-white px-6 py-3 rounded-lg hover:bg-[#0f3a44] transition motion-button">
+                <MotionButton className="bg-[#145566] text-white px-6 py-3 rounded-lg hover:bg-[#0f3a44] transition">
                   Trải nghiệm ngay
-                </button>
+                </MotionButton>
               </div>
             </MotionWrapper>
           </div>
@@ -91,11 +93,13 @@ const Introduce: React.FC = () => {
             </div>
           </MotionWrapper>
           <MotionWrapper animation="slideRight" delay={1.2}>
-            <img
-              src="image.png"
-              alt="dermatology-service"
-              className="rounded-lg shadow-md motion-card"
-            />
+            <MotionCard className="rounded-lg shadow-md overflow-hidden">
+              <img
+                src="image.png"
+                alt="dermatology-service"
+                className="w-full h-full object-cover"
+              />
+            </MotionCard>
           </MotionWrapper>
           </div>
         </MotionWrapper>

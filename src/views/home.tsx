@@ -3,8 +3,8 @@ import Navbar from '../components/navbar';
 import Footer from '../components/footer';
 import Medical3D from '../components/Medical3D';
 import MotionWrapper from '../components/MotionWrapper';
+import { MotionCard, MotionButton, MotionPulse, MotionFloat } from '../components/MotionComponents';
 import '../styles/medical3d.css';
-import '../styles/motion.css';
 
 const HomeView: React.FC = () => {
   const [activeFAQ, setActiveFAQ] = useState(0);
@@ -38,26 +38,26 @@ const HomeView: React.FC = () => {
           <div className="relative">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-4">
-                <div className="bg-gray-200 h-64 rounded-lg motion-card">
+                <MotionCard className="bg-gray-200 h-64 rounded-lg">
                   <img src="image2.jpg" alt="about" className="w-full h-full object-cover" />
-                </div>
-                <div className="bg-gray-300 h-32 rounded-lg motion-card">
+                </MotionCard>
+                <MotionCard className="bg-gray-300 h-32 rounded-lg">
                   <img src="image3.jpg" alt="about" className="w-full h-full object-cover" />
-                </div>
+                </MotionCard>
               </div>
               <div className="space-y-4 pt-8">
-                <div className="bg-gray-300 h-32 rounded-lg motion-card">
+                <MotionCard className="bg-gray-300 h-32 rounded-lg">
                   <img src="image4.png" alt="about" className="w-full h-full object-cover" />
-                </div>
-                <div className="bg-gray-200 h-64 rounded-lg motion-card">
+                </MotionCard>
+                <MotionCard className="bg-gray-200 h-64 rounded-lg">
                   <img src="image5.webp" alt="about" className="w-full h-full object-cover" />
-                </div>
+                </MotionCard>
               </div>
             </div>
-            <div className="absolute bottom-4 left-4 bg-[#145566] text-white p-4 rounded-lg motion-float">
+            <MotionFloat className="absolute bottom-4 left-4 bg-[#145566] text-white p-4 rounded-lg">
               <div className="text-2xl font-bold">AI</div>
               <div className="text-sm">Dermatology</div>
-            </div>
+            </MotionFloat>
           </div>
         </MotionWrapper>
       
@@ -85,9 +85,9 @@ const HomeView: React.FC = () => {
             ].map((feature, index) => (
               <MotionWrapper key={index} animation="slideUp" delay={0.8 + index * 0.1}>
                 <div className="flex items-center space-x-3">
-                  <div className="w-6 h-6 bg-[#145566] rounded-full flex items-center justify-center motion-pulse">
+                  <MotionPulse className="w-6 h-6 bg-[#145566] rounded-full flex items-center justify-center">
                     <span className="text-white text-sm">✓</span>
-                  </div>
+                  </MotionPulse>
                   <span className="text-gray-700">{feature}</span>
                 </div>
               </MotionWrapper>
@@ -102,9 +102,9 @@ const HomeView: React.FC = () => {
           </MotionWrapper>
           
           <MotionWrapper animation="slideUp" delay={1.6}>
-            <button className="bg-[#145566] text-white px-6 py-3 rounded-lg hover:bg-[#0f3f44] transition-colors motion-button">
+            <MotionButton className="bg-[#145566] text-white px-6 py-3 rounded-lg hover:bg-[#0f3f44] transition-colors">
               Tìm hiểu thêm
-            </button>
+            </MotionButton>
           </MotionWrapper>
         </div>
       </MotionWrapper>
