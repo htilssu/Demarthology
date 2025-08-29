@@ -1,6 +1,7 @@
 export interface LoginFormData {
     email: string;
     password: string;
+    rememberMe?: boolean;
 }
 
 export interface RegisterFormData {
@@ -32,5 +33,6 @@ export interface FormValidationErrors {
     confirmPassword?: string;
     dob?: string;
     location?: string;
+    rememberMe?: string;
     general?: string;
 }

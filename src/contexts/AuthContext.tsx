@@ -46,11 +46,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const login = async (credentials: LoginCredentials): Promise<void> => {
     setIsLoading(true);
     try {
-      await authService.login(credentials);
+      const loginResponse = await authService.login(credentials);
       
-      // Get user info after successful login
-      const currentUser = await authService.getCurrentUser();
-      setUser(currentUser);
+      // Convert UserInfo from login response to AuthUser for consistency
+      const authUser: AuthUser = {
+        id: 'user-' + Date.now(),
+        email: loginResponse.user.email,
+        name: `${loginResponse.user.firstName} ${loginResponse.user.lastName}`,
+        role: loginResponse.user.role || 'user',
+        permissions: ['read', 'write'],
+        avatarUrl: '/avatar.webp'
+      };
+      
+      setUser(authUser);
     } catch (error) {
       console.error('Login failed:', error);
       throw error;

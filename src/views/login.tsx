@@ -133,6 +133,8 @@ const Login: React.FC = () => {
                                             id="remember-me"
                                             name="remember-me"
                                             type="checkbox"
+                                            checked={formData.rememberMe || false}
+                                            onChange={(e) => updateField('rememberMe', e.target.checked)}
                                             className="h-4 w-4 text-[#145566] focus:ring-[#145566] border-gray-300 rounded"
                                         />
                                         <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-600">

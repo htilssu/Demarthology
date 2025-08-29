@@ -74,7 +74,7 @@ export interface PaginatedResponse<T> extends ApiResponse<T[]> {
 }
 
 /**
- * Auth token response interface
+ * Auth token response interface (legacy)
  */
 export interface AuthTokenResponse {
   accessToken: string;
@@ -84,15 +84,37 @@ export interface AuthTokenResponse {
 }
 
 /**
- * Login credentials interface
+ * Login request interface
  */
 export interface LoginCredentials {
   email: string;
   password: string;
+  rememberMe?: boolean;
 }
 
 /**
- * User authentication data interface
+ * Login response interface (new API spec)
+ */
+export interface LoginResponse {
+  success: boolean;
+  message: string;
+  user: UserInfo;
+  accessToken: string;
+  tokenType: string;
+}
+
+/**
+ * User information interface (new API spec)
+ */
+export interface UserInfo {
+  email: string;
+  firstName: string;
+  lastName: string;
+  role?: string;
+}
+
+/**
+ * User authentication data interface (legacy, for backward compatibility)
  */
 export interface AuthUser {
   id: string;
