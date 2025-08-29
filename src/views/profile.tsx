@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Edit3, Save, X, Heart, Pill, AlertTriangle, Activity, Users, FileText, User, FolderOpen } from 'lucide-react';
+import { Edit3, Save, X, Heart, Pill, AlertTriangle, Activity, Users, FileText, User, FolderOpen, Images } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import useProfileController from '../controllers/useProfileController';
 import useMedicalHistoryController from '../controllers/useMedicalHistoryController';
 
@@ -550,6 +551,13 @@ function Profile() {
                                                     <button className="border border-gray-300 text-gray-700 px-4 py-2 rounded text-sm hover:bg-gray-50 transition-colors">
                                                         Xuất PDF
                                                     </button>
+                                                    <Link 
+                                                        to="/before-after"
+                                                        className="flex items-center space-x-1 bg-green-600 text-white px-4 py-2 rounded text-sm hover:bg-green-700 transition-colors"
+                                                    >
+                                                        <Images size={14} />
+                                                        <span>So sánh Trước & Sau</span>
+                                                    </Link>
                                                     <button className="text-red-600 hover:text-red-700 px-4 py-2 transition-colors text-sm">
                                                         Xóa bệnh án
                                                     </button>
