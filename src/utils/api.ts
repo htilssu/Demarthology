@@ -64,7 +64,8 @@ export class ApiService {
    * Setup request and response interceptors
    */
   private setupInterceptors(): void {
-    // Request interceptor - add auth token
+    // Request interceptor - add auth token from localStorage
+    // Uses the same key ('auth_token') that AuthService stores the token with
     this.axiosInstance.interceptors.request.use(
       (config: InternalAxiosRequestConfig) => {
         // Skip auth for specific requests (check custom header)

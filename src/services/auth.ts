@@ -30,6 +30,7 @@ export class AuthService {
 
   /**
    * Login user with credentials
+   * Stores the returned token in localStorage with the same key that axios instance reads from
    */
   async login(credentials: LoginCredentials): Promise<LoginResponse> {
     const response = await this.apiService.post<LoginResponse>(
@@ -39,8 +40,15 @@ export class AuthService {
     );
 
     // Store tokens after successful login
+    // This uses the same key ('auth_token') that axios interceptor reads from
     if (response.accessToken) {
       AuthUtils.setAuthToken(response.accessToken);
+      
+      // Verify token was stored correctly and is immediately available for axios
+      if (!AuthUtils.verifyTokenStorage(response.accessToken)) {
+        throw new Error('Failed to store authentication token in localStorage');
+      }
+      
       // Note: New API doesn't provide refresh token in login response
       // This might need to be handled differently or stored separately
     }

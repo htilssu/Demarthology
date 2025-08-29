@@ -1,9 +1,13 @@
 /**
  * Authentication utility functions for managing tokens
  * Supports reading from both localStorage and cookies
+ * 
+ * IMPORTANT: TOKEN_KEY must match the key used by axios instance
+ * to ensure seamless token storage and retrieval for API calls
  */
 
 export class AuthUtils {
+  // This key is used by both storage (after login) and retrieval (by axios interceptor)
   private static readonly TOKEN_KEY = 'auth_token';
   private static readonly REFRESH_TOKEN_KEY = 'refresh_token';
 
@@ -39,6 +43,15 @@ export class AuthUtils {
    */
   static setAuthToken(token: string): void {
     localStorage.setItem(this.TOKEN_KEY, token);
+  }
+
+  /**
+   * Verify that the token was stored correctly and is immediately available
+   * This can be used after login to ensure axios can access the token
+   */
+  static verifyTokenStorage(expectedToken: string): boolean {
+    const storedToken = this.getAuthToken();
+    return storedToken === expectedToken;
   }
 
   /**
