@@ -40,11 +40,21 @@ function Profile() {
 
     const { medicalHistory, loadMedicalHistory } = useMedicalHistoryController();
     const [selectedRecords, setSelectedRecords] = useState<string[]>([]);
-    const [activeSection, setActiveSection] = useState<string>('profile');
+    const [activeSections, setActiveSections] = useState<string[]>(['profile']);
 
     useEffect(() => {
         loadMedicalHistory();
     }, [loadMedicalHistory]);
+
+    const toggleSection = (sectionId: string) => {
+        setActiveSections(prev => {
+            if (prev.includes(sectionId)) {
+                return prev.filter(id => id !== sectionId);
+            } else {
+                return [...prev, sectionId];
+            }
+        });
+    };
 
     const toggleRecordSelection = (recordId: string) => {
         setSelectedRecords(prev => {
@@ -80,7 +90,7 @@ function Profile() {
                             <div className="bg-white rounded-lg shadow-md overflow-hidden">
                                 <div className="bg-gradient-to-r from-[#145566] to-[#145569] text-white p-4">
                                     <h2 className="font-semibold">Điều hướng</h2>
-                                    <p className="text-xs text-gray-200 mt-1">Chọn mục để xem</p>
+                                    <p className="text-xs text-gray-200 mt-1">Chọn nhiều mục để xem</p>
                                 </div>
                                 
                                 <div className="p-4">
@@ -88,23 +98,23 @@ function Profile() {
                                         {sections.map((section) => (
                                             <button
                                                 key={section.id}
-                                                onClick={() => setActiveSection(section.id)}
+                                                onClick={() => toggleSection(section.id)}
                                                 className={`w-full text-left p-3 rounded-lg border transition-colors ${
-                                                    activeSection === section.id
+                                                    activeSections.includes(section.id)
                                                         ? 'bg-[#145566] text-white border-[#145566]'
                                                         : 'bg-gray-50 hover:bg-gray-100 border-gray-200'
                                                 }`}
                                             >
                                                 <div className="flex items-center space-x-3">
                                                     <div className={`${
-                                                        activeSection === section.id ? 'text-white' : 'text-[#145566]'
+                                                        activeSections.includes(section.id) ? 'text-white' : 'text-[#145566]'
                                                     }`}>
                                                         {section.icon}
                                                     </div>
                                                     <div className="flex-1">
                                                         <div className="font-medium text-sm">{section.name}</div>
                                                         <div className={`text-xs mt-1 ${
-                                                            activeSection === section.id ? 'text-gray-200' : 'text-gray-500'
+                                                            activeSections.includes(section.id) ? 'text-gray-200' : 'text-gray-500'
                                                         }`}>
                                                             {section.description}
                                                         </div>
@@ -117,9 +127,9 @@ function Profile() {
                             </div>
                         </div>
 
-                        {/* Right Content - Dynamic based on active section */}
+                        {/* Right Content - Dynamic based on active sections */}
                         <div className="lg:col-span-3 space-y-6">
-                            {activeSection === 'profile' && (
+                            {activeSections.includes('profile') && (
                                 /* Profile Section */
                                 <div className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200">
                                     {/* Profile Header */}
@@ -269,7 +279,7 @@ function Profile() {
                                 </div>
                             )}
 
-                            {activeSection === 'medical-records' && (
+                            {activeSections.includes('medical-records') && (
                                 /* Medical Records Section */
                                 <>
                                     {/* Medical Records Header */}
