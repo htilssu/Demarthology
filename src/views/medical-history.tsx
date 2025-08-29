@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
-import { Heart, Pill, AlertTriangle, Activity, Users, Calendar, FileText, Plus } from 'lucide-react';
+import { Heart, Pill, AlertTriangle, Activity, Users, Calendar, FileText, Plus, Images } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import useMedicalHistoryController from "../controllers/useMedicalHistoryController";
 
 export default function MedicalHistory() {
@@ -23,10 +24,19 @@ export default function MedicalHistory() {
                             <h1 className="text-3xl font-bold text-[#145566]">Lịch sử bệnh án</h1>
                             <p className="text-gray-600 mt-1">Quản lý thông tin sức khỏe và lịch sử điều trị</p>
                         </div>
-                        <button className="flex items-center space-x-2 bg-[#145566] text-white px-4 py-2 rounded-lg hover:bg-[#0f3f44] transition-colors">
-                            <Plus size={16} />
-                            <span>Thêm bệnh án</span>
-                        </button>
+                        <div className="flex space-x-3">
+                            <Link
+                                to="/before-after"
+                                className="flex items-center space-x-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
+                            >
+                                <Images size={16} />
+                                <span>So sánh Trước & Sau</span>
+                            </Link>
+                            <button className="flex items-center space-x-2 bg-[#145566] text-white px-4 py-2 rounded-lg hover:bg-[#0f3f44] transition-colors">
+                                <Plus size={16} />
+                                <span>Thêm bệnh án</span>
+                            </button>
+                        </div>
                     </div>
 
                     {medicalHistory.length === 0 ? (
@@ -165,6 +175,13 @@ export default function MedicalHistory() {
                                             <button className="border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors">
                                                 Xuất PDF
                                             </button>
+                                            <Link 
+                                                to="/before-after"
+                                                className="flex items-center space-x-1 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
+                                            >
+                                                <Images size={14} />
+                                                <span>So sánh Trước & Sau</span>
+                                            </Link>
                                             <button className="text-red-600 hover:text-red-700 px-4 py-2 transition-colors">
                                                 Xóa
                                             </button>
