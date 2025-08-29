@@ -71,52 +71,55 @@ const Register: React.FC = () => {
 
                             {/* Register Form */}
                             <form onSubmit={onSubmit} className="space-y-6">
-                                {/* First Name Field */}
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        Họ
-                                    </label>
-                                    <div className="relative">
-                                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                            <User className="h-5 w-5 text-gray-400" />
+                                {/* Name Fields - First Name and Last Name in one row */}
+                                <div className="grid grid-cols-2 gap-4">
+                                    {/* First Name Field */}
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            Họ
+                                        </label>
+                                        <div className="relative">
+                                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                <User className="h-5 w-5 text-gray-400" />
+                                            </div>
+                                            <input
+                                                type="text"
+                                                value={formData.firstName}
+                                                onChange={(e) => updateField('firstName', e.target.value)}
+                                                className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#145566] transition-colors ${
+                                                    errors.firstName ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                                                }`}
+                                                placeholder="Nhập họ của bạn"
+                                            />
                                         </div>
-                                        <input
-                                            type="text"
-                                            value={formData.firstName}
-                                            onChange={(e) => updateField('firstName', e.target.value)}
-                                            className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#145566] transition-colors ${
-                                                errors.firstName ? 'border-red-300 bg-red-50' : 'border-gray-300'
-                                            }`}
-                                            placeholder="Nhập họ của bạn"
-                                        />
+                                        {errors.firstName && (
+                                            <p className="mt-1 text-sm text-red-600">{errors.firstName}</p>
+                                        )}
                                     </div>
-                                    {errors.firstName && (
-                                        <p className="mt-1 text-sm text-red-600">{errors.firstName}</p>
-                                    )}
-                                </div>
 
-                                {/* Last Name Field */}
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        Tên
-                                    </label>
-                                    <div className="relative">
-                                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                            <User className="h-5 w-5 text-gray-400" />
+                                    {/* Last Name Field */}
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            Tên
+                                        </label>
+                                        <div className="relative">
+                                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                <User className="h-5 w-5 text-gray-400" />
+                                            </div>
+                                            <input
+                                                type="text"
+                                                value={formData.lastName}
+                                                onChange={(e) => updateField('lastName', e.target.value)}
+                                                className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#145566] transition-colors ${
+                                                    errors.lastName ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                                                }`}
+                                                placeholder="Nhập tên của bạn"
+                                            />
                                         </div>
-                                        <input
-                                            type="text"
-                                            value={formData.lastName}
-                                            onChange={(e) => updateField('lastName', e.target.value)}
-                                            className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#145566] transition-colors ${
-                                                errors.lastName ? 'border-red-300 bg-red-50' : 'border-gray-300'
-                                            }`}
-                                            placeholder="Nhập tên của bạn"
-                                        />
+                                        {errors.lastName && (
+                                            <p className="mt-1 text-sm text-red-600">{errors.lastName}</p>
+                                        )}
                                     </div>
-                                    {errors.lastName && (
-                                        <p className="mt-1 text-sm text-red-600">{errors.lastName}</p>
-                                    )}
                                 </div>
 
                                 {/* Email Field */}
