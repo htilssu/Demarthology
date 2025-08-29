@@ -156,57 +156,7 @@ const BeforeAfter: React.FC = () => {
           </div>
         </div>
 
-        {/* Additional Examples */}
-        <div className="mt-12">
-          <h2 className="text-2xl font-bold text-gray-800 text-center mb-8">Các ví dụ khác</h2>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[
-              {
-                before: "https://images.unsplash.com/photo-1582750433449-648ed127bb54?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
-                after: "https://images.unsplash.com/photo-1556228453-efd6c1ff04f6?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
-                title: "Điều trị mụn"
-              },
-              {
-                before: "https://images.unsplash.com/photo-1559757175-0eb30cd8c063?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
-                after: "https://images.unsplash.com/photo-1556228720-195a672e8a03?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
-                title: "Trẻ hóa da"
-              },
-              {
-                before: "https://images.unsplash.com/photo-1515377905703-c4788e51af15?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
-                after: "https://images.unsplash.com/photo-1502823403499-6ccfcf4fb453?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
-                title: "Điều trị sẹo"
-              }
-            ].map((example, index) => (
-              <div key={index} className="bg-white rounded-lg shadow-md overflow-hidden">
-                <div className="grid grid-cols-2">
-                  <div className="relative">
-                    <img 
-                      src={example.before} 
-                      alt="Trước" 
-                      className="w-full h-32 object-cover"
-                    />
-                    <div className="absolute bottom-1 left-1 bg-red-500 text-white px-2 py-0.5 rounded text-xs">
-                      TRƯỚC
-                    </div>
-                  </div>
-                  <div className="relative">
-                    <img 
-                      src={example.after} 
-                      alt="Sau" 
-                      className="w-full h-32 object-cover"
-                    />
-                    <div className="absolute bottom-1 right-1 bg-green-500 text-white px-2 py-0.5 rounded text-xs">
-                      SAU
-                    </div>
-                  </div>
-                </div>
-                <div className="p-3">
-                  <h3 className="font-semibold text-gray-800">{example.title}</h3>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+
       </div>
     </div>
   );
