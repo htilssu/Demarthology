@@ -1,5 +1,5 @@
 import React from 'react';
-import { User, Mail, MapPin, Globe, Calendar, Edit3, Save, X } from 'lucide-react';
+import { User, Mail, MapPin, Calendar, Edit3, Save, X } from 'lucide-react';
 import Navbar from '../components/navbar';
 import Footer from '../components/footer';
 import useProfileController from '../controllers/useProfileController';
@@ -9,10 +9,12 @@ function Profile() {
         profile, 
         isEditing, 
         editForm, 
+        sectionVisibility,
         startEdit, 
         cancelEdit, 
         saveProfile, 
-        updateEditForm 
+        updateEditForm,
+        toggleSection
     } = useProfileController();
 
     const formatDate = (dateString: string) => {
@@ -65,140 +67,186 @@ function Profile() {
                         </div>
                     </div>
 
-                    <div className="grid md:grid-cols-2 gap-6">
-                        {/* Thông tin cá nhân */}
-                        <div className="bg-white rounded-lg shadow-md p-6">
-                            <h2 className="text-xl font-semibold text-[#145566] mb-4 flex items-center">
-                                <User className="mr-2" size={20} />
-                                Thông tin cá nhân
-                            </h2>
-                            
-                            <div className="space-y-4">
-                                {/* Tên */}
-                                <div>
-                                    <label className="text-sm font-medium text-gray-700">Họ và tên</label>
-                                    {isEditing ? (
-                                        <input
-                                            type="text"
-                                            value={editForm.name}
-                                            onChange={(e) => updateEditForm('name', e.target.value)}
-                                            className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#145566]"
-                                        />
-                                    ) : (
-                                        <p className="mt-1 text-gray-900">{profile.name}</p>
-                                    )}
-                                </div>
-
-                                {/* Email */}
-                                <div>
-                                    <label className="text-sm font-medium text-gray-700 flex items-center">
-                                        <Mail size={16} className="mr-1" />
-                                        Email
-                                    </label>
-                                    {isEditing ? (
-                                        <input
-                                            type="email"
-                                            value={editForm.email}
-                                            onChange={(e) => updateEditForm('email', e.target.value)}
-                                            className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#145566]"
-                                        />
-                                    ) : (
-                                        <p className="mt-1 text-gray-900">{profile.email}</p>
-                                    )}
-                                </div>
-
-                                {/* Ngày sinh */}
-                                <div>
-                                    <label className="text-sm font-medium text-gray-700 flex items-center">
-                                        <Calendar size={16} className="mr-1" />
-                                        Ngày sinh
-                                    </label>
-                                    {isEditing ? (
-                                        <input
-                                            type="date"
-                                            value={editForm.dob}
-                                            onChange={(e) => updateEditForm('dob', e.target.value)}
-                                            className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#145566]"
-                                        />
-                                    ) : (
-                                        <p className="mt-1 text-gray-900">{formatDate(profile.dob)}</p>
-                                    )}
-                                </div>
-
-                                {/* Địa chỉ */}
-                                <div>
-                                    <label className="text-sm font-medium text-gray-700 flex items-center">
-                                        <MapPin size={16} className="mr-1" />
-                                        Địa chỉ
-                                    </label>
-                                    {isEditing ? (
-                                        <input
-                                            type="text"
-                                            value={editForm.location || ''}
-                                            onChange={(e) => updateEditForm('location', e.target.value)}
-                                            className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#145566]"
-                                            placeholder="Nhập địa chỉ"
-                                        />
-                                    ) : (
-                                        <p className="mt-1 text-gray-900">{profile.location || 'Chưa cập nhật'}</p>
-                                    )}
-                                </div>
-                            </div>
-
-                            {isEditing && (
-                                <div className="mt-6 flex space-x-3">
-                                    <button
-                                        onClick={saveProfile}
-                                        className="flex items-center space-x-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
-                                    >
-                                        <Save size={16} />
-                                        <span>Lưu thay đổi</span>
-                                    </button>
-                                </div>
-                            )}
-                        </div>
-
-                        {/* Giới thiệu */}
-                        <div className="bg-white rounded-lg shadow-md p-6">
-                            <h2 className="text-xl font-semibold text-[#145566] mb-4">Giới thiệu</h2>
-                            
-                            {isEditing ? (
-                                <textarea
-                                    value={editForm.bio || ''}
-                                    onChange={(e) => updateEditForm('bio', e.target.value)}
-                                    rows={6}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#145566]"
-                                    placeholder="Viết một chút về bản thân..."
+                    {/* Navigation Section */}
+                    <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+                        <h2 className="text-xl font-semibold text-[#145566] mb-4">Điều hướng</h2>
+                        <p className="text-gray-600 mb-4">Chọn các phần bạn muốn hiển thị (có thể chọn nhiều)</p>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <label className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+                                <input
+                                    type="checkbox"
+                                    checked={sectionVisibility.personalInfo}
+                                    onChange={() => toggleSection('personalInfo')}
+                                    className="w-4 h-4 text-[#145566] focus:ring-[#145566] border-gray-300 rounded"
                                 />
-                            ) : (
-                                <div className="text-gray-700">
-                                    {profile.bio ? (
-                                        <p className="leading-relaxed">{profile.bio}</p>
-                                    ) : (
-                                        <p className="text-gray-500 italic">Chưa có thông tin giới thiệu</p>
-                                    )}
-                                </div>
-                            )}
+                                <User size={16} className="text-[#145566]" />
+                                <span className="text-gray-700 font-medium">Thông tin cá nhân</span>
+                            </label>
+                            
+                            <label className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+                                <input
+                                    type="checkbox"
+                                    checked={sectionVisibility.introduction}
+                                    onChange={() => toggleSection('introduction')}
+                                    className="w-4 h-4 text-[#145566] focus:ring-[#145566] border-gray-300 rounded"
+                                />
+                                <Edit3 size={16} className="text-[#145566]" />
+                                <span className="text-gray-700 font-medium">Giới thiệu</span>
+                            </label>
+                            
+                            <label className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+                                <input
+                                    type="checkbox"
+                                    checked={sectionVisibility.statistics}
+                                    onChange={() => toggleSection('statistics')}
+                                    className="w-4 h-4 text-[#145566] focus:ring-[#145566] border-gray-300 rounded"
+                                />
+                                <Calendar size={16} className="text-[#145566]" />
+                                <span className="text-gray-700 font-medium">Thống kê hoạt động</span>
+                            </label>
                         </div>
                     </div>
 
-                    {/* Thống kê */}
-                    <div className="mt-6 bg-white rounded-lg shadow-md p-6">
-                        <h2 className="text-xl font-semibold text-[#145566] mb-4">Thống kê hoạt động</h2>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <div className="text-center p-4 bg-gray-50 rounded-lg">
-                                <div className="text-2xl font-bold text-[#145566]">12</div>
-                                <div className="text-sm text-gray-600">Lượt chẩn đoán</div>
+                    <div className="space-y-6">
+                        {/* Thông tin cá nhân */}
+                        {sectionVisibility.personalInfo && (
+                            <div className="bg-white rounded-lg shadow-md p-6">
+                                <h2 className="text-xl font-semibold text-[#145566] mb-4 flex items-center">
+                                    <User className="mr-2" size={20} />
+                                    Thông tin cá nhân
+                                </h2>
+                                
+                                <div className="grid md:grid-cols-2 gap-4 space-y-0">
+                                    {/* Tên */}
+                                    <div>
+                                        <label className="text-sm font-medium text-gray-700">Họ và tên</label>
+                                        {isEditing ? (
+                                            <input
+                                                type="text"
+                                                value={editForm.name}
+                                                onChange={(e) => updateEditForm('name', e.target.value)}
+                                                className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#145566]"
+                                            />
+                                        ) : (
+                                            <p className="mt-1 text-gray-900">{profile.name}</p>
+                                        )}
+                                    </div>
+
+                                    {/* Email */}
+                                    <div>
+                                        <label className="text-sm font-medium text-gray-700 flex items-center">
+                                            <Mail size={16} className="mr-1" />
+                                            Email
+                                        </label>
+                                        {isEditing ? (
+                                            <input
+                                                type="email"
+                                                value={editForm.email}
+                                                onChange={(e) => updateEditForm('email', e.target.value)}
+                                                className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#145566]"
+                                            />
+                                        ) : (
+                                            <p className="mt-1 text-gray-900">{profile.email}</p>
+                                        )}
+                                    </div>
+
+                                    {/* Ngày sinh */}
+                                    <div>
+                                        <label className="text-sm font-medium text-gray-700 flex items-center">
+                                            <Calendar size={16} className="mr-1" />
+                                            Ngày sinh
+                                        </label>
+                                        {isEditing ? (
+                                            <input
+                                                type="date"
+                                                value={editForm.dob}
+                                                onChange={(e) => updateEditForm('dob', e.target.value)}
+                                                className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#145566]"
+                                            />
+                                        ) : (
+                                            <p className="mt-1 text-gray-900">{formatDate(profile.dob)}</p>
+                                        )}
+                                    </div>
+
+                                    {/* Địa chỉ */}
+                                    <div>
+                                        <label className="text-sm font-medium text-gray-700 flex items-center">
+                                            <MapPin size={16} className="mr-1" />
+                                            Địa chỉ
+                                        </label>
+                                        {isEditing ? (
+                                            <input
+                                                type="text"
+                                                value={editForm.location || ''}
+                                                onChange={(e) => updateEditForm('location', e.target.value)}
+                                                className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#145566]"
+                                                placeholder="Nhập địa chỉ"
+                                            />
+                                        ) : (
+                                            <p className="mt-1 text-gray-900">{profile.location || 'Chưa cập nhật'}</p>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {isEditing && (
+                                    <div className="mt-6 flex space-x-3">
+                                        <button
+                                            onClick={saveProfile}
+                                            className="flex items-center space-x-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
+                                        >
+                                            <Save size={16} />
+                                            <span>Lưu thay đổi</span>
+                                        </button>
+                                    </div>
+                                )}
                             </div>
-                            <div className="text-center p-4 bg-gray-50 rounded-lg">
-                                <div className="text-2xl font-bold text-[#145566]">3</div>
-                                <div className="text-sm text-gray-600">Bệnh án</div>
+                        )}
+
+                        {/* Giới thiệu */}
+                        {sectionVisibility.introduction && (
+                            <div className="bg-white rounded-lg shadow-md p-6">
+                                <h2 className="text-xl font-semibold text-[#145566] mb-4">Giới thiệu</h2>
+                                
+                                {isEditing ? (
+                                    <textarea
+                                        value={editForm.bio || ''}
+                                        onChange={(e) => updateEditForm('bio', e.target.value)}
+                                        rows={6}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#145566]"
+                                        placeholder="Viết một chút về bản thân..."
+                                    />
+                                ) : (
+                                    <div className="text-gray-700">
+                                        {profile.bio ? (
+                                            <p className="leading-relaxed">{profile.bio}</p>
+                                        ) : (
+                                            <p className="text-gray-500 italic">Chưa có thông tin giới thiệu</p>
+                                        )}
+                                    </div>
+                                )}
                             </div>
-                            <div className="text-center p-4 bg-gray-50 rounded-lg">
-                                <div className="text-2xl font-bold text-[#145566]">30</div>
-                                <div className="text-sm text-gray-600">Ngày sử dụng</div>
+                        )}
+
+                        {/* Thống kê */}
+                        {sectionVisibility.statistics && (
+                            <div className="bg-white rounded-lg shadow-md p-6">
+                                <h2 className="text-xl font-semibold text-[#145566] mb-4">Thống kê hoạt động</h2>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                    <div className="text-center p-4 bg-gray-50 rounded-lg">
+                                        <div className="text-2xl font-bold text-[#145566]">12</div>
+                                        <div className="text-sm text-gray-600">Lượt chẩn đoán</div>
+                                    </div>
+                                    <div className="text-center p-4 bg-gray-50 rounded-lg">
+                                        <div className="text-2xl font-bold text-[#145566]">3</div>
+                                        <div className="text-sm text-gray-600">Bệnh án</div>
+                                    </div>
+                                    <div className="text-center p-4 bg-gray-50 rounded-lg">
+                                        <div className="text-2xl font-bold text-[#145566]">30</div>
+                                        <div className="text-sm text-gray-600">Ngày sử dụng</div>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
+                        )}
                     </div>
                 </div>
             </div>
