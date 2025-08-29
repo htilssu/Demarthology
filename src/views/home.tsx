@@ -1,6 +1,4 @@
 import React, { useState } from 'react';
-import Navbar from '../components/navbar';
-import Footer from '../components/footer';
 
 const HomeView: React.FC = () => {
   const [activeFAQ, setActiveFAQ] = useState(0);

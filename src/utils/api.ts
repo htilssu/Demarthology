@@ -9,7 +9,6 @@ import type {
 import { AuthUtils } from './auth';
 import { 
   ApiConfig, 
-  ApiResponse, 
   ApiError, 
   HttpMethod, 
   RequestOptions,
@@ -111,7 +110,7 @@ export class ApiService {
       apiError.message = this.getErrorMessage(error.response);
     } else if (error.request) {
       // Request made but no response received
-      apiError.message = 'Network error - please check your connection';
+      apiError.message = 'Lỗi kết nối mạng - vui lòng kiểm tra lại';
       apiError.statusCode = 0;
     } else {
       // Something else happened

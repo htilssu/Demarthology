@@ -4,11 +4,9 @@ import HomeView from '../views/home';
 import Introduce from '../views/introduce';
 import Diagnosis from '../views/diagnosis'; 
 import Contact from '../views/contact';
-import ArticlesView from '../views/articles';
 import Profile from "../views/profile";
 import MedicalHistory from "../views/medical-history";
 import Login from "../views/login";
-import Register from "../views/register";
 import MainLayout from "../components/layouts/main-layout";
 
 const AppRoutes: React.FC = () => {
@@ -17,7 +15,6 @@ const AppRoutes: React.FC = () => {
             <Routes>
               {/* Auth routes without layout */}
               <Route path="/login" element={<Login />}/>
-              <Route path="/register" element={<Register />}/>
 
               {/* Main app routes with layout */}
               <Route path={"/"} element={<MainLayout/>}>
@@ -27,7 +24,6 @@ const AppRoutes: React.FC = () => {
                   <Route path="/profile" element={<Profile />}/>
                   <Route path="/medical-history" element={<MedicalHistory />}/>
                   <Route path="/contact" element={<Contact />}/>
-                  <Route path="/articles" element={<ArticlesView />}/>
                   <Route path="*" element={<div>Page Not Found</div>} />
               </Route>
             </Routes>

@@ -3,7 +3,9 @@ import {
   ApiResponse, 
   LoginCredentials, 
   AuthTokenResponse, 
+  LoginResponse,
   AuthUser,
+  UserInfo,
   PaginatedResponse 
 } from '../types/api';
 import { AuthUtils } from '../utils/auth';
@@ -29,20 +31,21 @@ export class AuthService {
   /**
    * Login user with credentials
    */
-  async login(credentials: LoginCredentials): Promise<AuthTokenResponse> {
-    const response = await this.apiService.post<ApiResponse<AuthTokenResponse>>(
+  async login(credentials: LoginCredentials): Promise<LoginResponse> {
+    const response = await this.apiService.post<LoginResponse>(
       '/auth/login',
       credentials,
       { skipAuth: true } // Skip auth for login request
     );
 
     // Store tokens after successful login
-    if (response.data.accessToken) {
-      AuthUtils.setAuthToken(response.data.accessToken);
-      AuthUtils.setRefreshToken(response.data.refreshToken);
+    if (response.accessToken) {
+      AuthUtils.setAuthToken(response.accessToken);
+      // Note: New API doesn't provide refresh token in login response
+      // This might need to be handled differently or stored separately
     }
 
-    return response.data;
+    return response;
   }
 
   /**
@@ -76,11 +79,25 @@ export class AuthService {
   }
 
   /**
+   * Convert UserInfo to AuthUser for backward compatibility
+   */
+  private convertUserInfoToAuthUser(userInfo: UserInfo): AuthUser {
+    return {
+      id: 'user-' + Date.now(), // Generate ID since new API doesn't provide it
+      email: userInfo.email,
+      name: `${userInfo.firstName} ${userInfo.lastName}`,
+      role: userInfo.role || 'user',
+      permissions: ['read', 'write'], // Default permissions
+      avatarUrl: '/avatar.webp' // Default avatar
+    };
+  }
+
+  /**
    * Get current user profile
    */
   async getCurrentUser(): Promise<AuthUser> {
-    const response = await this.apiService.get<ApiResponse<AuthUser>>('/auth/me');
-    return response.data;
+    const response = await this.apiService.get<ApiResponse<UserInfo>>('/auth/me');
+    return this.convertUserInfoToAuthUser(response.data);
   }
 
   /**

@@ -1,15 +1,18 @@
 import { useState } from 'react';
 import { LoginFormData, AuthResponse, FormValidationErrors } from '../models/auth';
+import { useAuth } from '../contexts/AuthContext';
 
 export const useLoginController = () => {
     const [formData, setFormData] = useState<LoginFormData>({
         email: '',
-        password: ''
+        password: '',
+        rememberMe: false
     });
     const [errors, setErrors] = useState<FormValidationErrors>({});
+    const { login, isLoading: authLoading } = useAuth();
     const [isLoading, setIsLoading] = useState(false);
 
-    const updateField = (field: keyof LoginFormData, value: string) => {
+    const updateField = (field: keyof LoginFormData, value: string | boolean) => {
         setFormData(prev => ({ ...prev, [field]: value }));
         // Clear error when user starts typing
         if (errors[field]) {
@@ -44,28 +47,23 @@ export const useLoginController = () => {
         setIsLoading(true);
 
         try {
-            // Simulate API call
-            await new Promise(resolve => setTimeout(resolve, 1000));
-
-            // Mock successful login
-            const mockUser = {
-                id: '1',
-                name: 'Người dùng',
+            // Use actual AuthService through AuthContext
+            await login({
                 email: formData.email,
-                avatarUrl: '/avatar.webp'
-            };
+                password: formData.password,
+                rememberMe: formData.rememberMe
+            });
 
             setIsLoading(false);
             return {
                 success: true,
-                message: 'Đăng nhập thành công!',
-                user: mockUser
+                message: 'Đăng nhập thành công!'
             };
-        } catch (error) {
+        } catch (error: any) {
             setIsLoading(false);
             return {
                 success: false,
-                message: 'Có lỗi xảy ra, vui lòng thử lại'
+                message: error.message || 'Có lỗi xảy ra, vui lòng thử lại'
             };
         }
     };
@@ -73,7 +71,7 @@ export const useLoginController = () => {
     return {
         formData,
         errors,
-        isLoading,
+        isLoading: isLoading || authLoading,
         updateField,
         handleSubmit
     };

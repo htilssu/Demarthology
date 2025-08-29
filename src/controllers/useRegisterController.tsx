@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { RegisterFormData, AuthResponse, FormValidationErrors } from '../models/auth';
+import { AuthService } from '../services/auth';
 
 export const useRegisterController = () => {
     const [formData, setFormData] = useState<RegisterFormData>({
@@ -12,6 +13,8 @@ export const useRegisterController = () => {
     });
     const [errors, setErrors] = useState<FormValidationErrors>({});
     const [isLoading, setIsLoading] = useState(false);
+
+    const authService = AuthService.getInstance();
 
     const updateField = (field: keyof RegisterFormData, value: string) => {
         setFormData(prev => ({ ...prev, [field]: value }));
@@ -71,28 +74,26 @@ export const useRegisterController = () => {
         setIsLoading(true);
 
         try {
-            // Simulate API call
-            await new Promise(resolve => setTimeout(resolve, 1500));
-
-            // Mock successful registration
-            const mockUser = {
-                id: '1',
-                name: formData.name,
+            // Call real API for registration
+            const userData = {
                 email: formData.email,
-                avatarUrl: '/avatar.webp'
+                password: formData.password,
+                name: formData.name
             };
+
+            const user = await authService.register(userData);
 
             setIsLoading(false);
             return {
                 success: true,
                 message: 'Đăng ký thành công!',
-                user: mockUser
+                user: user
             };
-        } catch (error) {
+        } catch (error: any) {
             setIsLoading(false);
             return {
                 success: false,
-                message: 'Có lỗi xảy ra, vui lòng thử lại'
+                message: error.message || 'Có lỗi xảy ra, vui lòng thử lại'
             };
         }
     };
