@@ -40,11 +40,23 @@ function Profile() {
 
     const { medicalHistory, loadMedicalHistory } = useMedicalHistoryController();
     const [selectedRecords, setSelectedRecords] = useState<string[]>([]);
-    const [activeSection, setActiveSection] = useState<string>('profile');
+    const [activeSections, setActiveSections] = useState<string[]>(['profile']);
+    const [currentPage, setCurrentPage] = useState<number>(1);
+    const recordsPerPage = 3;
 
     useEffect(() => {
         loadMedicalHistory();
     }, [loadMedicalHistory]);
+
+    const toggleSection = (sectionId: string) => {
+        setActiveSections(prev => {
+            if (prev.includes(sectionId)) {
+                return prev.filter(id => id !== sectionId);
+            } else {
+                return [...prev, sectionId];
+            }
+        });
+    };
 
     const toggleRecordSelection = (recordId: string) => {
         setSelectedRecords(prev => {
@@ -58,6 +70,32 @@ function Profile() {
 
     const getSelectedRecordsInOrder = () => {
         return medicalHistory.filter(record => selectedRecords.includes(record.id));
+    };
+
+    const getCurrentPageRecords = () => {
+        const startIndex = (currentPage - 1) * recordsPerPage;
+        const endIndex = startIndex + recordsPerPage;
+        return medicalHistory.slice(startIndex, endIndex);
+    };
+
+    const getTotalPages = () => {
+        return Math.ceil(medicalHistory.length / recordsPerPage);
+    };
+
+    const goToPage = (page: number) => {
+        setCurrentPage(page);
+    };
+
+    const goToPreviousPage = () => {
+        if (currentPage > 1) {
+            setCurrentPage(currentPage - 1);
+        }
+    };
+
+    const goToNextPage = () => {
+        if (currentPage < getTotalPages()) {
+            setCurrentPage(currentPage + 1);
+        }
     };
 
     const formatDate = (dateString: string) => {
@@ -80,7 +118,7 @@ function Profile() {
                             <div className="bg-white rounded-lg shadow-md overflow-hidden">
                                 <div className="bg-gradient-to-r from-[#145566] to-[#145569] text-white p-4">
                                     <h2 className="font-semibold">Điều hướng</h2>
-                                    <p className="text-xs text-gray-200 mt-1">Chọn mục để xem</p>
+                                    <p className="text-xs text-gray-200 mt-1">Chọn nhiều mục để xem</p>
                                 </div>
                                 
                                 <div className="p-4">
@@ -88,23 +126,23 @@ function Profile() {
                                         {sections.map((section) => (
                                             <button
                                                 key={section.id}
-                                                onClick={() => setActiveSection(section.id)}
+                                                onClick={() => toggleSection(section.id)}
                                                 className={`w-full text-left p-3 rounded-lg border transition-colors ${
-                                                    activeSection === section.id
+                                                    activeSections.includes(section.id)
                                                         ? 'bg-[#145566] text-white border-[#145566]'
                                                         : 'bg-gray-50 hover:bg-gray-100 border-gray-200'
                                                 }`}
                                             >
                                                 <div className="flex items-center space-x-3">
                                                     <div className={`${
-                                                        activeSection === section.id ? 'text-white' : 'text-[#145566]'
+                                                        activeSections.includes(section.id) ? 'text-white' : 'text-[#145566]'
                                                     }`}>
                                                         {section.icon}
                                                     </div>
                                                     <div className="flex-1">
                                                         <div className="font-medium text-sm">{section.name}</div>
                                                         <div className={`text-xs mt-1 ${
-                                                            activeSection === section.id ? 'text-gray-200' : 'text-gray-500'
+                                                            activeSections.includes(section.id) ? 'text-gray-200' : 'text-gray-500'
                                                         }`}>
                                                             {section.description}
                                                         </div>
@@ -117,9 +155,23 @@ function Profile() {
                             </div>
                         </div>
 
-                        {/* Right Content - Dynamic based on active section */}
+                        {/* Right Content - Dynamic based on active sections */}
                         <div className="lg:col-span-3 space-y-6">
-                            {activeSection === 'profile' && (
+                            {/* Empty state when no sections are selected */}
+                            {activeSections.length === 0 && (
+                                <div className="bg-white rounded-lg shadow-md p-8 text-center border border-gray-200">
+                                    <div className="flex justify-center mb-4">
+                                        <div className="flex space-x-2">
+                                            <User size={32} className="text-gray-400" />
+                                            <FolderOpen size={32} className="text-gray-400" />
+                                        </div>
+                                    </div>
+                                    <h3 className="text-lg font-semibold text-gray-700 mb-2">Chọn mục để xem thông tin</h3>
+                                    <p className="text-gray-500">Vui lòng chọn ít nhất một mục từ danh sách điều hướng bên trái để hiển thị nội dung.</p>
+                                </div>
+                            )}
+
+                            {activeSections.includes('profile') && (
                                 /* Profile Section */
                                 <div className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200">
                                     {/* Profile Header */}
@@ -269,33 +321,20 @@ function Profile() {
                                 </div>
                             )}
 
-                            {activeSection === 'medical-records' && (
+                            {activeSections.includes('medical-records') && (
                                 /* Medical Records Section */
                                 <>
-                                    {/* Medical Records Header */}
-                                    <div className="bg-white rounded-lg shadow-md p-6">
-                                        <div className="flex items-center justify-between">
-                                            <div>
-                                                <h2 className="text-xl font-bold text-[#145566]">Quản lý bệnh án</h2>
-                                                <p className="text-gray-600 mt-1">Chọn nhiều bệnh án để xem chi tiết</p>
-                                            </div>
-                                            {medicalHistory.length === 0 && (
-                                                <button 
-                                                    onClick={loadMedicalHistory}
-                                                    className="bg-[#145566] text-white px-4 py-2 rounded-lg hover:bg-[#0f3f44] transition-colors"
-                                                >
-                                                    Tải dữ liệu mẫu
-                                                </button>
-                                            )}
-                                        </div>
-                                    </div>
-
                                     {/* Medical Records Selection */}
                                     {medicalHistory.length > 0 && (
                                         <div className="bg-white rounded-lg shadow-md p-6">
-                                            <h3 className="text-lg font-semibold text-gray-800 mb-4">Danh sách bệnh án</h3>
+                                            <div className="flex items-center justify-between mb-4">
+                                                <h3 className="text-lg font-semibold text-gray-800">Danh sách bệnh án</h3>
+                                                <div className="text-sm text-gray-500">
+                                                    Trang {currentPage} / {getTotalPages()} - Hiển thị {getCurrentPageRecords().length} / {medicalHistory.length} bệnh án
+                                                </div>
+                                            </div>
                                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                                {medicalHistory.map((record) => (
+                                                {getCurrentPageRecords().map((record) => (
                                                     <button
                                                         key={record.id}
                                                         onClick={() => toggleRecordSelection(record.id)}
@@ -327,6 +366,54 @@ function Profile() {
                                                     </button>
                                                 ))}
                                             </div>
+                                            
+                                            {/* Pagination Controls */}
+                                            {getTotalPages() > 1 && (
+                                                <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-200">
+                                                    <button
+                                                        onClick={goToPreviousPage}
+                                                        disabled={currentPage === 1}
+                                                        className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                                                            currentPage === 1
+                                                                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                                                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                                        }`}
+                                                    >
+                                                        ← Trang trước
+                                                    </button>
+                                                    
+                                                    <div className="flex items-center space-x-2">
+                                                        {Array.from({ length: getTotalPages() }, (_, index) => {
+                                                            const page = index + 1;
+                                                            return (
+                                                                <button
+                                                                    key={page}
+                                                                    onClick={() => goToPage(page)}
+                                                                    className={`w-8 h-8 rounded-lg text-sm font-medium transition-colors ${
+                                                                        page === currentPage
+                                                                            ? 'bg-[#145566] text-white'
+                                                                            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                                                    }`}
+                                                                >
+                                                                    {page}
+                                                                </button>
+                                                            );
+                                                        })}
+                                                    </div>
+                                                    
+                                                    <button
+                                                        onClick={goToNextPage}
+                                                        disabled={currentPage === getTotalPages()}
+                                                        className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                                                            currentPage === getTotalPages()
+                                                                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                                                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                                        }`}
+                                                    >
+                                                        Trang sau →
+                                                    </button>
+                                                </div>
+                                            )}
                                         </div>
                                     )}
 
