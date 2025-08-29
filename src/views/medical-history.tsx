@@ -1,7 +1,5 @@
 import React, { useEffect } from 'react';
 import { Heart, Pill, AlertTriangle, Activity, Users, Calendar, FileText, Plus } from 'lucide-react';
-import Navbar from '../components/navbar';
-import Footer from '../components/footer';
 import useMedicalHistoryController from "../controllers/useMedicalHistoryController";
 
 export default function MedicalHistory() {
