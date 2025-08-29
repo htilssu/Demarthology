@@ -41,6 +41,8 @@ function Profile() {
     const { medicalHistory, loadMedicalHistory } = useMedicalHistoryController();
     const [selectedRecords, setSelectedRecords] = useState<string[]>([]);
     const [activeSections, setActiveSections] = useState<string[]>(['profile']);
+    const [currentPage, setCurrentPage] = useState<number>(1);
+    const recordsPerPage = 3;
 
     useEffect(() => {
         loadMedicalHistory();
@@ -68,6 +70,32 @@ function Profile() {
 
     const getSelectedRecordsInOrder = () => {
         return medicalHistory.filter(record => selectedRecords.includes(record.id));
+    };
+
+    const getCurrentPageRecords = () => {
+        const startIndex = (currentPage - 1) * recordsPerPage;
+        const endIndex = startIndex + recordsPerPage;
+        return medicalHistory.slice(startIndex, endIndex);
+    };
+
+    const getTotalPages = () => {
+        return Math.ceil(medicalHistory.length / recordsPerPage);
+    };
+
+    const goToPage = (page: number) => {
+        setCurrentPage(page);
+    };
+
+    const goToPreviousPage = () => {
+        if (currentPage > 1) {
+            setCurrentPage(currentPage - 1);
+        }
+    };
+
+    const goToNextPage = () => {
+        if (currentPage < getTotalPages()) {
+            setCurrentPage(currentPage + 1);
+        }
     };
 
     const formatDate = (dateString: string) => {
@@ -285,9 +313,14 @@ function Profile() {
                                     {/* Medical Records Selection */}
                                     {medicalHistory.length > 0 && (
                                         <div className="bg-white rounded-lg shadow-md p-6">
-                                            <h3 className="text-lg font-semibold text-gray-800 mb-4">Danh sách bệnh án</h3>
+                                            <div className="flex items-center justify-between mb-4">
+                                                <h3 className="text-lg font-semibold text-gray-800">Danh sách bệnh án</h3>
+                                                <div className="text-sm text-gray-500">
+                                                    Trang {currentPage} / {getTotalPages()} - Hiển thị {getCurrentPageRecords().length} / {medicalHistory.length} bệnh án
+                                                </div>
+                                            </div>
                                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                                {medicalHistory.map((record) => (
+                                                {getCurrentPageRecords().map((record) => (
                                                     <button
                                                         key={record.id}
                                                         onClick={() => toggleRecordSelection(record.id)}
@@ -319,6 +352,54 @@ function Profile() {
                                                     </button>
                                                 ))}
                                             </div>
+                                            
+                                            {/* Pagination Controls */}
+                                            {getTotalPages() > 1 && (
+                                                <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-200">
+                                                    <button
+                                                        onClick={goToPreviousPage}
+                                                        disabled={currentPage === 1}
+                                                        className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                                                            currentPage === 1
+                                                                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                                                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                                        }`}
+                                                    >
+                                                        ← Trang trước
+                                                    </button>
+                                                    
+                                                    <div className="flex items-center space-x-2">
+                                                        {Array.from({ length: getTotalPages() }, (_, index) => {
+                                                            const page = index + 1;
+                                                            return (
+                                                                <button
+                                                                    key={page}
+                                                                    onClick={() => goToPage(page)}
+                                                                    className={`w-8 h-8 rounded-lg text-sm font-medium transition-colors ${
+                                                                        page === currentPage
+                                                                            ? 'bg-[#145566] text-white'
+                                                                            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                                                    }`}
+                                                                >
+                                                                    {page}
+                                                                </button>
+                                                            );
+                                                        })}
+                                                    </div>
+                                                    
+                                                    <button
+                                                        onClick={goToNextPage}
+                                                        disabled={currentPage === getTotalPages()}
+                                                        className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                                                            currentPage === getTotalPages()
+                                                                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                                                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                                        }`}
+                                                    >
+                                                        Trang sau →
+                                                    </button>
+                                                </div>
+                                            )}
                                         </div>
                                     )}
 
