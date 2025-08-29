@@ -4,6 +4,7 @@ import {
   LoginCredentials, 
   AuthTokenResponse, 
   LoginResponse,
+  RegisterResponse,
   AuthUser,
   UserInfo,
   PaginatedResponse 
@@ -54,14 +55,22 @@ export class AuthService {
   async register(userData: {
     email: string;
     password: string;
-    name: string;
-  }): Promise<AuthUser> {
-    const response = await this.apiService.post<ApiResponse<AuthUser>>(
+    firstName: string;
+    lastName: string;
+    dob: string;
+  }): Promise<RegisterResponse> {
+    const response = await this.apiService.post<RegisterResponse>(
       '/auth/register',
       userData,
       { skipAuth: true }
     );
-    return response.data;
+    
+    // Store tokens after successful registration
+    if (response.accessToken) {
+      AuthUtils.setAuthToken(response.accessToken);
+    }
+    
+    return response;
   }
 
   /**

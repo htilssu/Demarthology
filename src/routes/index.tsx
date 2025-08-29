@@ -7,6 +7,7 @@ import Contact from '../views/contact';
 import Profile from "../views/profile";
 import MedicalHistory from "../views/medical-history";
 import Login from "../views/login";
+import Register from "../views/register";
 import MainLayout from "../components/layouts/main-layout";
 
 const AppRoutes: React.FC = () => {
@@ -15,6 +16,7 @@ const AppRoutes: React.FC = () => {
             <Routes>
               {/* Auth routes without layout */}
               <Route path="/login" element={<Login />}/>
+              <Route path="/register" element={<Register />}/>
 
               {/* Main app routes with layout */}
               <Route path={"/"} element={<MainLayout/>}>

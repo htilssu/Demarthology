@@ -114,6 +114,28 @@ export interface UserInfo {
 }
 
 /**
+ * Register request interface (new API spec)
+ */
+export interface RegisterRequest {
+  email: string;
+  password: string;
+  firstName: string;
+  lastName: string;
+  dob: string;
+}
+
+/**
+ * Register response interface (new API spec)
+ */
+export interface RegisterResponse {
+  success: boolean;
+  message: string;
+  user: UserInfo;
+  accessToken: string;
+  tokenType: string;
+}
+
+/**
  * User authentication data interface (legacy, for backward compatibility)
  */
 export interface AuthUser {
