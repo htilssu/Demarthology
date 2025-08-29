@@ -32,49 +32,20 @@ export class AuthService {
    * Login user with credentials
    */
   async login(credentials: LoginCredentials): Promise<LoginResponse> {
-    try {
-      const response = await this.apiService.post<LoginResponse>(
-        '/auth/login',
-        credentials,
-        { skipAuth: true } // Skip auth for login request
-      );
+    const response = await this.apiService.post<LoginResponse>(
+      '/auth/login',
+      credentials,
+      { skipAuth: true } // Skip auth for login request
+    );
 
-      // Store tokens after successful login
-      if (response.accessToken) {
-        AuthUtils.setAuthToken(response.accessToken);
-        // Note: New API doesn't provide refresh token in login response
-        // This might need to be handled differently or stored separately
-      }
-
-      return response;
-    } catch (error: any) {
-      // If API is not available, provide mock authentication for demo purposes
-      if (error.statusCode === 0 || error.message.includes('Network error')) {
-        console.log('API not available, using mock authentication for demo');
-        
-        // Mock successful login response matching new API spec
-        const mockLoginResponse: LoginResponse = {
-          success: true,
-          message: 'Đăng nhập thành công',
-          user: {
-            email: credentials.email,
-            firstName: 'Người dùng',
-            lastName: 'Demo',
-            role: 'user'
-          },
-          accessToken: 'mock-access-token-' + Date.now(),
-          tokenType: 'bearer'
-        };
-
-        // Store token
-        AuthUtils.setAuthToken(mockLoginResponse.accessToken);
-
-        return mockLoginResponse;
-      }
-      
-      // Re-throw other errors
-      throw error;
+    // Store tokens after successful login
+    if (response.accessToken) {
+      AuthUtils.setAuthToken(response.accessToken);
+      // Note: New API doesn't provide refresh token in login response
+      // This might need to be handled differently or stored separately
     }
+
+    return response;
   }
 
   /**
@@ -125,30 +96,8 @@ export class AuthService {
    * Get current user profile
    */
   async getCurrentUser(): Promise<AuthUser> {
-    try {
-      const response = await this.apiService.get<ApiResponse<UserInfo>>('/auth/me');
-      return this.convertUserInfoToAuthUser(response.data);
-    } catch (error: any) {
-      // If API is not available, provide mock user data for demo purposes
-      if (error.statusCode === 0 || error.message.includes('Network error')) {
-        console.log('API not available, using mock user data for demo');
-        
-        // Mock user data
-        const mockUser: AuthUser = {
-          id: 'mock-user-1',
-          email: 'test@example.com',
-          name: 'Người dùng Demo',
-          role: 'user',
-          permissions: ['read', 'write'],
-          avatarUrl: '/avatar.webp'
-        };
-
-        return mockUser;
-      }
-      
-      // Re-throw other errors
-      throw error;
-    }
+    const response = await this.apiService.get<ApiResponse<UserInfo>>('/auth/me');
+    return this.convertUserInfoToAuthUser(response.data);
   }
 
   /**
