@@ -157,6 +157,20 @@ function Profile() {
 
                         {/* Right Content - Dynamic based on active sections */}
                         <div className="lg:col-span-3 space-y-6">
+                            {/* Empty state when no sections are selected */}
+                            {activeSections.length === 0 && (
+                                <div className="bg-white rounded-lg shadow-md p-8 text-center border border-gray-200">
+                                    <div className="flex justify-center mb-4">
+                                        <div className="flex space-x-2">
+                                            <User size={32} className="text-gray-400" />
+                                            <FolderOpen size={32} className="text-gray-400" />
+                                        </div>
+                                    </div>
+                                    <h3 className="text-lg font-semibold text-gray-700 mb-2">Chọn mục để xem thông tin</h3>
+                                    <p className="text-gray-500">Vui lòng chọn ít nhất một mục từ danh sách điều hướng bên trái để hiển thị nội dung.</p>
+                                </div>
+                            )}
+
                             {activeSections.includes('profile') && (
                                 /* Profile Section */
                                 <div className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200">
