@@ -1,4 +1,4 @@
-import type { AxiosRequestConfig, AxiosResponse } from 'axios';
+import type { AxiosRequestConfig } from 'axios';
 
 /**
  * API Configuration interface
@@ -100,4 +100,5 @@ export interface AuthUser {
   name: string;
   role: string;
   permissions: string[];
+  avatarUrl?: string;
 }

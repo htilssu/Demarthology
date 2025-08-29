@@ -1,14 +1,13 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, Mail, Lock, ArrowRight } from 'lucide-react';
 import { useLoginController } from '../controllers/useLoginController';
-import Navbar from '../components/navbar';
-import Footer from '../components/footer';
 
 const Login: React.FC = () => {
     const { formData, errors, isLoading, updateField, handleSubmit } = useLoginController();
     const [showPassword, setShowPassword] = useState(false);
     const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+    const navigate = useNavigate();
 
     const onSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -22,15 +21,13 @@ const Login: React.FC = () => {
         if (result.success) {
             // Redirect to dashboard or home page
             setTimeout(() => {
-                window.location.href = '/';
+                navigate('/');
             }, 1500);
         }
     };
 
     return (
-        <div className="min-h-screen bg-gray-50">
-            <Navbar />
-            
+        <div className="min-h-screen bg-gray-50">            
             {/* Hero Section */}
             <section className="pt-20 pb-16 bg-gradient-to-r from-[#145566] to-[#0e3e46]">
                 <div className="container mx-auto px-6">
@@ -201,8 +198,6 @@ const Login: React.FC = () => {
                     </div>
                 </div>
             </section>
-
-            <Footer />
         </div>
     );
 };

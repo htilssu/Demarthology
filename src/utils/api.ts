@@ -9,7 +9,6 @@ import type {
 import { AuthUtils } from './auth';
 import { 
   ApiConfig, 
-  ApiResponse, 
   ApiError, 
   HttpMethod, 
   RequestOptions,
