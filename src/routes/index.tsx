@@ -13,6 +13,7 @@ import HospitalView from '../views/hospital';
 import UV from '../views/uv';
 import CommunityView from '../views/community';
 import QuestionDetailView from '../views/question-detail';
+import BeforeAfter from '../views/before-after';
 
 const AppRoutes: React.FC = () => {
   return (
@@ -34,6 +35,7 @@ const AppRoutes: React.FC = () => {
                   <Route path="/uv" element={<UV />}/>
                   <Route path="/community" element={<CommunityView />}/>
                   <Route path="/community/question/:questionId" element={<QuestionDetailView/>}/>
+                  <Route path="/before-after" element={<BeforeAfter />}/>
                   <Route path="*" element={<div>Page Not Found</div>} />
               </Route>
             </Routes>
