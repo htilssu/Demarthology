@@ -68,7 +68,7 @@ const ResetPassword: React.FC = () => {
                             )}
 
                             {/* Reset Password Form */}
-                            <form onSubmit={onSubmit} className="space-y-6">
+                            <form onSubmit={onSubmit} className="space-y-3">
                                 {/* New Password Field */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">

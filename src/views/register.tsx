@@ -55,7 +55,7 @@ const Register: React.FC = () => {
                             )}
 
                             {/* Register Form */}
-                            <form onSubmit={onSubmit} className="space-y-6">
+                            <form onSubmit={onSubmit} className="space-y-3">
                                 {/* Name Fields - First Name and Last Name in one row */}
                                 <div className="grid grid-cols-2 gap-4">
                                     {/* First Name Field */}

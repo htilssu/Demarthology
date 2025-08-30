@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { ForgotPasswordFormData, AuthResponse, FormValidationErrors } from '../models/auth';
+import { validateEmail, formatEmail } from '../utils/validation';
 
 export const useForgotPasswordController = () => {
     const [formData, setFormData] = useState<ForgotPasswordFormData>({
@@ -19,10 +20,10 @@ export const useForgotPasswordController = () => {
     const validateForm = (): boolean => {
         const newErrors: FormValidationErrors = {};
 
-        if (!formData.email) {
-            newErrors.email = 'Email là bắt buộc';
-        } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-            newErrors.email = 'Email không hợp lệ';
+        // Use custom email validation
+        const emailValidation = validateEmail(formData.email);
+        if (!emailValidation.isValid) {
+            newErrors.email = emailValidation.error;
         }
 
         setErrors(newErrors);
@@ -41,7 +42,7 @@ export const useForgotPasswordController = () => {
             await new Promise(resolve => setTimeout(resolve, 1500));
             
             // For demo purposes, always return success
-            // In real implementation, this would call an API
+            // In real implementation, this would call an API with the formatted email
             return { 
                 success: true, 
                 message: 'Liên kết đặt lại mật khẩu đã được gửi đến email của bạn. Vui lòng kiểm tra hộp thư.' 
