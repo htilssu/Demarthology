@@ -14,6 +14,10 @@ export interface RegisterFormData {
     location?: string;
 }
 
+export interface ForgotPasswordFormData {
+    email: string;
+}
+
 export interface AuthUser {
     id: string;
     name: string;

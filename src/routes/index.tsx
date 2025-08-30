@@ -8,6 +8,7 @@ import Profile from "../views/profile";
 import MedicalHistory from "../views/medical-history";
 import Login from "../views/login";
 import Register from "../views/register";
+import ForgotPassword from "../views/forgot-password";
 import MainLayout from "../components/layouts/main-layout";
 import HospitalView from '../views/hospital';
 import UV from '../views/uv';
@@ -21,6 +22,7 @@ const AppRoutes: React.FC = () => {
                 {/* Auth routes without layout */}
                 <Route path="/login" element={<Login/>}/>
                 <Route path="/register" element={<Register/>}/>
+                <Route path="/forgot-password" element={<ForgotPassword/>}/>
 
                 {/* Main app routes with layout */}
                 <Route path={"/"} element={<MainLayout/>}>
