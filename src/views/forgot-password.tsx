@@ -46,7 +46,7 @@ const ForgotPassword: React.FC = () => {
                             )}
 
                             {/* Forgot Password Form */}
-                            <form onSubmit={onSubmit} className="space-y-6">
+                            <form onSubmit={onSubmit} className="space-y-3">
                                 {/* Email Field */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -57,7 +57,7 @@ const ForgotPassword: React.FC = () => {
                                             <Mail className="h-5 w-5 text-gray-400" />
                                         </div>
                                         <input
-                                            type="email"
+                                            type="text"
                                             value={formData.email}
                                             onChange={(e) => updateField('email', e.target.value)}
                                             className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#145566] transition-colors ${

@@ -54,7 +54,7 @@ const Login: React.FC = () => {
                             )}
 
                             {/* Login Form */}
-                            <form onSubmit={onSubmit} className="space-y-6">
+                            <form onSubmit={onSubmit} className="space-y-3">
                                 {/* Email Field */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">
