@@ -16,38 +16,38 @@ export const useUVController = () => {
   /**
    * Helper functions for UV level classification
    */
-  const getUVLevel = (uvIndex: number): UVLevel => {
-    if (uvIndex <= 2) return "Thấp";
-    if (uvIndex <= 5) return "Trung bình";
-    if (uvIndex <= 7) return "Cao";
-    if (uvIndex <= 10) return "Rất cao";
+  const getUVLevel = (uvValue: number): UVLevel => {
+    if (uvValue <= 2) return "Thấp";
+    if (uvValue <= 5) return "Trung bình";
+    if (uvValue <= 7) return "Cao";
+    if (uvValue <= 10) return "Rất cao";
     return "Cực cao";
   };
 
-  const getUVColor = (uvIndex: number): string => {
-    if (uvIndex <= 2) return "from-green-400 to-green-500";
-    if (uvIndex <= 5) return "from-yellow-400 to-yellow-500";
-    if (uvIndex <= 7) return "from-orange-400 to-orange-500";
-    if (uvIndex <= 10) return "from-red-500 to-red-600";
+  const getUVColor = (uvValue: number): string => {
+    if (uvValue <= 2) return "from-green-400 to-green-500";
+    if (uvValue <= 5) return "from-yellow-400 to-yellow-500";
+    if (uvValue <= 7) return "from-orange-400 to-orange-500";
+    if (uvValue <= 10) return "from-red-500 to-red-600";
     return "from-purple-500 to-purple-600";
   };
 
-  const getUVMessage = (uvIndex: number): string => {
-    if (uvIndex <= 2) return "UV thấp, an toàn để ra ngoài.";
-    if (uvIndex <= 5) return "UV trung bình, cần bảo vệ da khi ra ngoài.";
-    if (uvIndex <= 7) return "UV cao! Giảm thời gian ngoài trời giữa trưa.";
-    if (uvIndex <= 10) return "UV rất cao! Tránh ra ngoài, bảo vệ tối đa.";
+  const getUVMessage = (uvValue: number): string => {
+    if (uvValue <= 2) return "UV thấp, an toàn để ra ngoài.";
+    if (uvValue <= 5) return "UV trung bình, cần bảo vệ da khi ra ngoài.";
+    if (uvValue <= 7) return "UV cao! Giảm thời gian ngoài trời giữa trưa.";
+    if (uvValue <= 10) return "UV rất cao! Tránh ra ngoài, bảo vệ tối đa.";
     return "UV cực cao! Nguy hiểm, tránh ra ngoài hoàn toàn.";
   };
 
-  const getUVNote = (uvIndex: number): string => {
-    if (uvIndex <= 2)
+  const getUVNote = (uvValue: number): string => {
+    if (uvValue <= 2)
       return "🌿 Thoải mái ra ngoài, nhưng vẫn nên bôi kem chống nắng.";
-    if (uvIndex <= 5)
+    if (uvValue <= 5)
       return "🧴 Nên bôi kem chống nắng và đội mũ khi ra ngoài.";
-    if (uvIndex <= 7)
+    if (uvValue <= 7)
       return "🕶️ Hạn chế ra ngoài giữa trưa, mặc đồ dài, bôi kem chống nắng.";
-    if (uvIndex <= 10)
+    if (uvValue <= 10)
       return "⚠️ Tránh ra ngoài, bảo vệ tối đa: kính, mũ, áo chống nắng.";
     return "🚫 Nguy hiểm! Tránh ra ngoài hoàn toàn, bảo vệ tối đa!";
   };
@@ -60,13 +60,13 @@ export const useUVController = () => {
       setLoading(true);
       setError(null);
       
-      const uvResponse = await uvService.getUVIndexForCurrentLocation();
-      setUVData(uvResponse);
+      const response = await uvService.getUVIndexForCurrentLocation();
+      setUVData(response.uvData);
       
       // Update location state
       setLocation({
-        latitude: uvResponse.lat,
-        longitude: uvResponse.lon
+        latitude: response.location.lat,
+        longitude: response.location.lon
       });
       
     } catch (err: any) {

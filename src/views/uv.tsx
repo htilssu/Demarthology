@@ -87,10 +87,10 @@ const UVIndex: React.FC = () => {
     );
   }
 
-  const { uv_index } = uvData;
+  const { uv_value, message, level_uv } = uvData;
   
-  // Add defensive check for uv_index
-  if (uv_index === undefined || uv_index === null || isNaN(uv_index)) {
+  // Add defensive check for uv_value
+  if (uv_value === undefined || uv_value === null || isNaN(uv_value)) {
     return (
       <div className="max-w-7xl mx-auto p-6 flex items-center justify-center min-h-[400px]">
         <div className="text-center">
@@ -101,9 +101,9 @@ const UVIndex: React.FC = () => {
     );
   }
   
-  const uvLevel = getUVLevel(uv_index);
-  const uvMessage = getUVMessage(uv_index);
-  const uvNote = getUVNote(uv_index);
+  const uvLevel = getUVLevel(uv_value);
+  const uvMessage = getUVMessage(uv_value);
+  const uvNote = getUVNote(uv_value);
   const { latitude, longitude } = location;
 
   return (
@@ -120,7 +120,7 @@ const UVIndex: React.FC = () => {
             <h2 className="text-3xl font-bold text-slate-800">
               Chỉ số UV hiện tại
             </h2>
-            <p className="mt-1 text-xl text-slate-700">{uvMessage}</p>
+            <p className="mt-1 text-xl text-slate-700">{message || uvMessage}</p>
           </div>
         </div>
 
@@ -129,10 +129,10 @@ const UVIndex: React.FC = () => {
           animate={{ scale: 1 }}
           transition={{ type: "spring", stiffness: 260, damping: 20 }}
           className={`p-8 rounded-3xl text-white text-center text-5xl font-bold bg-gradient-to-r ${getUVColor(
-            uv_index
+            uv_value
           )} shadow-xl`}
         >
-          {uv_index.toFixed(1)} - {uvLevel}
+          {uv_value.toFixed(1)} - {level_uv || uvLevel}
         </motion.div>
 
         <motion.div
@@ -141,7 +141,7 @@ const UVIndex: React.FC = () => {
           transition={{ delay: 0.3 }}
           className="flex items-center gap-3 p-4 bg-slate-100 rounded-2xl shadow-inner"
         >
-          {uv_index <= 5 ? (
+          {uv_value <= 5 ? (
             <CheckCircle className="w-8 h-8 text-green-500" />
           ) : (
             <AlertCircle className="w-8 h-8 text-red-500 animate-pulse" />
@@ -155,9 +155,6 @@ const UVIndex: React.FC = () => {
           <div className="text-sm text-slate-700">
             <p className="font-medium">Vị trí hiện tại</p>
             <p>Lat: {latitude.toFixed(4)}, Lon: {longitude.toFixed(4)}</p>
-            {uvData.location_name && (
-              <p className="text-blue-600">{uvData.location_name}</p>
-            )}
           </div>
         </div>
 
@@ -215,11 +212,6 @@ const UVIndex: React.FC = () => {
             <MapPin className="w-5 h-5" />
             Lấy vị trí hiện tại
           </motion.button>
-          {uvData.updated_at && (
-            <p className="text-sm text-slate-400 text-center">
-              Cập nhật: {new Date(uvData.updated_at).toLocaleString('vi-VN')}
-            </p>
-          )}
         </div>
       </motion.div>
 

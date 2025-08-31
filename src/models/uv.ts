@@ -1,12 +1,10 @@
 /**
- * UV Index API response interface
+ * UV Index API response interface (matches actual backend format)
  */
 export interface UVIndexResponse {
-  uv_index: number;
-  lat: number;
-  lon: number;
-  updated_at?: string;
-  location_name?: string;
+  message: string;
+  uv_value: number;
+  level_uv: string;
 }
 
 /**

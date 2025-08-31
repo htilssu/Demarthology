@@ -32,8 +32,8 @@ export class UVService {
 
       console.log('✅ UV index data received:', response);
       
-      // Validate response has required uv_index field
-      if (response && typeof response.uv_index === 'number' && !isNaN(response.uv_index)) {
+      // Validate response has required uv_value field
+      if (response && typeof response.uv_value === 'number' && !isNaN(response.uv_value)) {
         return response;
       } else {
         throw new Error('Invalid UV index data received from API');
@@ -43,13 +43,19 @@ export class UVService {
       
       // Return mock data as fallback for development
       console.log('⚠️ Using mock UV data as fallback');
-      const mockUVIndex = parseFloat((Math.random() * 12).toFixed(1));
+      const mockUVValue = parseFloat((Math.random() * 12).toFixed(1));
       return {
-        uv_index: mockUVIndex, 
-        lat: params.lat,
-        lon: params.lon,
-        updated_at: new Date().toISOString(),
-        location_name: 'Development Location'
+        uv_value: mockUVValue,
+        message: mockUVValue <= 2 ? "🟢 UV thấp, an toàn để ra ngoài." :
+                 mockUVValue <= 5 ? "🟡 UV trung bình, cần bảo vệ da khi ra ngoài." :
+                 mockUVValue <= 7 ? "🟠 UV cao! Giảm thời gian ngoài trời giữa trưa." :
+                 mockUVValue <= 10 ? "🔴 UV rất cao! Tránh ra ngoài, bảo vệ tối đa." :
+                 "🟣 UV cực kỳ nguy hiểm! Tránh ra ngoài và mặc kín toàn thân.",
+        level_uv: mockUVValue <= 2 ? "Thấp" :
+                  mockUVValue <= 5 ? "Trung bình" :
+                  mockUVValue <= 7 ? "Cao" :
+                  mockUVValue <= 10 ? "Rất cao" :
+                  "Nguy hiểm"
       };
     }
   }
@@ -57,7 +63,7 @@ export class UVService {
   /**
    * Get current geolocation and fetch UV index
    */
-  async getUVIndexForCurrentLocation(): Promise<UVIndexResponse> {
+  async getUVIndexForCurrentLocation(): Promise<{uvData: UVIndexResponse, location: {lat: number, lon: number}}> {
     return new Promise((resolve, reject) => {
       if (!navigator.geolocation) {
         reject(new Error('Geolocation is not supported by this browser'));
@@ -69,7 +75,10 @@ export class UVService {
           try {
             const { latitude, longitude } = position.coords;
             const uvData = await this.getUVIndex({ lat: latitude, lon: longitude });
-            resolve(uvData);
+            resolve({
+              uvData,
+              location: { lat: latitude, lon: longitude }
+            });
           } catch (error) {
             reject(error);
           }
@@ -82,7 +91,10 @@ export class UVService {
           console.log('Using default coordinates:', defaultCoords);
           
           this.getUVIndex(defaultCoords)
-            .then(resolve)
+            .then(uvData => resolve({
+              uvData,
+              location: defaultCoords
+            }))
             .catch(reject);
         },
         {
