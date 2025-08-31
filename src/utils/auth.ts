@@ -10,6 +10,7 @@ export class AuthUtils {
   // This key is used by both storage (after login) and retrieval (by axios interceptor)
   private static readonly TOKEN_KEY = 'auth_token';
   private static readonly REFRESH_TOKEN_KEY = 'refresh_token';
+  private static readonly USER_KEY = 'auth_user';
 
   /**
    * Get authentication token from localStorage or cookies
@@ -62,11 +63,36 @@ export class AuthUtils {
   }
 
   /**
+   * Get user information from localStorage
+   */
+  static getUser(): any | null {
+    try {
+      const userStr = localStorage.getItem(this.USER_KEY);
+      return userStr ? JSON.parse(userStr) : null;
+    } catch (error) {
+      console.error('Failed to parse user data from localStorage:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Set user information in localStorage
+   */
+  static setUser(user: any): void {
+    try {
+      localStorage.setItem(this.USER_KEY, JSON.stringify(user));
+    } catch (error) {
+      console.error('Failed to save user data to localStorage:', error);
+    }
+  }
+
+  /**
    * Remove authentication tokens from localStorage
    */
   static clearTokens(): void {
     localStorage.removeItem(this.TOKEN_KEY);
     localStorage.removeItem(this.REFRESH_TOKEN_KEY);
+    localStorage.removeItem(this.USER_KEY);
   }
 
   /**

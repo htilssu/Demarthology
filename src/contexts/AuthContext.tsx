@@ -30,8 +30,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
         const initializeAuth = async () => {
             if (AuthUtils.isAuthenticated()) {
                 try {
-                    const currentUser = await authService.getCurrentUser();
-                    setUser(currentUser);
+                    // First try to get user from localStorage
+                    const savedUser = AuthUtils.getUser();
+                    if (savedUser) {
+                        setUser(savedUser);
+                    } else {
+                        // If no saved user, fetch from API
+                        const currentUser = await authService.getCurrentUser();
+                        setUser(currentUser);
+                        // Save user to localStorage for future use
+                        AuthUtils.setUser(currentUser);
+                    }
                 } catch (error) {
                     console.error('Failed to get current user:', error);
                     AuthUtils.clearTokens();
@@ -59,6 +68,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
             };
 
             setUser(authUser);
+            // Save user to localStorage for persistence
+            AuthUtils.setUser(authUser);
         } catch (error) {
             console.error('Login failed:', error);
             throw error;
@@ -84,6 +95,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
             try {
                 const currentUser = await authService.getCurrentUser();
                 setUser(currentUser);
+                // Update user in localStorage
+                AuthUtils.setUser(currentUser);
             } catch (error) {
                 console.error('Failed to refresh auth:', error);
                 setUser(null);

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { RegisterFormData, AuthResponse, FormValidationErrors } from '../models/auth';
 import { AuthService } from '../services/auth';
+import { AuthUtils } from '../utils/auth';
 
 export const useRegisterController = () => {
     const [formData, setFormData] = useState<RegisterFormData>({
@@ -92,16 +93,24 @@ export const useRegisterController = () => {
 
             const response = await authService.register(userData);
 
+            // Create user object for localStorage
+            const authUser = {
+                id: 'user-' + Date.now(),
+                name: `${response.user.firstName} ${response.user.lastName}`,
+                email: response.user.email,
+                role: response.user.role || 'user',
+                permissions: ['read', 'write'],
+                avatarUrl: '/avatar.webp'
+            };
+
+            // Save user to localStorage for persistence
+            AuthUtils.setUser(authUser);
+
             setIsLoading(false);
             return {
                 success: true,
                 message: response.message,
-                user: {
-                    id: 'user-' + Date.now(),
-                    name: `${response.user.firstName} ${response.user.lastName}`,
-                    email: response.user.email,
-                    avatarUrl: '/avatar.webp'
-                }
+                user: authUser
             };
         } catch (error: any) {
             setIsLoading(false);
