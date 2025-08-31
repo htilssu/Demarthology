@@ -4,13 +4,10 @@ import { AuthService } from '../services/auth';
 
 export const useRegisterController = () => {
     const [formData, setFormData] = useState<RegisterFormData>({
-        firstName: '',
-        lastName: '',
         email: '',
+        phone: '',
         password: '',
-        confirmPassword: '',
-        dob: '',
-        location: ''
+        dateOfBirth: ''
     });
     const [errors, setErrors] = useState<FormValidationErrors>({});
     const [isLoading, setIsLoading] = useState(false);
@@ -28,22 +25,16 @@ export const useRegisterController = () => {
     const validateForm = (): boolean => {
         const newErrors: FormValidationErrors = {};
 
-        if (!formData.firstName.trim()) {
-            newErrors.firstName = 'Họ là bắt buộc';
-        } else if (formData.firstName.trim().length < 2) {
-            newErrors.firstName = 'Họ phải có ít nhất 2 ký tự';
-        }
-
-        if (!formData.lastName.trim()) {
-            newErrors.lastName = 'Tên là bắt buộc';
-        } else if (formData.lastName.trim().length < 2) {
-            newErrors.lastName = 'Tên phải có ít nhất 2 ký tự';
-        }
-
         if (!formData.email) {
             newErrors.email = 'Email là bắt buộc';
         } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
             newErrors.email = 'Email không hợp lệ';
+        }
+
+        if (!formData.phone) {
+            newErrors.phone = 'Số điện thoại là bắt buộc';
+        } else if (!/^[0-9]{10,11}$/.test(formData.phone.replace(/\s/g, ''))) {
+            newErrors.phone = 'Số điện thoại không hợp lệ (10-11 chữ số)';
         }
 
         if (!formData.password) {
@@ -52,20 +43,14 @@ export const useRegisterController = () => {
             newErrors.password = 'Mật khẩu phải có ít nhất 6 ký tự';
         }
 
-        if (!formData.confirmPassword) {
-            newErrors.confirmPassword = 'Xác nhận mật khẩu là bắt buộc';
-        } else if (formData.password !== formData.confirmPassword) {
-            newErrors.confirmPassword = 'Mật khẩu xác nhận không khớp';
-        }
-
-        if (!formData.dob) {
-            newErrors.dob = 'Ngày sinh là bắt buộc';
+        if (!formData.dateOfBirth) {
+            newErrors.dateOfBirth = 'Ngày sinh là bắt buộc';
         } else {
-            const dobDate = new Date(formData.dob);
+            const dobDate = new Date(formData.dateOfBirth);
             const today = new Date();
             const age = today.getFullYear() - dobDate.getFullYear();
             if (age < 13) {
-                newErrors.dob = 'Bạn phải từ 13 tuổi trở lên';
+                newErrors.dateOfBirth = 'Bạn phải từ 13 tuổi trở lên';
             }
         }
 
@@ -84,11 +69,9 @@ export const useRegisterController = () => {
             // Call real API for registration with correct structure
             const userData = {
                 email: formData.email,
+                phone: formData.phone,
                 password: formData.password,
-                firstName: formData.firstName,
-                lastName: formData.lastName,
-                dob: formData.dob,
-                phone: "0123456789" // Default phone for now
+                dateOfBirth: formData.dateOfBirth
             };
 
             const userProfile = await authService.register(userData);

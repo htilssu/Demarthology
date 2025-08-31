@@ -128,10 +128,9 @@ export interface UserInfo {
  */
 export interface RegisterRequest {
   email: string;
+  phone: string;
   password: string;
-  firstName: string;
-  lastName: string;
-  dob: string;
+  dateOfBirth: string;
 }
 
 /**

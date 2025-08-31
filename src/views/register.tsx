@@ -1,12 +1,11 @@
 import React, {useState} from 'react';
 import {Link} from 'react-router-dom';
-import {ArrowRight, Calendar, Eye, EyeOff, Lock, Mail, MapPin, User} from 'lucide-react';
+import {ArrowRight, Calendar, Eye, EyeOff, Lock, Mail, Phone} from 'lucide-react';
 import {useRegisterController} from '../controllers/useRegisterController';
 
 const Register: React.FC = () => {
     const { formData, errors, isLoading, updateField, handleSubmit } = useRegisterController();
     const [showPassword, setShowPassword] = useState(false);
-    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
     const onSubmit = async (e: React.FormEvent) => {
@@ -55,61 +54,10 @@ const Register: React.FC = () => {
 
                             {/* Register Form */}
                             <form onSubmit={onSubmit} className="space-y-6">
-                                {/* Name Fields - First Name and Last Name in one row */}
-                                <div className="grid grid-cols-2 gap-4">
-                                    {/* First Name Field */}
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            Họ
-                                        </label>
-                                        <div className="relative">
-                                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                                <User className="h-5 w-5 text-gray-400" />
-                                            </div>
-                                            <input
-                                                type="text"
-                                                value={formData.firstName}
-                                                onChange={(e) => updateField('firstName', e.target.value)}
-                                                className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#145566] transition-colors ${
-                                                    errors.firstName ? 'border-red-300 bg-red-50' : 'border-gray-300'
-                                                }`}
-                                                placeholder="Nhập họ của bạn"
-                                            />
-                                        </div>
-                                        {errors.firstName && (
-                                            <p className="mt-1 text-sm text-red-600">{errors.firstName}</p>
-                                        )}
-                                    </div>
-
-                                    {/* Last Name Field */}
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            Tên
-                                        </label>
-                                        <div className="relative">
-                                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                                <User className="h-5 w-5 text-gray-400" />
-                                            </div>
-                                            <input
-                                                type="text"
-                                                value={formData.lastName}
-                                                onChange={(e) => updateField('lastName', e.target.value)}
-                                                className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#145566] transition-colors ${
-                                                    errors.lastName ? 'border-red-300 bg-red-50' : 'border-gray-300'
-                                                }`}
-                                                placeholder="Nhập tên của bạn"
-                                            />
-                                        </div>
-                                        {errors.lastName && (
-                                            <p className="mt-1 text-sm text-red-600">{errors.lastName}</p>
-                                        )}
-                                    </div>
-                                </div>
-
                                 {/* Email Field */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        Email
+                                        Email *
                                     </label>
                                     <div className="relative">
                                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -123,6 +71,7 @@ const Register: React.FC = () => {
                                                 errors.email ? 'border-red-300 bg-red-50' : 'border-gray-300'
                                             }`}
                                             placeholder="Nhập email của bạn"
+                                            required
                                         />
                                     </div>
                                     {errors.email && (
@@ -130,52 +79,35 @@ const Register: React.FC = () => {
                                     )}
                                 </div>
 
-                                {/* Date of Birth Field */}
+                                {/* Phone Field */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        Ngày sinh
+                                        Số điện thoại *
                                     </label>
                                     <div className="relative">
                                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                            <Calendar className="h-5 w-5 text-gray-400" />
+                                            <Phone className="h-5 w-5 text-gray-400" />
                                         </div>
                                         <input
-                                            type="date"
-                                            value={formData.dob}
-                                            onChange={(e) => updateField('dob', e.target.value)}
+                                            type="tel"
+                                            value={formData.phone}
+                                            onChange={(e) => updateField('phone', e.target.value)}
                                             className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#145566] transition-colors ${
-                                                errors.dob ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                                                errors.phone ? 'border-red-300 bg-red-50' : 'border-gray-300'
                                             }`}
+                                            placeholder="Nhập số điện thoại của bạn"
+                                            required
                                         />
                                     </div>
-                                    {errors.dob && (
-                                        <p className="mt-1 text-sm text-red-600">{errors.dob}</p>
+                                    {errors.phone && (
+                                        <p className="mt-1 text-sm text-red-600">{errors.phone}</p>
                                     )}
-                                </div>
-
-                                {/* Location Field */}
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        Địa chỉ (tùy chọn)
-                                    </label>
-                                    <div className="relative">
-                                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                            <MapPin className="h-5 w-5 text-gray-400" />
-                                        </div>
-                                        <input
-                                            type="text"
-                                            value={formData.location}
-                                            onChange={(e) => updateField('location', e.target.value)}
-                                            className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#145566] transition-colors"
-                                            placeholder="Thành phố, tỉnh của bạn"
-                                        />
-                                    </div>
                                 </div>
 
                                 {/* Password Field */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        Mật khẩu
+                                        Mật khẩu *
                                     </label>
                                     <div className="relative">
                                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -189,6 +121,7 @@ const Register: React.FC = () => {
                                                 errors.password ? 'border-red-300 bg-red-50' : 'border-gray-300'
                                             }`}
                                             placeholder="Tạo mật khẩu mạnh"
+                                            required
                                         />
                                         <button
                                             type="button"
@@ -207,38 +140,27 @@ const Register: React.FC = () => {
                                     )}
                                 </div>
 
-                                {/* Confirm Password Field */}
+                                {/* Date of Birth Field */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        Xác nhận mật khẩu
+                                        Ngày sinh *
                                     </label>
                                     <div className="relative">
                                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                            <Lock className="h-5 w-5 text-gray-400" />
+                                            <Calendar className="h-5 w-5 text-gray-400" />
                                         </div>
                                         <input
-                                            type={showConfirmPassword ? 'text' : 'password'}
-                                            value={formData.confirmPassword}
-                                            onChange={(e) => updateField('confirmPassword', e.target.value)}
-                                            className={`w-full pl-10 pr-12 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#145566] transition-colors ${
-                                                errors.confirmPassword ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                                            type="date"
+                                            value={formData.dateOfBirth}
+                                            onChange={(e) => updateField('dateOfBirth', e.target.value)}
+                                            className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#145566] transition-colors ${
+                                                errors.dateOfBirth ? 'border-red-300 bg-red-50' : 'border-gray-300'
                                             }`}
-                                            placeholder="Nhập lại mật khẩu"
+                                            required
                                         />
-                                        <button
-                                            type="button"
-                                            className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                                        >
-                                            {showConfirmPassword ? (
-                                                <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600" />
-                                            ) : (
-                                                <Eye className="h-5 w-5 text-gray-400 hover:text-gray-600" />
-                                            )}
-                                        </button>
                                     </div>
-                                    {errors.confirmPassword && (
-                                        <p className="mt-1 text-sm text-red-600">{errors.confirmPassword}</p>
+                                    {errors.dateOfBirth && (
+                                        <p className="mt-1 text-sm text-red-600">{errors.dateOfBirth}</p>
                                     )}
                                 </div>
 

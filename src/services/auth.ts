@@ -96,22 +96,18 @@ export class AuthService {
    */
   async register(userData: {
     email: string;
+    phone: string;
     password: string;
-    firstName: string;
-    lastName: string;
-    dob: string;
-    phone?: string;
+    dateOfBirth: string;
   }): Promise<RegisterResponse> {
     try {
       // Call real API register endpoint
       console.log('🔐 Calling real API registration...');
       const userProfile = await this.apiService.post<RegisterResponse>('/api/register', {
         email: userData.email,
+        phone: userData.phone,
         password: userData.password,
-        firstName: userData.firstName,
-        lastName: userData.lastName,
-        dateOfBirth: userData.dob,
-        phone: userData.phone || "0123456789"
+        dateOfBirth: userData.dateOfBirth
       });
 
       console.log('✅ Real API registration successful');
@@ -139,11 +135,9 @@ export class AuthService {
    */
   private async developmentRegister(userData: {
     email: string;
+    phone: string;
     password: string;
-    firstName: string;
-    lastName: string;
-    dob: string;
-    phone?: string;
+    dateOfBirth: string;
   }): Promise<RegisterResponse> {
     console.log('🛠️ Using development registration mode');
     
@@ -152,11 +146,11 @@ export class AuthService {
     
     // Create user profile matching the API format
     const userProfile: RegisterResponse = {
-      dateOfBirth: userData.dob,
+      dateOfBirth: userData.dateOfBirth,
       email: userData.email,
-      name: `${userData.firstName} ${userData.lastName}`,
+      name: userData.email.split('@')[0] || 'User', // Generate name from email
       password: userData.password,
-      phone: userData.phone || "0123456789",
+      phone: userData.phone,
       urlImage: "https://example.com/default_avatar.jpg"
     };
 
