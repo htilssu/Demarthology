@@ -5,13 +5,11 @@ export interface LoginFormData {
 }
 
 export interface RegisterFormData {
-    firstName: string;
-    lastName: string;
     email: string;
+    phone: string;
     password: string;
-    confirmPassword: string;
-    dob: string;
-    location?: string;
+    dateOfBirth: string;
+    name: string;
 }
 
 export interface AuthUser {
@@ -28,13 +26,13 @@ export interface AuthResponse {
 }
 
 export interface FormValidationErrors {
-    firstName?: string;
-    lastName?: string;
     email?: string;
+    phone?: string;
     password?: string;
     confirmPassword?: string;
-    dob?: string;
-    location?: string;
+    dateOfBirth?: string;
+    name?: string;
     rememberMe?: string;
+    agreeTerms?: string;
     general?: string;
 }

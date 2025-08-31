@@ -1,13 +1,13 @@
 import React, {useState} from 'react';
-import {Link} from 'react-router-dom';
-import {ArrowRight, Calendar, Eye, EyeOff, Lock, Mail, MapPin, User} from 'lucide-react';
+import {Link, useNavigate} from 'react-router-dom';
+import {ArrowRight, Calendar, Eye, EyeOff, Lock, Mail, Phone, User} from 'lucide-react';
 import {useRegisterController} from '../controllers/useRegisterController';
 
 const Register: React.FC = () => {
     const { formData, errors, isLoading, updateField, handleSubmit } = useRegisterController();
     const [showPassword, setShowPassword] = useState(false);
-    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+    const navigate = useNavigate();
 
     const onSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -19,9 +19,10 @@ const Register: React.FC = () => {
         });
 
         if (result.success) {
-            // Redirect to login page or dashboard
+            // User is automatically logged in after successful registration
+            // Redirect to home page instead of login page
             setTimeout(() => {
-                window.location.href = '/login';
+                navigate('/');
             }, 1500);
         }
     };
@@ -55,68 +56,17 @@ const Register: React.FC = () => {
 
                             {/* Register Form */}
                             <form onSubmit={onSubmit} className="space-y-6">
-                                {/* Name Fields - First Name and Last Name in one row */}
-                                <div className="grid grid-cols-2 gap-4">
-                                    {/* First Name Field */}
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            Họ
-                                        </label>
-                                        <div className="relative">
-                                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                                <User className="h-5 w-5 text-gray-400" />
-                                            </div>
-                                            <input
-                                                type="text"
-                                                value={formData.firstName}
-                                                onChange={(e) => updateField('firstName', e.target.value)}
-                                                className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#145566] transition-colors ${
-                                                    errors.firstName ? 'border-red-300 bg-red-50' : 'border-gray-300'
-                                                }`}
-                                                placeholder="Nhập họ của bạn"
-                                            />
-                                        </div>
-                                        {errors.firstName && (
-                                            <p className="mt-1 text-sm text-red-600">{errors.firstName}</p>
-                                        )}
-                                    </div>
-
-                                    {/* Last Name Field */}
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            Tên
-                                        </label>
-                                        <div className="relative">
-                                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                                <User className="h-5 w-5 text-gray-400" />
-                                            </div>
-                                            <input
-                                                type="text"
-                                                value={formData.lastName}
-                                                onChange={(e) => updateField('lastName', e.target.value)}
-                                                className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#145566] transition-colors ${
-                                                    errors.lastName ? 'border-red-300 bg-red-50' : 'border-gray-300'
-                                                }`}
-                                                placeholder="Nhập tên của bạn"
-                                            />
-                                        </div>
-                                        {errors.lastName && (
-                                            <p className="mt-1 text-sm text-red-600">{errors.lastName}</p>
-                                        )}
-                                    </div>
-                                </div>
-
                                 {/* Email Field */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        Email
+                                        Email *
                                     </label>
                                     <div className="relative">
                                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                             <Mail className="h-5 w-5 text-gray-400" />
                                         </div>
                                         <input
-                                            type="email"
+                                            type="text"
                                             value={formData.email}
                                             onChange={(e) => updateField('email', e.target.value)}
                                             className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#145566] transition-colors ${
@@ -130,52 +80,58 @@ const Register: React.FC = () => {
                                     )}
                                 </div>
 
-                                {/* Date of Birth Field */}
+                                {/* Name Field */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        Ngày sinh
+                                        Họ tên đầy đủ *
                                     </label>
                                     <div className="relative">
                                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                            <Calendar className="h-5 w-5 text-gray-400" />
-                                        </div>
-                                        <input
-                                            type="date"
-                                            value={formData.dob}
-                                            onChange={(e) => updateField('dob', e.target.value)}
-                                            className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#145566] transition-colors ${
-                                                errors.dob ? 'border-red-300 bg-red-50' : 'border-gray-300'
-                                            }`}
-                                        />
-                                    </div>
-                                    {errors.dob && (
-                                        <p className="mt-1 text-sm text-red-600">{errors.dob}</p>
-                                    )}
-                                </div>
-
-                                {/* Location Field */}
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        Địa chỉ (tùy chọn)
-                                    </label>
-                                    <div className="relative">
-                                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                            <MapPin className="h-5 w-5 text-gray-400" />
+                                            <User className="h-5 w-5 text-gray-400" />
                                         </div>
                                         <input
                                             type="text"
-                                            value={formData.location}
-                                            onChange={(e) => updateField('location', e.target.value)}
-                                            className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#145566] transition-colors"
-                                            placeholder="Thành phố, tỉnh của bạn"
+                                            value={formData.name}
+                                            onChange={(e) => updateField('name', e.target.value)}
+                                            className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#145566] transition-colors ${
+                                                errors.name ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                                            }`}
+                                            placeholder="Nhập họ tên đầy đủ của bạn"
                                         />
                                     </div>
+                                    {errors.name && (
+                                        <p className="mt-1 text-sm text-red-600">{errors.name}</p>
+                                    )}
+                                </div>
+
+                                {/* Phone Field */}
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Số điện thoại *
+                                    </label>
+                                    <div className="relative">
+                                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <Phone className="h-5 w-5 text-gray-400" />
+                                        </div>
+                                        <input
+                                            type="text"
+                                            value={formData.phone}
+                                            onChange={(e) => updateField('phone', e.target.value)}
+                                            className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#145566] transition-colors ${
+                                                errors.phone ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                                            }`}
+                                            placeholder="Nhập số điện thoại của bạn"
+                                        />
+                                    </div>
+                                    {errors.phone && (
+                                        <p className="mt-1 text-sm text-red-600">{errors.phone}</p>
+                                    )}
                                 </div>
 
                                 {/* Password Field */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        Mật khẩu
+                                        Mật khẩu *
                                     </label>
                                     <div className="relative">
                                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -210,57 +166,77 @@ const Register: React.FC = () => {
                                 {/* Confirm Password Field */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        Xác nhận mật khẩu
+                                        Xác nhận mật khẩu *
                                     </label>
                                     <div className="relative">
                                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                             <Lock className="h-5 w-5 text-gray-400" />
                                         </div>
                                         <input
-                                            type={showConfirmPassword ? 'text' : 'password'}
+                                            type={showPassword ? 'text' : 'password'}
                                             value={formData.confirmPassword}
                                             onChange={(e) => updateField('confirmPassword', e.target.value)}
-                                            className={`w-full pl-10 pr-12 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#145566] transition-colors ${
+                                            className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#145566] transition-colors ${
                                                 errors.confirmPassword ? 'border-red-300 bg-red-50' : 'border-gray-300'
                                             }`}
                                             placeholder="Nhập lại mật khẩu"
                                         />
-                                        <button
-                                            type="button"
-                                            className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                                        >
-                                            {showConfirmPassword ? (
-                                                <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600" />
-                                            ) : (
-                                                <Eye className="h-5 w-5 text-gray-400 hover:text-gray-600" />
-                                            )}
-                                        </button>
                                     </div>
                                     {errors.confirmPassword && (
                                         <p className="mt-1 text-sm text-red-600">{errors.confirmPassword}</p>
                                     )}
                                 </div>
 
-                                {/* Terms Agreement */}
-                                <div className="flex items-center">
-                                    <input
-                                        id="agree-terms"
-                                        name="agree-terms"
-                                        type="checkbox"
-                                        className="h-4 w-4 text-[#145566] focus:ring-[#145566] border-gray-300 rounded"
-                                        required
-                                    />
-                                    <label htmlFor="agree-terms" className="ml-2 block text-sm text-gray-600">
-                                        Tôi đồng ý với{' '}
-                                        <Link to="/terms" className="text-[#145566] hover:text-[#0f3f44] font-medium">
-                                            Điều khoản sử dụng
-                                        </Link>{' '}
-                                        và{' '}
-                                        <Link to="/privacy" className="text-[#145566] hover:text-[#0f3f44] font-medium">
-                                            Chính sách bảo mật
-                                        </Link>
+                                {/* Date of Birth Field */}
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Ngày sinh *
                                     </label>
+                                    <div className="relative">
+                                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <Calendar className="h-5 w-5 text-gray-400" />
+                                        </div>
+                                        <input
+                                            type="date"
+                                            value={formData.dateOfBirth}
+                                            onChange={(e) => updateField('dateOfBirth', e.target.value)}
+                                            className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#145566] transition-colors ${
+                                                errors.dateOfBirth ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                                            }`}
+                                            max={new Date().toISOString().split('T')[0]}
+                                            min={new Date(new Date().getFullYear() - 120, 0, 1).toISOString().split('T')[0]}
+                                        />
+                                    </div>
+                                    {errors.dateOfBirth && (
+                                        <p className="mt-1 text-sm text-red-600">{errors.dateOfBirth}</p>
+                                    )}
+                                </div>
+
+                                {/* Terms Agreement */}
+                                <div>
+                                    <div className="flex items-start">
+                                        <input
+                                            id="agree-terms"
+                                            name="agree-terms"
+                                            type="checkbox"
+                                            checked={formData.agreeTerms}
+                                            onChange={(e) => updateField('agreeTerms', e.target.checked)}
+                                            className="h-4 w-4 text-[#145566] focus:ring-[#145566] border-gray-300 rounded mt-1"
+                                        />
+                                        <label htmlFor="agree-terms" className="ml-2 block text-sm text-gray-600">
+                                            Tôi đồng ý với{' '}
+                                            <Link to="/terms" className="text-[#145566] hover:text-[#0f3f44] font-medium">
+                                                Điều khoản sử dụng
+                                            </Link>{' '}
+                                            và{' '}
+                                            <Link to="/privacy" className="text-[#145566] hover:text-[#0f3f44] font-medium">
+                                                Chính sách bảo mật
+                                            </Link>
+                                        </label>
+                                    </div>
+                                    {errors.agreeTerms && (
+                                        <p className="mt-1 text-sm text-red-600">{errors.agreeTerms}</p>
+                                    )}
                                 </div>
 
                                 {/* Submit Button */}

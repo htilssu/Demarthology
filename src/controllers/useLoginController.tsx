@@ -23,12 +23,14 @@ export const useLoginController = () => {
     const validateForm = (): boolean => {
         const newErrors: FormValidationErrors = {};
 
+        // Email validation
         if (!formData.email) {
             newErrors.email = 'Email là bắt buộc';
-        } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
             newErrors.email = 'Email không hợp lệ';
         }
 
+        // Password validation
         if (!formData.password) {
             newErrors.password = 'Mật khẩu là bắt buộc';
         } else if (formData.password.length < 6) {

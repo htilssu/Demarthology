@@ -128,7 +128,7 @@ const Navbar: React.FC = () => {
                 onClick={() => setOpenMenu(!openMenu)}
               >
                 <img
-                  src={user?.avatarUrl || "/avatar.webp"}
+                  src={user?.urlImage || "/avatar.webp"}
                   alt="User"
                   className="w-8 h-8 rounded-full border-2 border-white object-cover"
                 />

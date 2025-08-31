@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { authService } from '../services';
 import { apiService, AuthUtils } from '../utils';
-import { AuthUser } from '../types';
+import { UserProfile } from '../types';
 
 /**
  * Example component demonstrating API service usage
  * This component shows how to use the implemented Axios API instance
  */
 const ApiExampleComponent: React.FC = () => {
-  const [user, setUser] = useState<AuthUser | null>(null);
+  const [user, setUser] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loginForm, setLoginForm] = useState({ email: '', password: '' });
@@ -42,7 +42,7 @@ const ApiExampleComponent: React.FC = () => {
     try {
       const result = await authService.login(loginForm);
       console.log('Login successful:', result);
-      await loadCurrentUser(); // Load user data after successful login
+      setUser(result); // Login now returns UserProfile directly
     } catch (err: any) {
       setError(`Login failed: ${err.message}`);
       console.error('Login failed:', err);
@@ -59,7 +59,7 @@ const ApiExampleComponent: React.FC = () => {
     } catch (err: any) {
       console.error('Logout failed:', err);
       // Clear local state even if API call fails
-      AuthUtils.clearTokens();
+      AuthUtils.clearUserProfile();
       setUser(null);
     }
   };
@@ -154,11 +154,14 @@ const ApiExampleComponent: React.FC = () => {
       <div className="mb-6 p-4 border rounded-lg">
         <h3 className="text-lg font-semibold mb-2">Authentication Status</h3>
         <p>Authenticated: {AuthUtils.isAuthenticated() ? 'Yes' : 'No'}</p>
-        <p>Token: {AuthUtils.getAuthToken() ? 'Present' : 'None'}</p>
         {user && (
           <div className="mt-2">
             <p>User: {user.name} ({user.email})</p>
-            <p>Role: {user.role}</p>
+            <p>Phone: {user.phone}</p>
+            <p>Date of Birth: {user.dateOfBirth}</p>
+            {user.urlImage && (
+              <img src={user.urlImage} alt="User Avatar" className="w-16 h-16 rounded-full mt-2" />
+            )}
           </div>
         )}
       </div>
