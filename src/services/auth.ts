@@ -55,14 +55,8 @@ export class AuthService {
         return this.developmentLogin(credentials);
       }
       
-      // Handle specific API errors
-      if (error.statusCode === 401 || error.statusCode === 403) {
-        throw new Error('Email hoặc mật khẩu không đúng');
-      } else if (error.statusCode === 400) {
-        throw new Error('Thông tin đăng nhập không hợp lệ');
-      } else {
-        throw new Error(error.message || 'Đăng nhập thất bại. Vui lòng thử lại.');
-      }
+      // Handle specific API errors - use server error message from 'detail' field
+      throw new Error(error.message || 'Đăng nhập thất bại. Vui lòng thử lại.');
     }
   }
 
@@ -135,14 +129,8 @@ export class AuthService {
         return this.developmentRegister(userData);
       }
       
-      // Handle specific API errors
-      if (error.statusCode === 409) {
-        throw new Error('Email này đã được sử dụng. Vui lòng chọn email khác.');
-      } else if (error.statusCode === 400) {
-        throw new Error('Thông tin đăng ký không hợp lệ. Vui lòng kiểm tra lại.');
-      } else {
-        throw new Error(error.message || 'Đăng ký thất bại. Vui lòng thử lại.');
-      }
+      // Handle specific API errors - use server error message from 'detail' field
+      throw new Error(error.message || 'Đăng ký thất bại. Vui lòng thử lại.');
     }
   }
 
