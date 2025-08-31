@@ -100,40 +100,26 @@ export class ApiService {
                 return response;
             },
             async (error: AxiosError) => {
-                const originalRequest = error.config;
                 
-                // Handle 401 Unauthorized - attempt token refresh
-                if (error.response?.status === 401 && originalRequest && !originalRequest.headers['retry-attempted']) {
+                // Handle 401 Unauthorized - logout user since we don't use token refresh
+                if (error.response?.status === 401) {
                     try {
                         // Import AuthService dynamically to avoid circular dependency
                         const { AuthService } = await import('../services/auth');
                         const authService = AuthService.getInstance();
                         
-                        // Attempt to refresh token
-                        await authService.refreshToken();
+                        // Logout user and clear stored data
+                        await authService.logout();
                         
-                        // Mark request as retried to prevent infinite loop
-                        originalRequest.headers['retry-attempted'] = 'true';
-                        
-                        // Update Authorization header with new token
-                        const newAuthHeader = AuthUtils.getAuthorizationHeader();
-                        if (newAuthHeader) {
-                            originalRequest.headers.Authorization = newAuthHeader;
-                        }
-                        
-                        // Retry the original request
-                        return this.axiosInstance.request(originalRequest);
-                    } catch (refreshError) {
-                        // Refresh failed - redirect to login
-                        AuthUtils.clearTokens();
-                        
-                        // Dispatch custom event for authentication failure
+                        // Dispatch session expired event
                         if (typeof window !== 'undefined') {
                             window.dispatchEvent(new CustomEvent('auth:session-expired'));
                         }
-                        
-                        return Promise.reject(this.handleError(error));
+                    } catch (logoutError) {
+                        console.error('Error during automatic logout:', logoutError);
                     }
+                    
+                    return Promise.reject(this.handleError(error));
                 }
                 
                 return Promise.reject(this.handleError(error));

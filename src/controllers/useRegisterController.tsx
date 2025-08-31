@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { RegisterFormData, AuthResponse, FormValidationErrors } from '../models/auth';
 import { AuthService } from '../services/auth';
-import { AuthUtils } from '../utils/auth';
 
 export const useRegisterController = () => {
     const [formData, setFormData] = useState<RegisterFormData>({
@@ -88,28 +87,19 @@ export const useRegisterController = () => {
                 password: formData.password,
                 firstName: formData.firstName,
                 lastName: formData.lastName,
-                dob: formData.dob
+                dob: formData.dob,
+                phone: "0123456789" // Default phone for now
             };
 
-            const response = await authService.register(userData);
+            const userProfile = await authService.register(userData);
 
-            // Create user object for localStorage
-            const authUser = {
-                id: 'user-' + Date.now(),
-                name: `${response.user.firstName} ${response.user.lastName}`,
-                email: response.user.email,
-                role: response.user.role || 'user',
-                permissions: ['read', 'write'],
-                avatarUrl: '/avatar.webp'
-            };
-
-            // Save user to localStorage for persistence
-            AuthUtils.setUser(authUser);
+            // Convert UserProfile to AuthUser for backward compatibility
+            const authUser = authService.convertUserProfileToAuthUser(userProfile);
 
             setIsLoading(false);
             return {
                 success: true,
-                message: response.message,
+                message: 'Đăng ký thành công',
                 user: authUser
             };
         } catch (error: any) {

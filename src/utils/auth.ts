@@ -1,159 +1,94 @@
 /**
- * Authentication utility functions for managing tokens
- * Supports reading from both localStorage and cookies
- * 
- * IMPORTANT: TOKEN_KEY must match the key used by axios instance
- * to ensure seamless token storage and retrieval for API calls
+ * Authentication utility functions for managing user profile in localStorage
+ * Simplified to work without tokens - just stores user profile data
  */
 
+import { UserProfile } from '../types/api';
+
 export class AuthUtils {
-  // This key is used by both storage (after login) and retrieval (by axios interceptor)
-  private static readonly TOKEN_KEY = 'auth_token';
-  private static readonly REFRESH_TOKEN_KEY = 'refresh_token';
-  private static readonly USER_KEY = 'auth_user';
+  private static readonly USER_KEY = 'user_profile';
 
   /**
-   * Get authentication token from localStorage or cookies
-   * Priority: localStorage > cookies
+   * Get user profile from localStorage
    */
-  static getAuthToken(): string | null {
-    // Try localStorage first
-    const localStorageToken = localStorage.getItem(this.TOKEN_KEY);
-    if (localStorageToken) {
-      return localStorageToken;
-    }
-
-    // Fallback to cookies
-    return this.getCookieValue(this.TOKEN_KEY);
-  }
-
-  /**
-   * Get refresh token from localStorage or cookies
-   */
-  static getRefreshToken(): string | null {
-    const localStorageToken = localStorage.getItem(this.REFRESH_TOKEN_KEY);
-    if (localStorageToken) {
-      return localStorageToken;
-    }
-
-    return this.getCookieValue(this.REFRESH_TOKEN_KEY);
-  }
-
-  /**
-   * Set authentication token in localStorage
-   */
-  static setAuthToken(token: string): void {
-    localStorage.setItem(this.TOKEN_KEY, token);
-  }
-
-  /**
-   * Verify that the token was stored correctly and is immediately available
-   * This can be used after login to ensure axios can access the token
-   */
-  static verifyTokenStorage(expectedToken: string): boolean {
-    const storedToken = this.getAuthToken();
-    return storedToken === expectedToken;
-  }
-
-  /**
-   * Set refresh token in localStorage
-   */
-  static setRefreshToken(token: string): void {
-    localStorage.setItem(this.REFRESH_TOKEN_KEY, token);
-  }
-
-  /**
-   * Get user information from localStorage
-   */
-  static getUser(): any | null {
+  static getUserProfile(): UserProfile | null {
     try {
       const userStr = localStorage.getItem(this.USER_KEY);
       return userStr ? JSON.parse(userStr) : null;
     } catch (error) {
-      console.error('Failed to parse user data from localStorage:', error);
+      console.error('Failed to parse user profile from localStorage:', error);
       return null;
     }
   }
 
   /**
-   * Set user information in localStorage
+   * Set user profile in localStorage
    */
-  static setUser(user: any): void {
+  static setUserProfile(userProfile: UserProfile): void {
     try {
-      localStorage.setItem(this.USER_KEY, JSON.stringify(user));
+      localStorage.setItem(this.USER_KEY, JSON.stringify(userProfile));
     } catch (error) {
-      console.error('Failed to save user data to localStorage:', error);
+      console.error('Failed to save user profile to localStorage:', error);
     }
   }
 
   /**
-   * Remove authentication tokens from localStorage
+   * Remove user profile from localStorage
    */
-  static clearTokens(): void {
-    localStorage.removeItem(this.TOKEN_KEY);
-    localStorage.removeItem(this.REFRESH_TOKEN_KEY);
+  static clearUserProfile(): void {
     localStorage.removeItem(this.USER_KEY);
   }
 
   /**
-   * Check if user is authenticated
+   * Check if user is authenticated (has user profile in localStorage)
    */
   static isAuthenticated(): boolean {
-    return !!this.getAuthToken();
+    return !!this.getUserProfile();
   }
 
   /**
-   * Get Authorization header value
+   * Get user information (legacy method for backward compatibility)
    */
-  static getAuthorizationHeader(): string | null {
-    const token = this.getAuthToken();
-    return token ? `Bearer ${token}` : null;
+  static getUser(): any | null {
+    return this.getUserProfile();
   }
 
   /**
-   * Parse cookie string and get specific cookie value
+   * Set user information (legacy method for backward compatibility)
    */
-  private static getCookieValue(name: string): string | null {
-    if (typeof document === 'undefined') {
-      return null; // SSR safety
-    }
+  static setUser(user: any): void {
+    this.setUserProfile(user);
+  }
 
-    const nameEQ = name + "=";
-    const ca = document.cookie.split(';');
-    
-    for (let i = 0; i < ca.length; i++) {
-      let c = ca[i];
-      while (c.charAt(0) === ' ') {
-        c = c.substring(1, c.length);
-      }
-      if (c.indexOf(nameEQ) === 0) {
-        return c.substring(nameEQ.length, c.length);
-      }
-    }
+  /**
+   * Clear tokens (legacy method for backward compatibility)
+   */
+  static clearTokens(): void {
+    this.clearUserProfile();
+  }
+
+  // Legacy token methods (kept for compatibility but not used)
+  static getAuthToken(): string | null {
     return null;
   }
 
-  /**
-   * Set cookie with token
-   */
-  static setCookie(name: string, value: string, days: number = 7): void {
-    if (typeof document === 'undefined') {
-      return; // SSR safety
-    }
-
-    const expires = new Date();
-    expires.setTime(expires.getTime() + (days * 24 * 60 * 60 * 1000));
-    document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/`;
+  static getRefreshToken(): string | null {
+    return null;
   }
 
-  /**
-   * Remove specific cookie
-   */
-  static removeCookie(name: string): void {
-    if (typeof document === 'undefined') {
-      return; // SSR safety
-    }
+  static setAuthToken(token: string): void {
+    // No-op - tokens not used anymore
+  }
 
-    document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:01 GMT;path=/`;
+  static setRefreshToken(token: string): void {
+    // No-op - tokens not used anymore
+  }
+
+  static verifyTokenStorage(expectedToken: string): boolean {
+    return true; // Always return true since we don't use tokens
+  }
+
+  static getAuthorizationHeader(): string | null {
+    return null; // No authorization header needed
   }
 }

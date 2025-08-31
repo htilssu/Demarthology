@@ -107,18 +107,14 @@ export interface LoginCredentials {
 }
 
 /**
- * Login response interface (new API spec)
+ * Login response interface - matches actual API response format
  */
-export interface LoginResponse {
-  success: boolean;
-  message: string;
-  user: UserInfo;
-  accessToken: string;
-  tokenType: string;
+export interface LoginResponse extends UserProfile {
+  // Login response is directly the user profile object
 }
 
 /**
- * User information interface (new API spec)
+ * User information interface (legacy)
  */
 export interface UserInfo {
   email: string;
@@ -128,7 +124,7 @@ export interface UserInfo {
 }
 
 /**
- * Register request interface (new API spec)
+ * Register request interface
  */
 export interface RegisterRequest {
   email: string;
@@ -139,14 +135,10 @@ export interface RegisterRequest {
 }
 
 /**
- * Register response interface (new API spec)
+ * Register response interface - matches actual API response format
  */
-export interface RegisterResponse {
-  success: boolean;
-  message: string;
-  user: UserInfo;
-  accessToken: string;
-  tokenType: string;
+export interface RegisterResponse extends UserProfile {
+  // Register response is directly the user profile object
 }
 
 /**
@@ -159,6 +151,18 @@ export interface AuthUser {
   role: string;
   permissions: string[];
   avatarUrl?: string;
+}
+
+/**
+ * User profile interface matching the actual API response format
+ */
+export interface UserProfile {
+  dateOfBirth: string;
+  email: string;
+  name: string;
+  password: string;
+  phone: string;
+  urlImage: string;
 }
 
 /**
