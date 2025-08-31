@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 import {Link} from 'react-router-dom';
-import {ArrowRight, Calendar, Eye, EyeOff, Lock, Mail, Phone} from 'lucide-react';
+import {ArrowRight, Calendar, Eye, EyeOff, Lock, Mail, Phone, User} from 'lucide-react';
 import {useRegisterController} from '../controllers/useRegisterController';
 
 const Register: React.FC = () => {
@@ -75,6 +75,30 @@ const Register: React.FC = () => {
                                     </div>
                                     {errors.email && (
                                         <p className="mt-1 text-sm text-red-600">{errors.email}</p>
+                                    )}
+                                </div>
+
+                                {/* Name Field */}
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Họ tên đầy đủ *
+                                    </label>
+                                    <div className="relative">
+                                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <User className="h-5 w-5 text-gray-400" />
+                                        </div>
+                                        <input
+                                            type="text"
+                                            value={formData.name}
+                                            onChange={(e) => updateField('name', e.target.value)}
+                                            className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#145566] transition-colors ${
+                                                errors.name ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                                            }`}
+                                            placeholder="Nhập họ tên đầy đủ của bạn"
+                                        />
+                                    </div>
+                                    {errors.name && (
+                                        <p className="mt-1 text-sm text-red-600">{errors.name}</p>
                                     )}
                                 </div>
 
@@ -171,13 +195,14 @@ const Register: React.FC = () => {
                                             <Calendar className="h-5 w-5 text-gray-400" />
                                         </div>
                                         <input
-                                            type="text"
+                                            type="date"
                                             value={formData.dateOfBirth}
                                             onChange={(e) => updateField('dateOfBirth', e.target.value)}
                                             className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#145566] transition-colors ${
                                                 errors.dateOfBirth ? 'border-red-300 bg-red-50' : 'border-gray-300'
                                             }`}
-                                            placeholder="yyyy-mm-dd"
+                                            max={new Date().toISOString().split('T')[0]}
+                                            min={new Date(new Date().getFullYear() - 120, 0, 1).toISOString().split('T')[0]}
                                         />
                                     </div>
                                     {errors.dateOfBirth && (

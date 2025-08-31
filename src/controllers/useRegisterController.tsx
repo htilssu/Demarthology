@@ -15,6 +15,7 @@ export const useRegisterController = () => {
         password: '',
         confirmPassword: '',
         dateOfBirth: '',
+        name: '',
         agreeTerms: false
     });
     const [errors, setErrors] = useState<FormValidationErrors>({});
@@ -32,6 +33,15 @@ export const useRegisterController = () => {
 
     const validateForm = (): boolean => {
         const newErrors: FormValidationErrors = {};
+
+        // Name validation
+        if (!formData.name) {
+            newErrors.name = 'Họ tên là bắt buộc';
+        } else if (formData.name.trim().length < 2) {
+            newErrors.name = 'Họ tên phải có ít nhất 2 ký tự';
+        } else if (formData.name.trim().length > 50) {
+            newErrors.name = 'Họ tên không được quá 50 ký tự';
+        }
 
         // Email validation
         if (!formData.email) {
@@ -115,7 +125,8 @@ export const useRegisterController = () => {
                 email: formData.email,
                 phone: formData.phone,
                 password: formData.password,
-                dateOfBirth: formData.dateOfBirth
+                dateOfBirth: formData.dateOfBirth,
+                name: formData.name
             };
 
             const userProfile = await authService.register(userData);

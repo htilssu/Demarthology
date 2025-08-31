@@ -99,6 +99,7 @@ export class AuthService {
     phone: string;
     password: string;
     dateOfBirth: string;
+    name: string;
   }): Promise<RegisterResponse> {
     try {
       // Call real API register endpoint with FormData
@@ -110,6 +111,7 @@ export class AuthService {
       formData.append('phone', userData.phone);
       formData.append('password', userData.password);
       formData.append('dateOfBirth', userData.dateOfBirth);
+      formData.append('name', userData.name);
 
       const userProfile = await this.apiService.post<RegisterResponse>('/api/register', formData, {
         headers: {
@@ -145,6 +147,7 @@ export class AuthService {
     phone: string;
     password: string;
     dateOfBirth: string;
+    name: string;
   }): Promise<RegisterResponse> {
     console.log('🛠️ Using development registration mode');
     
@@ -155,7 +158,7 @@ export class AuthService {
     const userProfile: RegisterResponse = {
       dateOfBirth: userData.dateOfBirth,
       email: userData.email,
-      name: userData.email.split('@')[0] || 'User', // Generate name from email
+      name: userData.name,
       password: userData.password,
       phone: userData.phone,
       urlImage: "https://example.com/default_avatar.jpg"

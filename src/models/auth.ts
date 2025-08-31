@@ -9,6 +9,7 @@ export interface RegisterFormData {
     phone: string;
     password: string;
     dateOfBirth: string;
+    name: string;
 }
 
 export interface AuthUser {
@@ -30,6 +31,7 @@ export interface FormValidationErrors {
     password?: string;
     confirmPassword?: string;
     dateOfBirth?: string;
+    name?: string;
     rememberMe?: string;
     agreeTerms?: string;
     general?: string;
