@@ -25,7 +25,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
 
     const isAuthenticated = !!user && AuthUtils.isAuthenticated();
 
-    // Check for existing authentication on mount
+    // Check for existing authentication on mount and listen for session expiry
     useEffect(() => {
         const initializeAuth = async () => {
             if (AuthUtils.isAuthenticated()) {
@@ -49,7 +49,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
             setIsLoading(false);
         };
 
+        // Listen for session expired events from API interceptor
+        const handleSessionExpired = () => {
+            console.log('Session expired, logging out user');
+            setUser(null);
+            setIsLoading(false);
+            // Clear any stale data
+            AuthUtils.clearTokens();
+        };
+
+        window.addEventListener('auth:session-expired', handleSessionExpired);
+
         initializeAuth();
+
+        // Cleanup event listener
+        return () => {
+            window.removeEventListener('auth:session-expired', handleSessionExpired);
+        };
     }, [authService]);
 
     const login = async (credentials: LoginCredentials): Promise<void> => {

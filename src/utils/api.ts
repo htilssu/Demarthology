@@ -99,7 +99,43 @@ export class ApiService {
             (response: AxiosResponse) => {
                 return response;
             },
-            (error: AxiosError) => {
+            async (error: AxiosError) => {
+                const originalRequest = error.config;
+                
+                // Handle 401 Unauthorized - attempt token refresh
+                if (error.response?.status === 401 && originalRequest && !originalRequest.headers['retry-attempted']) {
+                    try {
+                        // Import AuthService dynamically to avoid circular dependency
+                        const { AuthService } = await import('../services/auth');
+                        const authService = AuthService.getInstance();
+                        
+                        // Attempt to refresh token
+                        await authService.refreshToken();
+                        
+                        // Mark request as retried to prevent infinite loop
+                        originalRequest.headers['retry-attempted'] = 'true';
+                        
+                        // Update Authorization header with new token
+                        const newAuthHeader = AuthUtils.getAuthorizationHeader();
+                        if (newAuthHeader) {
+                            originalRequest.headers.Authorization = newAuthHeader;
+                        }
+                        
+                        // Retry the original request
+                        return this.axiosInstance.request(originalRequest);
+                    } catch (refreshError) {
+                        // Refresh failed - redirect to login
+                        AuthUtils.clearTokens();
+                        
+                        // Dispatch custom event for authentication failure
+                        if (typeof window !== 'undefined') {
+                            window.dispatchEvent(new CustomEvent('auth:session-expired'));
+                        }
+                        
+                        return Promise.reject(this.handleError(error));
+                    }
+                }
+                
                 return Promise.reject(this.handleError(error));
             }
         );
