@@ -101,13 +101,20 @@ export class AuthService {
     dateOfBirth: string;
   }): Promise<RegisterResponse> {
     try {
-      // Call real API register endpoint
+      // Call real API register endpoint with FormData
       console.log('🔐 Calling real API registration...');
-      const userProfile = await this.apiService.post<RegisterResponse>('/api/register', {
-        email: userData.email,
-        phone: userData.phone,
-        password: userData.password,
-        dateOfBirth: userData.dateOfBirth
+      
+      // Create FormData for the registration request
+      const formData = new FormData();
+      formData.append('email', userData.email);
+      formData.append('phone', userData.phone);
+      formData.append('password', userData.password);
+      formData.append('dateOfBirth', userData.dateOfBirth);
+
+      const userProfile = await this.apiService.post<RegisterResponse>('/api/register', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
       });
 
       console.log('✅ Real API registration successful');
