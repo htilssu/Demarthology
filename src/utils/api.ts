@@ -102,21 +102,29 @@ export class ApiService {
             async (error: AxiosError) => {
                 
                 // Handle 401 Unauthorized - logout user since we don't use token refresh
+                // BUT exclude login/register endpoints as 401 is expected for invalid credentials
                 if (error.response?.status === 401) {
-                    try {
-                        // Import AuthService dynamically to avoid circular dependency
-                        const { AuthService } = await import('../services/auth');
-                        const authService = AuthService.getInstance();
-                        
-                        // Logout user and clear stored data
-                        await authService.logout();
-                        
-                        // Dispatch session expired event
-                        if (typeof window !== 'undefined') {
-                            window.dispatchEvent(new CustomEvent('auth:session-expired'));
+                    const requestUrl = error.config?.url || '';
+                    const isAuthEndpoint = requestUrl.includes('/api/login') || 
+                                         requestUrl.includes('/api/register');
+                    
+                    // Only auto-logout for non-authentication endpoints
+                    if (!isAuthEndpoint) {
+                        try {
+                            // Import AuthService dynamically to avoid circular dependency
+                            const { AuthService } = await import('../services/auth');
+                            const authService = AuthService.getInstance();
+                            
+                            // Logout user and clear stored data
+                            await authService.logout();
+                            
+                            // Dispatch session expired event
+                            if (typeof window !== 'undefined') {
+                                window.dispatchEvent(new CustomEvent('auth:session-expired'));
+                            }
+                        } catch (logoutError) {
+                            console.error('Error during automatic logout:', logoutError);
                         }
-                    } catch (logoutError) {
-                        console.error('Error during automatic logout:', logoutError);
                     }
                     
                     return Promise.reject(this.handleError(error));
