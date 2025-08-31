@@ -28,6 +28,7 @@ export interface FormValidationErrors {
     email?: string;
     phone?: string;
     password?: string;
+    confirmPassword?: string;
     dateOfBirth?: string;
     rememberMe?: string;
     general?: string;

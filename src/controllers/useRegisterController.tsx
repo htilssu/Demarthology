@@ -2,11 +2,17 @@ import { useState } from 'react';
 import { RegisterFormData, AuthResponse, FormValidationErrors } from '../models/auth';
 import { AuthService } from '../services/auth';
 
+// Extended form data for UI (includes confirmPassword for validation)
+interface RegisterFormState extends RegisterFormData {
+    confirmPassword: string;
+}
+
 export const useRegisterController = () => {
-    const [formData, setFormData] = useState<RegisterFormData>({
+    const [formData, setFormData] = useState<RegisterFormState>({
         email: '',
         phone: '',
         password: '',
+        confirmPassword: '',
         dateOfBirth: ''
     });
     const [errors, setErrors] = useState<FormValidationErrors>({});
@@ -14,7 +20,7 @@ export const useRegisterController = () => {
 
     const authService = AuthService.getInstance();
 
-    const updateField = (field: keyof RegisterFormData, value: string) => {
+    const updateField = (field: keyof RegisterFormState, value: string) => {
         setFormData(prev => ({ ...prev, [field]: value }));
         // Clear error when user starts typing
         if (errors[field]) {
@@ -41,6 +47,12 @@ export const useRegisterController = () => {
             newErrors.password = 'Mật khẩu là bắt buộc';
         } else if (formData.password.length < 6) {
             newErrors.password = 'Mật khẩu phải có ít nhất 6 ký tự';
+        }
+
+        if (!formData.confirmPassword) {
+            newErrors.confirmPassword = 'Xác nhận mật khẩu là bắt buộc';
+        } else if (formData.password !== formData.confirmPassword) {
+            newErrors.confirmPassword = 'Mật khẩu xác nhận không khớp';
         }
 
         if (!formData.dateOfBirth) {

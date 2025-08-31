@@ -140,6 +140,31 @@ const Register: React.FC = () => {
                                     )}
                                 </div>
 
+                                {/* Confirm Password Field */}
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Xác nhận mật khẩu *
+                                    </label>
+                                    <div className="relative">
+                                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <Lock className="h-5 w-5 text-gray-400" />
+                                        </div>
+                                        <input
+                                            type={showPassword ? 'text' : 'password'}
+                                            value={formData.confirmPassword}
+                                            onChange={(e) => updateField('confirmPassword', e.target.value)}
+                                            className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#145566] transition-colors ${
+                                                errors.confirmPassword ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                                            }`}
+                                            placeholder="Nhập lại mật khẩu"
+                                            required
+                                        />
+                                    </div>
+                                    {errors.confirmPassword && (
+                                        <p className="mt-1 text-sm text-red-600">{errors.confirmPassword}</p>
+                                    )}
+                                </div>
+
                                 {/* Date of Birth Field */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">
