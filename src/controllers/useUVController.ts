@@ -119,6 +119,10 @@ export const useUVController = () => {
    * Refresh UV data for current location
    */
   const refreshUVData = useCallback(() => {
+    // Clear existing data to show loading state during refresh
+    setUVData(null);
+    setError(null);
+    
     if (location) {
       fetchUVForLocation(location.latitude, location.longitude);
     } else {

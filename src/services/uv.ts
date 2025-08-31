@@ -31,14 +31,21 @@ export class UVService {
       );
 
       console.log('✅ UV index data received:', response);
-      return response;
+      
+      // Validate response has required uv_index field
+      if (response && typeof response.uv_index === 'number' && !isNaN(response.uv_index)) {
+        return response;
+      } else {
+        throw new Error('Invalid UV index data received from API');
+      }
     } catch (error: any) {
       console.error('❌ Failed to fetch UV index:', error);
       
       // Return mock data as fallback for development
       console.log('⚠️ Using mock UV data as fallback');
+      const mockUVIndex = parseFloat((Math.random() * 12).toFixed(1));
       return {
-        uv_index: parseFloat((Math.random() * 12).toFixed(1)),
+        uv_index: mockUVIndex, 
         lat: params.lat,
         lon: params.lon,
         updated_at: new Date().toISOString(),

@@ -88,6 +88,19 @@ const UVIndex: React.FC = () => {
   }
 
   const { uv_index } = uvData;
+  
+  // Add defensive check for uv_index
+  if (uv_index === undefined || uv_index === null || isNaN(uv_index)) {
+    return (
+      <div className="max-w-7xl mx-auto p-6 flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <RefreshCw className="w-8 h-8 text-blue-500 animate-spin mx-auto mb-4" />
+          <p className="text-slate-600 font-medium">Đang xử lý dữ liệu UV...</p>
+        </div>
+      </div>
+    );
+  }
+  
   const uvLevel = getUVLevel(uv_index);
   const uvMessage = getUVMessage(uv_index);
   const uvNote = getUVNote(uv_index);
