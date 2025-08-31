@@ -163,6 +163,11 @@ export class ApiService {
             return data;
         }
 
+        // Check for 'detail' field first (API standard format)
+        if (data?.detail) {
+            return data.detail;
+        }
+
         if (data?.message) {
             return data.message;
         }
