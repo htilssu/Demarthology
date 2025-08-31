@@ -35,7 +35,7 @@ export class AuthService {
     try {
       // Call real API login endpoint
       console.log('🔐 Calling real API login...');
-      const userProfile = await this.apiService.post<LoginResponse>('/api/auth/login', {
+      const userProfile = await this.apiService.post<LoginResponse>('/api/login', {
         email: credentials.email,
         password: credentials.password
       });
@@ -111,7 +111,7 @@ export class AuthService {
     try {
       // Call real API register endpoint
       console.log('🔐 Calling real API registration...');
-      const userProfile = await this.apiService.post<RegisterResponse>('/api/auth/register', {
+      const userProfile = await this.apiService.post<RegisterResponse>('/api/register', {
         email: userData.email,
         password: userData.password,
         firstName: userData.firstName,
@@ -184,7 +184,7 @@ export class AuthService {
   async logout(): Promise<void> {
     try {
       // Call real API logout endpoint
-      await this.apiService.post('/api/auth/logout');
+      await this.apiService.post('/api/logout');
     } catch (error) {
       // Continue with local logout even if API call fails
       console.warn('Logout API call failed:', error);
