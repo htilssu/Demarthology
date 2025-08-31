@@ -31,5 +31,6 @@ export interface FormValidationErrors {
     confirmPassword?: string;
     dateOfBirth?: string;
     rememberMe?: string;
+    agreeTerms?: string;
     general?: string;
 }

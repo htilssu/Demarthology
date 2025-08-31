@@ -64,14 +64,13 @@ const Register: React.FC = () => {
                                             <Mail className="h-5 w-5 text-gray-400" />
                                         </div>
                                         <input
-                                            type="email"
+                                            type="text"
                                             value={formData.email}
                                             onChange={(e) => updateField('email', e.target.value)}
                                             className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#145566] transition-colors ${
                                                 errors.email ? 'border-red-300 bg-red-50' : 'border-gray-300'
                                             }`}
                                             placeholder="Nhập email của bạn"
-                                            required
                                         />
                                     </div>
                                     {errors.email && (
@@ -89,14 +88,13 @@ const Register: React.FC = () => {
                                             <Phone className="h-5 w-5 text-gray-400" />
                                         </div>
                                         <input
-                                            type="tel"
+                                            type="text"
                                             value={formData.phone}
                                             onChange={(e) => updateField('phone', e.target.value)}
                                             className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#145566] transition-colors ${
                                                 errors.phone ? 'border-red-300 bg-red-50' : 'border-gray-300'
                                             }`}
                                             placeholder="Nhập số điện thoại của bạn"
-                                            required
                                         />
                                     </div>
                                     {errors.phone && (
@@ -121,7 +119,6 @@ const Register: React.FC = () => {
                                                 errors.password ? 'border-red-300 bg-red-50' : 'border-gray-300'
                                             }`}
                                             placeholder="Tạo mật khẩu mạnh"
-                                            required
                                         />
                                         <button
                                             type="button"
@@ -157,7 +154,6 @@ const Register: React.FC = () => {
                                                 errors.confirmPassword ? 'border-red-300 bg-red-50' : 'border-gray-300'
                                             }`}
                                             placeholder="Nhập lại mật khẩu"
-                                            required
                                         />
                                     </div>
                                     {errors.confirmPassword && (
@@ -175,13 +171,13 @@ const Register: React.FC = () => {
                                             <Calendar className="h-5 w-5 text-gray-400" />
                                         </div>
                                         <input
-                                            type="date"
+                                            type="text"
                                             value={formData.dateOfBirth}
                                             onChange={(e) => updateField('dateOfBirth', e.target.value)}
                                             className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#145566] transition-colors ${
                                                 errors.dateOfBirth ? 'border-red-300 bg-red-50' : 'border-gray-300'
                                             }`}
-                                            required
+                                            placeholder="yyyy-mm-dd"
                                         />
                                     </div>
                                     {errors.dateOfBirth && (
@@ -190,24 +186,30 @@ const Register: React.FC = () => {
                                 </div>
 
                                 {/* Terms Agreement */}
-                                <div className="flex items-center">
-                                    <input
-                                        id="agree-terms"
-                                        name="agree-terms"
-                                        type="checkbox"
-                                        className="h-4 w-4 text-[#145566] focus:ring-[#145566] border-gray-300 rounded"
-                                        required
-                                    />
-                                    <label htmlFor="agree-terms" className="ml-2 block text-sm text-gray-600">
-                                        Tôi đồng ý với{' '}
-                                        <Link to="/terms" className="text-[#145566] hover:text-[#0f3f44] font-medium">
-                                            Điều khoản sử dụng
-                                        </Link>{' '}
-                                        và{' '}
-                                        <Link to="/privacy" className="text-[#145566] hover:text-[#0f3f44] font-medium">
-                                            Chính sách bảo mật
-                                        </Link>
-                                    </label>
+                                <div>
+                                    <div className="flex items-start">
+                                        <input
+                                            id="agree-terms"
+                                            name="agree-terms"
+                                            type="checkbox"
+                                            checked={formData.agreeTerms}
+                                            onChange={(e) => updateField('agreeTerms', e.target.checked)}
+                                            className="h-4 w-4 text-[#145566] focus:ring-[#145566] border-gray-300 rounded mt-1"
+                                        />
+                                        <label htmlFor="agree-terms" className="ml-2 block text-sm text-gray-600">
+                                            Tôi đồng ý với{' '}
+                                            <Link to="/terms" className="text-[#145566] hover:text-[#0f3f44] font-medium">
+                                                Điều khoản sử dụng
+                                            </Link>{' '}
+                                            và{' '}
+                                            <Link to="/privacy" className="text-[#145566] hover:text-[#0f3f44] font-medium">
+                                                Chính sách bảo mật
+                                            </Link>
+                                        </label>
+                                    </div>
+                                    {errors.agreeTerms && (
+                                        <p className="mt-1 text-sm text-red-600">{errors.agreeTerms}</p>
+                                    )}
                                 </div>
 
                                 {/* Submit Button */}
