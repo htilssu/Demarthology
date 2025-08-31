@@ -38,7 +38,7 @@ const Navbar: React.FC = () => {
         { name: "Đọc báo / Tin tức y khoa", path: "/articles" },
       ]
     },
-    { name: "Cộng đồng", path: "/community" },
+    // { name: "Cộng đồng", path: "/community" },
     {
       name: "Dịch vụ",
       dropdown: [
@@ -53,7 +53,7 @@ const Navbar: React.FC = () => {
 
   return (
     <header className="fixed h-[80px] top-0 left-0 right-0 backdrop-blur-md bg-white/80 border-b border-white/20 z-50 transition-all duration-300">
-      <div className="container mx-auto px-6 py-4 flex items-center justify-between">
+      <div className="container mx-auto px-6  flex items-center justify-between">
         {/* Logo */}
         <div className="flex items-center space-x-3">
           <button
@@ -62,28 +62,28 @@ const Navbar: React.FC = () => {
           >
             <Menu className="w-6 h-6 text-[#145566]" />
           </button>
-          <img src="/logo.png" alt="Logo" className="w-16 h-16 object-contain" />
+          <img src="/logo.png" alt="Logo" className="w-20 h-20 object-contain" />
           <div>
-            <h1 className="text-l font-bold text-[#145566]">Dermatology</h1>
-            <p className="text-xs text-gray-500">Smart Diagnosis</p>
+            <h1 className="text-xl font-bold text-[#145566]">Dermatology</h1>
+            <p className="text-sm text-gray-500">Smart Diagnosis</p>
           </div>
         </div>
 
         {/* Desktop Nav */}
-        <nav className="hidden lg:flex items-center space-x-2 text-xs whitespace-nowrap">
+        <nav className="hidden lg:flex items-center space-x-8 text-xl whitespace-nowrap">
   {navItems.map((item, index) =>
     item.dropdown ? (
       <div key={index} className="relative group">
-        <button className="flex items-center text-gray-700 hover:text-[#145566] transition-all duration-300 text-xs whitespace-nowrap">
+        <button className="flex items-center text-gray-700 hover:text-[#145566] transition-all duration-300 text-xl whitespace-nowrap">
           {item.name}
           <ChevronDown className="ml-1 w-3 h-3" />
         </button>
-        <div className="absolute top-full left-0 mt-1 w-40 bg-white shadow-lg rounded-md border border-gray-100 p-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+        <div className="absolute top-full left-0 mt-1 w-46 bg-white shadow-lg rounded-md border border-gray-100 p-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
           {item.dropdown.map((sub, i) => (
             <Link
               key={i}
               to={sub.path}
-              className="block px-2 py-1 text-gray-700 text-xs whitespace-nowrap rounded-md hover:bg-gray-100 hover:text-[#145566] transition-all duration-200"
+              className="block px-2 py-1 text-gray-700 text-base whitespace-nowrap rounded-md hover:bg-gray-100 hover:text-[#145566] transition-all duration-200"
             >
               {sub.name}
             </Link>
@@ -94,7 +94,7 @@ const Navbar: React.FC = () => {
       <Link
         key={index}
         to={item.path}
-        className="text-gray-700 hover:text-[#145566] transition-all duration-300 relative group text-xs whitespace-nowrap"
+        className="text-gray-700 hover:text-[#145566] transition-all duration-300 relative group text-xl whitespace-nowrap"
       >
         {item.name}
         <span className="absolute -bottom-0.5 left-0 w-0 h-0.5 bg-gradient-to-r from-[#145566] to-indigo-600 transition-all duration-300 group-hover:w-full"></span>
