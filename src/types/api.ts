@@ -74,6 +74,20 @@ export interface PaginatedResponse<T> extends ApiResponse<T[]> {
 }
 
 /**
+ * User Model from OpenAPI specification
+ */
+export interface UserModel {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  role?: string;
+  avatar?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+/**
  * Auth token response interface (legacy)
  */
 export interface AuthTokenResponse {
@@ -145,4 +159,15 @@ export interface AuthUser {
   role: string;
   permissions: string[];
   avatarUrl?: string;
+}
+
+/**
+ * User update request body for multipart/form-data
+ */
+export interface UserUpdateRequest {
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  role?: string;
+  avatar?: File;
 }
