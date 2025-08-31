@@ -10,6 +10,7 @@ import MedicalHistory from "../views/medical-history";
 import Login from "../views/login";
 import Register from "../views/register";
 import MainLayout from "../components/layouts/main-layout";
+import ProtectedRoute from "../components/auth/ProtectedRoute";
 import HospitalView from '../views/hospital';
 import UV from '../views/uv';
 import CommunityView from '../views/community';
@@ -27,9 +28,21 @@ const AppRoutes: React.FC = () => {
                 <Route path={"/"} element={<MainLayout/>}>
                     <Route path="/" element={<HomeView/>}/>
                     <Route path="/introduce" element={<Introduce/>}/>
-                    <Route path="/diagnosis" element={<Diagnosis/>}/>
-                    <Route path="/profile" element={<Profile/>}/>
-                    <Route path="/medical-history" element={<MedicalHistory/>}/>
+                    <Route path="/diagnosis" element={
+                        <ProtectedRoute>
+                            <Diagnosis/>
+                        </ProtectedRoute>
+                    }/>
+                    <Route path="/profile" element={
+                        <ProtectedRoute>
+                            <Profile/>
+                        </ProtectedRoute>
+                    }/>
+                    <Route path="/medical-history" element={
+                        <ProtectedRoute>
+                            <MedicalHistory/>
+                        </ProtectedRoute>
+                    }/>
                     <Route path="/contact" element={<Contact/>}/>
                     <Route path="/articles" element={<ArticlesView />}/>
                     <Route path="/hospital" element={<HospitalView/>}/>

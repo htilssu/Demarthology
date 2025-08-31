@@ -1,10 +1,11 @@
 import React, {createContext, useContext, useState, useEffect, ReactNode} from 'react';
 import {AuthService} from '../services';
-import {AuthUser, LoginCredentials} from '../types';
+import {AuthUser, LoginCredentials, UserProfile} from '../types';
 import {AuthUtils} from '../utils';
 
 interface AuthContextType {
-    user: AuthUser | null;
+    user: UserProfile | null;
+    authUser: AuthUser | null; // For backward compatibility
     isAuthenticated: boolean;
     isLoading: boolean;
     login: (credentials: LoginCredentials) => Promise<void>;
@@ -19,23 +20,27 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
-    const [user, setUser] = useState<AuthUser | null>(null);
+    const [user, setUser] = useState<UserProfile | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const authService = AuthService.getInstance();
 
     const isAuthenticated = !!user && AuthUtils.isAuthenticated();
 
+    // Convert UserProfile to AuthUser for backward compatibility
+    const authUser: AuthUser | null = user ? authService.convertUserProfileToAuthUser(user) : null;
+
     // Check for existing authentication on mount
     useEffect(() => {
         const initializeAuth = async () => {
-            if (AuthUtils.isAuthenticated()) {
-                try {
-                    const currentUser = await authService.getCurrentUser();
-                    setUser(currentUser);
-                } catch (error) {
-                    console.error('Failed to get current user:', error);
-                    AuthUtils.clearTokens();
+            try {
+                // Get user profile from localStorage
+                const userProfile = await authService.getCurrentUser();
+                if (userProfile) {
+                    setUser(userProfile);
                 }
+            } catch (error) {
+                console.error('Failed to get current user:', error);
+                AuthUtils.clearUserProfile();
             }
             setIsLoading(false);
         };
@@ -46,19 +51,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
     const login = async (credentials: LoginCredentials): Promise<void> => {
         setIsLoading(true);
         try {
-            const loginResponse = await authService.login(credentials);
-
-            // Convert UserInfo from login response to AuthUser for consistency
-            const authUser: AuthUser = {
-                id: 'user-' + Date.now(),
-                email: loginResponse.user.email,
-                name: `${loginResponse.user.firstName} ${loginResponse.user.lastName}`,
-                role: loginResponse.user.role || 'user',
-                permissions: ['read', 'write'],
-                avatarUrl: '/avatar.webp'
-            };
-
-            setUser(authUser);
+            const userProfile = await authService.login(credentials);
+            setUser(userProfile);
         } catch (error) {
             console.error('Login failed:', error);
             throw error;
@@ -80,20 +74,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
     };
 
     const refreshAuth = async (): Promise<void> => {
-        if (AuthUtils.isAuthenticated()) {
-            try {
-                const currentUser = await authService.getCurrentUser();
-                setUser(currentUser);
-            } catch (error) {
-                console.error('Failed to refresh auth:', error);
-                setUser(null);
-                AuthUtils.clearTokens();
-            }
+        try {
+            const userProfile = await authService.getCurrentUser();
+            setUser(userProfile);
+        } catch (error) {
+            console.error('Failed to refresh auth:', error);
+            setUser(null);
+            AuthUtils.clearUserProfile();
         }
     };
 
     const value: AuthContextType = {
         user,
+        authUser,
         isAuthenticated,
         isLoading,
         login,

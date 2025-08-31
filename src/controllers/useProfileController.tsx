@@ -1,19 +1,23 @@
 import { useState } from 'react';
-import { UserProfile } from '../models/profile';
+import { UserProfile as ProfileModel } from '../models/profile';
+import { useAuth } from '../contexts/AuthContext';
 
 function useProfileController() {
-    const [profile, setProfile] = useState<UserProfile>({
-        id: '1',
-        name: 'Người dùng',
-        dob: '1990-01-01',
-        email: 'user@example.com',
-        avatarUrl: '/avatar.webp',
+    const { user } = useAuth();
+    
+    // Convert API user profile to local profile model
+    const [profile, setProfile] = useState<ProfileModel>({
+        id: user?.email || '1',
+        name: user?.name || 'Người dùng',
+        dob: user?.dateOfBirth || '1990-01-01',
+        email: user?.email || 'user@example.com',
+        avatarUrl: user?.urlImage || '/avatar.webp',
         bio: 'Tôi quan tâm đến sức khỏe da và tìm hiểu về các phương pháp chẩn đoán hiện đại.',
         location: 'Hà Nội, Việt Nam',
     });
 
     const [isEditing, setIsEditing] = useState(false);
-    const [editForm, setEditForm] = useState<UserProfile>(profile);
+    const [editForm, setEditForm] = useState<ProfileModel>(profile);
 
     const startEdit = () => {
         setEditForm(profile);
@@ -30,7 +34,7 @@ function useProfileController() {
         setIsEditing(false);
     };
 
-    const updateEditForm = (field: keyof UserProfile, value: string) => {
+    const updateEditForm = (field: keyof ProfileModel, value: string) => {
         setEditForm(prev => ({ ...prev, [field]: value }));
     };
 

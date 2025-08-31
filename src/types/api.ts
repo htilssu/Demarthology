@@ -74,6 +74,20 @@ export interface PaginatedResponse<T> extends ApiResponse<T[]> {
 }
 
 /**
+ * User Model from OpenAPI specification
+ */
+export interface UserModel {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  role?: string;
+  avatar?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+/**
  * Auth token response interface (legacy)
  */
 export interface AuthTokenResponse {
@@ -93,18 +107,14 @@ export interface LoginCredentials {
 }
 
 /**
- * Login response interface (new API spec)
+ * Login response interface - matches actual API response format
  */
-export interface LoginResponse {
-  success: boolean;
-  message: string;
-  user: UserInfo;
-  accessToken: string;
-  tokenType: string;
+export interface LoginResponse extends UserProfile {
+  // Login response is directly the user profile object
 }
 
 /**
- * User information interface (new API spec)
+ * User information interface (legacy)
  */
 export interface UserInfo {
   email: string;
@@ -114,25 +124,21 @@ export interface UserInfo {
 }
 
 /**
- * Register request interface (new API spec)
+ * Register request interface
  */
 export interface RegisterRequest {
   email: string;
+  phone: string;
   password: string;
-  firstName: string;
-  lastName: string;
-  dob: string;
+  dateOfBirth: string;
+  name: string;
 }
 
 /**
- * Register response interface (new API spec)
+ * Register response interface - matches actual API response format
  */
-export interface RegisterResponse {
-  success: boolean;
-  message: string;
-  user: UserInfo;
-  accessToken: string;
-  tokenType: string;
+export interface RegisterResponse extends UserProfile {
+  // Register response is directly the user profile object
 }
 
 /**
@@ -145,4 +151,27 @@ export interface AuthUser {
   role: string;
   permissions: string[];
   avatarUrl?: string;
+}
+
+/**
+ * User profile interface matching the actual API response format
+ */
+export interface UserProfile {
+  dateOfBirth: string;
+  email: string;
+  name: string;
+  password: string;
+  phone: string;
+  urlImage: string;
+}
+
+/**
+ * User update request body for multipart/form-data
+ */
+export interface UserUpdateRequest {
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  role?: string;
+  avatar?: File;
 }
