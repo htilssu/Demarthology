@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import {Link} from 'react-router-dom';
+import {Link, useNavigate} from 'react-router-dom';
 import {ArrowRight, Calendar, Eye, EyeOff, Lock, Mail, Phone, User} from 'lucide-react';
 import {useRegisterController} from '../controllers/useRegisterController';
 
@@ -7,6 +7,7 @@ const Register: React.FC = () => {
     const { formData, errors, isLoading, updateField, handleSubmit } = useRegisterController();
     const [showPassword, setShowPassword] = useState(false);
     const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+    const navigate = useNavigate();
 
     const onSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -18,9 +19,10 @@ const Register: React.FC = () => {
         });
 
         if (result.success) {
-            // Redirect to login page or dashboard
+            // User is automatically logged in after successful registration
+            // Redirect to home page instead of login page
             setTimeout(() => {
-                window.location.href = '/login';
+                navigate('/');
             }, 1500);
         }
     };
