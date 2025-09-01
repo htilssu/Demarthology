@@ -10,6 +10,7 @@ export const useUVController = () => {
   const [location, setLocation] = useState<Location | null>(null);
   const [locationAccuracy, setLocationAccuracy] = useState<number | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
+  const [uvDataLoading, setUvDataLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
   const uvService = UVService.getInstance();
@@ -124,9 +125,13 @@ export const useUVController = () => {
   /**
    * Fetch UV data for specific coordinates
    */
-  const fetchUVForLocation = useCallback(async (lat: number, lon: number) => {
+  const fetchUVForLocation = useCallback(async (lat: number, lon: number, useUvDataLoading: boolean = false) => {
     try {
-      setLoading(true);
+      if (useUvDataLoading) {
+        setUvDataLoading(true);
+      } else {
+        setLoading(true);
+      }
       setError(null);
       
       const uvResponse = await uvService.getUVIndex({ lat, lon });
@@ -142,7 +147,11 @@ export const useUVController = () => {
       console.error('Error fetching UV for location:', err);
       setError(err.message || 'Failed to fetch UV data');
     } finally {
-      setLoading(false);
+      if (useUvDataLoading) {
+        setUvDataLoading(false);
+      } else {
+        setLoading(false);
+      }
     }
   }, [uvService]);
 
@@ -155,8 +164,8 @@ export const useUVController = () => {
       longitude: lon
     });
     
-    // Automatically fetch UV data for new location
-    fetchUVForLocation(lat, lon);
+    // Automatically fetch UV data for new location using UV data loading state
+    fetchUVForLocation(lat, lon, true);
   }, [fetchUVForLocation]);
 
   /**
@@ -168,7 +177,7 @@ export const useUVController = () => {
     setError(null);
     
     if (location) {
-      fetchUVForLocation(location.latitude, location.longitude);
+      fetchUVForLocation(location.latitude, location.longitude, false);
     } else {
       fetchUVForCurrentLocation();
     }
@@ -187,6 +196,7 @@ export const useUVController = () => {
     location,
     locationAccuracy,
     loading,
+    uvDataLoading,
     error,
     
     // Actions
