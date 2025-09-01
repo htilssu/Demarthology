@@ -1,15 +1,42 @@
-import React, { useEffect, useRef, useCallback } from 'react';
-import { Map } from '@openmapvn/openmapvn-gl';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
+import { Map, Marker } from '@openmapvn/openmapvn-gl';
 
 interface OpenMapVNMapProps {
   latitude: number;
   longitude: number;
   className?: string;
+  onLocationChange?: (lat: number, lng: number) => void;
 }
 
-const OpenMapVNMap: React.FC<OpenMapVNMapProps> = ({ latitude, longitude, className }) => {
+const OpenMapVNMap: React.FC<OpenMapVNMapProps> = ({ 
+  latitude, 
+  longitude, 
+  className,
+  onLocationChange 
+}) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<Map | null>(null);
+  const marker = useRef<Marker | null>(null);
+  const [coordinates, setCoordinates] = useState<{ lng: number; lat: number }>({
+    lng: longitude,
+    lat: latitude
+  });
+
+  const onDragEnd = useCallback(() => {
+    if (marker.current) {
+      const lngLat = marker.current.getLngLat();
+      const newCoordinates = {
+        lng: parseFloat(lngLat.lng.toFixed(6)),
+        lat: parseFloat(lngLat.lat.toFixed(6))
+      };
+      setCoordinates(newCoordinates);
+      
+      // Call the callback function if provided
+      if (onLocationChange) {
+        onLocationChange(newCoordinates.lat, newCoordinates.lng);
+      }
+    }
+  }, [onLocationChange]);
 
   // Initialize map only once
   useEffect(() => {
@@ -22,53 +49,17 @@ const OpenMapVNMap: React.FC<OpenMapVNMapProps> = ({ latitude, longitude, classN
       zoom: 14
     });
 
-    // Add marker at the current location
-    map.current.on('load', () => {
-      if (map.current) {
-        map.current.addSource('location-marker', {
-          type: 'geojson',
-          data: {
-            type: 'FeatureCollection',
-            features: [
-              {
-                type: 'Feature',
-                geometry: {
-                  type: 'Point',
-                  coordinates: [longitude, latitude]
-                },
-                properties: {}
-              }
-            ]
-          }
-        });
+    // Create draggable marker
+    marker.current = new Marker({ draggable: true })
+      .setLngLat([longitude, latitude])
+      .addTo(map.current);
 
-        map.current.addLayer({
-          id: 'location-marker',
-          type: 'circle',
-          source: 'location-marker',
-          paint: {
-            'circle-radius': 8,
-            'circle-color': '#3b82f6',
-            'circle-stroke-width': 3,
-            'circle-stroke-color': '#ffffff'
-          }
-        });
+    marker.current.on('dragend', onDragEnd);
 
-        // Add a pulse animation
-        map.current.addLayer({
-          id: 'location-pulse',
-          type: 'circle',
-          source: 'location-marker',
-          paint: {
-            'circle-radius': 20,
-            'circle-color': '#3b82f6',
-            'circle-opacity': 0.3,
-            'circle-stroke-width': 2,
-            'circle-stroke-color': '#3b82f6',
-            'circle-stroke-opacity': 0.5
-          }
-        });
-      }
+    // Set initial coordinates
+    setCoordinates({
+      lng: parseFloat(longitude.toFixed(6)),
+      lat: parseFloat(latitude.toFixed(6))
     });
 
     return () => {
@@ -77,44 +68,38 @@ const OpenMapVNMap: React.FC<OpenMapVNMapProps> = ({ latitude, longitude, classN
         map.current = null;
       }
     };
-  }, []); // Empty dependency array - initialize only once
+  }, [latitude, longitude, onDragEnd]); // Include dependencies
 
-  // Update map center when coordinates change
-  const updateMapLocation = useCallback(() => {
-    if (map.current) {
+  // Update marker position when coordinates prop changes
+  useEffect(() => {
+    if (marker.current && map.current) {
+      marker.current.setLngLat([longitude, latitude]);
       map.current.setCenter([longitude, latitude]);
-      
-      // Update marker position
-      const source = map.current.getSource('location-marker');
-      if (source && source.type === 'geojson') {
-        (source as any).setData({
-          type: 'FeatureCollection',
-          features: [
-            {
-              type: 'Feature',
-              geometry: {
-                type: 'Point',
-                coordinates: [longitude, latitude]
-              },
-              properties: {}
-            }
-          ]
-        });
-      }
+      setCoordinates({
+        lng: parseFloat(longitude.toFixed(6)),
+        lat: parseFloat(latitude.toFixed(6))
+      });
     }
   }, [latitude, longitude]);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => {
-    updateMapLocation();
-  }, [updateMapLocation]);
-
   return (
-    <div 
-      ref={mapContainer} 
-      className={className}
-      style={{ width: '100%', height: '100%' }}
-    />
+    <div className={`relative ${className}`}>
+      <div 
+        ref={mapContainer} 
+        className="w-full h-full rounded-lg"
+        style={{ width: '100%', height: '100%' }}
+      />
+      <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm p-3 rounded-lg shadow-md border">
+        <div className="text-sm font-semibold text-gray-700 mb-1">Vị trí đã chọn:</div>
+        <div className="text-xs text-gray-600">
+          Longitude: {coordinates.lng}<br />
+          Latitude: {coordinates.lat}
+        </div>
+        <div className="text-xs text-blue-600 mt-1 italic">
+          Kéo marker để thay đổi vị trí
+        </div>
+      </div>
+    </div>
   );
 };
 

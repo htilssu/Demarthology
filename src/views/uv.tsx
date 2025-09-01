@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Sun, AlertCircle, CheckCircle, Clock, MapPin, RefreshCw } from "lucide-react";
 import { useUVController } from "../controllers/useUVController";
-import UVMapLibreMap from "../components/UVMapLibreMap";
+import OpenMapVNMap from "../components/OpenMapVNMap";
 
 const UVIndex: React.FC = () => {
   const {
@@ -245,7 +245,7 @@ const UVIndex: React.FC = () => {
         animate={{ opacity: 1, x: 0 }}
         className="flex-1 rounded-3xl overflow-hidden shadow-md border border-slate-200 h-96 lg:h-auto"
       >
-        <UVMapLibreMap
+        <OpenMapVNMap
           latitude={latitude}
           longitude={longitude}
           className="w-full h-full"

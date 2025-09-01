@@ -2,9 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* MapLibre GL styles */
-@import 'maplibre-gl/dist/maplibre-gl.css';
-
 /* OpenMapVN styles */
 @import '@openmapvn/openmapvn-gl/dist/maplibre-gl.css';
 
