@@ -2,6 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* OpenMapVN styles */
+@import '@openmapvn/openmapvn-gl/dist/maplibre-gl.css';
+
 @keyframes slideInRight {
   from {
     transform: translateX(100%);
