@@ -10,6 +10,7 @@ const UVIndex: React.FC = () => {
     location,
     locationAccuracy,
     loading,
+    uvDataLoading,
     error,
     fetchUVForCurrentLocation,
     refreshUVData,
@@ -40,6 +41,59 @@ const UVIndex: React.FC = () => {
       setUVTrend(getMockTrend());
     }
   }, [uvData, uvTrend.length]);
+
+  // Loading placeholder component for left panel
+  const UVDataLoadingPlaceholder = () => (
+    <motion.div
+      initial={{ opacity: 0, x: -50 }}
+      animate={{ opacity: 1, x: 0 }}
+      className="flex-1 flex flex-col gap-6 p-6 bg-white rounded-3xl shadow-2xl"
+    >
+      <div className="flex items-center gap-4">
+        <div className="w-14 h-14 bg-yellow-200 rounded-full animate-pulse"></div>
+        <div>
+          <div className="h-8 bg-slate-200 rounded animate-pulse mb-2"></div>
+          <div className="h-6 bg-slate-200 rounded animate-pulse"></div>
+        </div>
+      </div>
+
+      <div className="p-8 rounded-3xl bg-slate-200 animate-pulse text-center">
+        <div className="flex items-center justify-center min-h-[80px]">
+          <RefreshCw className="w-8 h-8 text-blue-500 animate-spin" />
+        </div>
+      </div>
+
+      <div className="flex items-center gap-3 p-4 bg-slate-100 rounded-2xl">
+        <div className="w-8 h-8 bg-slate-200 rounded-full animate-pulse"></div>
+        <div className="flex-1">
+          <div className="h-4 bg-slate-200 rounded animate-pulse mb-2"></div>
+          <div className="h-3 bg-slate-200 rounded animate-pulse"></div>
+        </div>
+      </div>
+
+      <div className="flex items-center gap-3 p-4 bg-blue-50 rounded-2xl">
+        <div className="w-6 h-6 bg-blue-200 rounded animate-pulse"></div>
+        <div className="flex-1">
+          <div className="h-4 bg-blue-200 rounded animate-pulse mb-2"></div>
+          <div className="h-3 bg-blue-200 rounded animate-pulse"></div>
+        </div>
+      </div>
+
+      <div className="p-4 bg-slate-50 rounded-2xl">
+        <div className="h-4 bg-slate-200 rounded animate-pulse mb-2"></div>
+        <div className="flex justify-between items-end h-24 gap-1">
+          {Array.from({ length: 12 }, (_, i) => (
+            <div key={i} className="flex-1 bg-slate-200 rounded-t-xl animate-pulse" style={{ height: '60%' }}></div>
+          ))}
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <div className="w-full h-12 bg-slate-200 rounded-2xl animate-pulse"></div>
+        <div className="w-full h-12 bg-slate-200 rounded-2xl animate-pulse"></div>
+      </div>
+    </motion.div>
+  );
 
   // Show loading state
   if (loading) {
@@ -113,131 +167,135 @@ const UVIndex: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto p-6 flex flex-col lg:flex-row gap-6">
       {/* Left Panel: UV Info */}
-      <motion.div
-        initial={{ opacity: 0, x: -50 }}
-        animate={{ opacity: 1, x: 0 }}
-        className="flex-1 flex flex-col gap-6 p-6 bg-white rounded-3xl shadow-2xl hover:shadow-3xl transition-shadow"
-      >
-        <div className="flex items-center gap-4">
-          <Sun className="w-14 h-14 text-yellow-400 animate-pulse" />
-          <div>
-            <h2 className="text-3xl font-bold text-slate-800">
-              Chỉ số UV hiện tại
-            </h2>
-            <p className="mt-1 text-xl text-slate-700">{message || uvMessage}</p>
+      {uvDataLoading ? (
+        <UVDataLoadingPlaceholder />
+      ) : (
+        <motion.div
+          initial={{ opacity: 0, x: -50 }}
+          animate={{ opacity: 1, x: 0 }}
+          className="flex-1 flex flex-col gap-6 p-6 bg-white rounded-3xl shadow-2xl hover:shadow-3xl transition-shadow"
+        >
+          <div className="flex items-center gap-4">
+            <Sun className="w-14 h-14 text-yellow-400 animate-pulse" />
+            <div>
+              <h2 className="text-3xl font-bold text-slate-800">
+                Chỉ số UV hiện tại
+              </h2>
+              <p className="mt-1 text-xl text-slate-700">{message || uvMessage}</p>
+            </div>
           </div>
-        </div>
 
-        <motion.div
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ type: "spring", stiffness: 260, damping: 20 }}
-          className={`p-8 rounded-3xl text-white text-center text-5xl font-bold bg-gradient-to-r ${getUVColor(
-            uv_value
-          )} shadow-xl`}
-        >
-          {uv_value.toFixed(1)} - {level_uv || uvLevel}
-        </motion.div>
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ type: "spring", stiffness: 260, damping: 20 }}
+            className={`p-8 rounded-3xl text-white text-center text-5xl font-bold bg-gradient-to-r ${getUVColor(
+              uv_value
+            )} shadow-xl`}
+          >
+            {uv_value.toFixed(1)} - {level_uv || uvLevel}
+          </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.3 }}
-          className="flex items-center gap-3 p-4 bg-slate-100 rounded-2xl shadow-inner"
-        >
-          {uv_value <= 5 ? (
-            <CheckCircle className="w-8 h-8 text-green-500" />
-          ) : (
-            <AlertCircle className="w-8 h-8 text-red-500 animate-pulse" />
-          )}
-          <p className="text-slate-700 font-medium">{uvNote}</p>
-        </motion.div>
-
-        {/* Location Info */}
-        <div className="flex items-center gap-3 p-4 bg-blue-50 rounded-2xl shadow-inner">
-          <MapPin className="w-6 h-6 text-blue-600" />
-          <div className="text-sm text-slate-700 flex-1">
-            <p className="font-medium">Vị trí hiện tại</p>
-            <p>Lat: {latitude.toFixed(4)}, Lon: {longitude.toFixed(4)}</p>
-            {locationAccuracy && (
-              <div className="flex items-center gap-2 mt-1">
-                <p className="text-xs text-slate-500">
-                  Độ chính xác: {locationAccuracy < 1000
-                    ? `${Math.round(locationAccuracy)}m`
-                    : `${(locationAccuracy/1000).toFixed(1)}km`}
-                </p>
-                <div className={`w-2 h-2 rounded-full ${
-                  locationAccuracy <= 10 ? 'bg-green-500' :
-                  locationAccuracy <= 50 ? 'bg-yellow-500' :
-                  locationAccuracy <= 200 ? 'bg-orange-500' :
-                  'bg-red-500'
-                }`} title={
-                  locationAccuracy <= 10 ? 'Rất chính xác' :
-                  locationAccuracy <= 50 ? 'Chính xác' :
-                  locationAccuracy <= 200 ? 'Trung bình' :
-                  'Kém chính xác'
-                }></div>
-              </div>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3 }}
+            className="flex items-center gap-3 p-4 bg-slate-100 rounded-2xl shadow-inner"
+          >
+            {uv_value <= 5 ? (
+              <CheckCircle className="w-8 h-8 text-green-500" />
+            ) : (
+              <AlertCircle className="w-8 h-8 text-red-500 animate-pulse" />
             )}
-          </div>
-        </div>
+            <p className="text-slate-700 font-medium">{uvNote}</p>
+          </motion.div>
 
-        {/* UV Trend */}
-        {uvTrend.length > 0 && (
-          <div className="p-4 bg-slate-50 rounded-2xl shadow-inner">
-            <div className="flex items-center gap-2 mb-2 text-slate-700 font-medium">
-              <Clock className="w-5 h-5" />
-              <span>Xu hướng UV 12 giờ (mô phỏng)</span>
-            </div>
-            <div className="flex justify-between items-end h-24 gap-1">
-              {uvTrend.map((v, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ height: 0 }}
-                  animate={{ height: `${(v / 12) * 100}%` }}
-                  transition={{ duration: 0.8, delay: i * 0.05 }}
-                  className={`flex-1 flex flex-col items-center w-6 rounded-t-xl ${
-                    v <= 2
-                      ? "bg-green-400"
-                      : v <= 5
-                      ? "bg-yellow-400"
-                      : v <= 7
-                      ? "bg-orange-400"
-                      : v <= 10
-                      ? "bg-red-500"
-                      : "bg-purple-600"
-                  }`}
-                >
-                  <span className="text-xs mt-1">{i + 1}h</span>
-                </motion.div>
-              ))}
+          {/* Location Info */}
+          <div className="flex items-center gap-3 p-4 bg-blue-50 rounded-2xl shadow-inner">
+            <MapPin className="w-6 h-6 text-blue-600" />
+            <div className="text-sm text-slate-700 flex-1">
+              <p className="font-medium">Vị trí hiện tại</p>
+              <p>Lat: {latitude.toFixed(4)}, Lon: {longitude.toFixed(4)}</p>
+              {locationAccuracy && (
+                <div className="flex items-center gap-2 mt-1">
+                  <p className="text-xs text-slate-500">
+                    Độ chính xác: {locationAccuracy < 1000
+                      ? `${Math.round(locationAccuracy)}m`
+                      : `${(locationAccuracy/1000).toFixed(1)}km`}
+                  </p>
+                  <div className={`w-2 h-2 rounded-full ${
+                    locationAccuracy <= 10 ? 'bg-green-500' :
+                    locationAccuracy <= 50 ? 'bg-yellow-500' :
+                    locationAccuracy <= 200 ? 'bg-orange-500' :
+                    'bg-red-500'
+                  }`} title={
+                    locationAccuracy <= 10 ? 'Rất chính xác' :
+                    locationAccuracy <= 50 ? 'Chính xác' :
+                    locationAccuracy <= 200 ? 'Trung bình' :
+                    'Kém chính xác'
+                  }></div>
+                </div>
+              )}
             </div>
           </div>
-        )}
 
-        <div className="flex flex-col gap-2">
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={handleRefresh}
-            disabled={loading}
-            className="w-full py-3 rounded-2xl bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-semibold shadow-lg transition-transform duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-          >
-            <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
-            Cập nhật UV
-          </motion.button>
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={refreshLocation}
-            disabled={loading}
-            className="w-full py-3 rounded-2xl bg-gradient-to-r from-green-600 to-emerald-600 text-white font-semibold shadow-lg transition-transform duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-          >
-            <MapPin className="w-5 h-5" />
-            Lấy vị trí chính xác
-          </motion.button>
-        </div>
-      </motion.div>
+          {/* UV Trend */}
+          {uvTrend.length > 0 && (
+            <div className="p-4 bg-slate-50 rounded-2xl shadow-inner">
+              <div className="flex items-center gap-2 mb-2 text-slate-700 font-medium">
+                <Clock className="w-5 h-5" />
+                <span>Xu hướng UV 12 giờ (mô phỏng)</span>
+              </div>
+              <div className="flex justify-between items-end h-24 gap-1">
+                {uvTrend.map((v, i) => (
+                  <motion.div
+                    key={i}
+                    initial={{ height: 0 }}
+                    animate={{ height: `${(v / 12) * 100}%` }}
+                    transition={{ duration: 0.8, delay: i * 0.05 }}
+                    className={`flex-1 flex flex-col items-center w-6 rounded-t-xl ${
+                      v <= 2
+                        ? "bg-green-400"
+                        : v <= 5
+                        ? "bg-yellow-400"
+                        : v <= 7
+                        ? "bg-orange-400"
+                        : v <= 10
+                        ? "bg-red-500"
+                        : "bg-purple-600"
+                    }`}
+                  >
+                    <span className="text-xs mt-1">{i + 1}h</span>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="flex flex-col gap-2">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={handleRefresh}
+              disabled={loading || uvDataLoading}
+              className="w-full py-3 rounded-2xl bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-semibold shadow-lg transition-transform duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            >
+              <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
+              Cập nhật UV
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={refreshLocation}
+              disabled={loading || uvDataLoading}
+              className="w-full py-3 rounded-2xl bg-gradient-to-r from-green-600 to-emerald-600 text-white font-semibold shadow-lg transition-transform duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            >
+              <MapPin className="w-5 h-5" />
+              Lấy vị trí chính xác
+            </motion.button>
+          </div>
+        </motion.div>
+      )}
 
       {/* Right Panel: Map */}
       <motion.div

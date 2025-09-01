@@ -1,26 +1,26 @@
 import React, { useEffect, useRef, useState } from "react";
-import maplibregl from 'maplibre-gl';
+import { Map, Marker } from '@openmapvn/openmapvn-gl';
 import Navbar from "../components/navbar";
 import Footer from "../components/footer";
 
 const Contact: React.FC = () => {
   const mapContainer = useRef<HTMLDivElement>(null);
-  const map = useRef<maplibregl.Map | null>(null);
+  const map = useRef<Map | null>(null);
   const [coordinates, setCoordinates] = useState<{ lng: number; lat: number } | null>(null);
 
   useEffect(() => {
     if (map.current || !mapContainer.current) return; // initialize map only once
 
     // Initialize map
-    map.current = new maplibregl.Map({
+    map.current = new Map({
       container: mapContainer.current,
-      style: 'https://demotiles.maplibre.org/style.json', // Demo tile style
+      style: 'https://tiles.openmap.vn/styles/day-v1/style.json', // OpenMapVN style
       center: [106.7, 10.8], // Ho Chi Minh City coordinates
       zoom: 12
     });
 
     // Create draggable marker
-    const marker = new maplibregl.Marker({ draggable: true })
+    const marker = new Marker({ draggable: true })
       .setLngLat([106.7, 10.8])
       .addTo(map.current);
 
