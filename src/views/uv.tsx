@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Sun, AlertCircle, CheckCircle, Clock, MapPin, RefreshCw } from "lucide-react";
 import { useUVController } from "../controllers/useUVController";
+import OpenMapVNMap from "../components/OpenMapVNMap";
 
 const UVIndex: React.FC = () => {
   const {
@@ -90,7 +91,7 @@ const UVIndex: React.FC = () => {
   }
 
   const { uv_value, message, level_uv } = uvData;
-  
+
   // Add defensive check for uv_value
   if (uv_value === undefined || uv_value === null || isNaN(uv_value)) {
     return (
@@ -102,7 +103,7 @@ const UVIndex: React.FC = () => {
       </div>
     );
   }
-  
+
   const uvLevel = getUVLevel(uv_value);
   const uvMessage = getUVMessage(uv_value);
   const uvNote = getUVNote(uv_value);
@@ -160,8 +161,8 @@ const UVIndex: React.FC = () => {
             {locationAccuracy && (
               <div className="flex items-center gap-2 mt-1">
                 <p className="text-xs text-slate-500">
-                  Độ chính xác: {locationAccuracy < 1000 
-                    ? `${Math.round(locationAccuracy)}m` 
+                  Độ chính xác: {locationAccuracy < 1000
+                    ? `${Math.round(locationAccuracy)}m`
                     : `${(locationAccuracy/1000).toFixed(1)}km`}
                 </p>
                 <div className={`w-2 h-2 rounded-full ${
@@ -243,14 +244,11 @@ const UVIndex: React.FC = () => {
         animate={{ opacity: 1, x: 0 }}
         className="flex-1 rounded-3xl overflow-hidden shadow-md border border-slate-200 h-96 lg:h-auto"
       >
-        <iframe
-          title="User Location"
-          width="100%"
-          height="100%"
-          frameBorder="0"
-          src={`https://www.google.com/maps?q=${latitude},${longitude}&hl=vi&z=12&output=embed`}
-          allowFullScreen
-        ></iframe>
+        <OpenMapVNMap
+          latitude={latitude}
+          longitude={longitude}
+          className="w-full h-full"
+        />
       </motion.div>
     </div>
   );
