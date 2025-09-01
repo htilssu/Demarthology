@@ -7,10 +7,12 @@ const UVIndex: React.FC = () => {
   const {
     uvData,
     location,
+    locationAccuracy,
     loading,
     error,
     fetchUVForCurrentLocation,
     refreshUVData,
+    refreshLocation,
     getUVLevel,
     getUVColor,
     getUVMessage,
@@ -152,9 +154,29 @@ const UVIndex: React.FC = () => {
         {/* Location Info */}
         <div className="flex items-center gap-3 p-4 bg-blue-50 rounded-2xl shadow-inner">
           <MapPin className="w-6 h-6 text-blue-600" />
-          <div className="text-sm text-slate-700">
+          <div className="text-sm text-slate-700 flex-1">
             <p className="font-medium">Vị trí hiện tại</p>
             <p>Lat: {latitude.toFixed(4)}, Lon: {longitude.toFixed(4)}</p>
+            {locationAccuracy && (
+              <div className="flex items-center gap-2 mt-1">
+                <p className="text-xs text-slate-500">
+                  Độ chính xác: {locationAccuracy < 1000 
+                    ? `${Math.round(locationAccuracy)}m` 
+                    : `${(locationAccuracy/1000).toFixed(1)}km`}
+                </p>
+                <div className={`w-2 h-2 rounded-full ${
+                  locationAccuracy <= 10 ? 'bg-green-500' :
+                  locationAccuracy <= 50 ? 'bg-yellow-500' :
+                  locationAccuracy <= 200 ? 'bg-orange-500' :
+                  'bg-red-500'
+                }`} title={
+                  locationAccuracy <= 10 ? 'Rất chính xác' :
+                  locationAccuracy <= 50 ? 'Chính xác' :
+                  locationAccuracy <= 200 ? 'Trung bình' :
+                  'Kém chính xác'
+                }></div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -200,17 +222,17 @@ const UVIndex: React.FC = () => {
             className="w-full py-3 rounded-2xl bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-semibold shadow-lg transition-transform duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
             <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
-            Cập nhật vị trí & UV
+            Cập nhật UV
           </motion.button>
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            onClick={fetchUVForCurrentLocation}
+            onClick={refreshLocation}
             disabled={loading}
             className="w-full py-3 rounded-2xl bg-gradient-to-r from-green-600 to-emerald-600 text-white font-semibold shadow-lg transition-transform duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
             <MapPin className="w-5 h-5" />
-            Lấy vị trí hiện tại
+            Lấy vị trí chính xác
           </motion.button>
         </div>
       </motion.div>

@@ -8,6 +8,7 @@ import { UVIndexResponse, Location, UVLevel } from '../models/uv';
 export const useUVController = () => {
   const [uvData, setUVData] = useState<UVIndexResponse | null>(null);
   const [location, setLocation] = useState<Location | null>(null);
+  const [locationAccuracy, setLocationAccuracy] = useState<number | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -63,15 +64,58 @@ export const useUVController = () => {
       const response = await uvService.getUVIndexForCurrentLocation();
       setUVData(response.uvData);
       
-      // Update location state
+      // Update location state and accuracy
       setLocation({
-        latitude: response.location.lat,
-        longitude: response.location.lon
+        latitude: response.location.latitude,
+        longitude: response.location.longitude
       });
+      
+      // Store accuracy if available
+      if (response.location.accuracy) {
+        setLocationAccuracy(response.location.accuracy);
+      }
       
     } catch (err: any) {
       console.error('Error fetching UV for current location:', err);
       setError(err.message || 'Failed to fetch UV data');
+    } finally {
+      setLoading(false);
+    }
+  }, [uvService]);
+
+  /**
+   * Get fresh location coordinates with improved accuracy
+   */
+  const refreshLocation = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      console.log('🔄 Refreshing location...');
+      const locationData = await uvService.getCurrentLocation();
+      
+      // Update location state
+      setLocation({
+        latitude: locationData.latitude,
+        longitude: locationData.longitude
+      });
+      
+      // Store accuracy if available
+      if (locationData.accuracy) {
+        setLocationAccuracy(locationData.accuracy);
+        console.log(`📍 Location updated with ${locationData.accuracy}m accuracy`);
+      }
+      
+      // Fetch UV data for the new location
+      const uvResponse = await uvService.getUVIndex({ 
+        lat: locationData.latitude, 
+        lon: locationData.longitude 
+      });
+      setUVData(uvResponse);
+      
+    } catch (err: any) {
+      console.error('Error refreshing location:', err);
+      setError(err.message || 'Failed to refresh location');
     } finally {
       setLoading(false);
     }
@@ -141,6 +185,7 @@ export const useUVController = () => {
     // State
     uvData,
     location,
+    locationAccuracy,
     loading,
     error,
     
@@ -149,6 +194,7 @@ export const useUVController = () => {
     fetchUVForLocation,
     updateLocation,
     refreshUVData,
+    refreshLocation,
     
     // Helper functions
     getUVLevel,
