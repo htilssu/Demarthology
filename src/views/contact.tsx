@@ -1,7 +1,12 @@
 import React from "react";
+import Navbar from "../components/navbar";
+import Footer from "../components/footer";
+
 const Contact: React.FC = () => {
   return (
     <div className="bg-white min-h-screen">
+      {/* Navbar */}
+      <Navbar />
 
       {/* Banner */}
       <div className="relative w-full h-64 bg-gray-200 flex items-center justify-center">
@@ -82,6 +87,8 @@ const Contact: React.FC = () => {
           <p>+84 28 1234 5678</p>
         </div>
       </div>
+      
+      <Footer/>
     </div>
   );
 };

@@ -14,6 +14,7 @@ const UVIndex: React.FC = () => {
     fetchUVForCurrentLocation,
     refreshUVData,
     refreshLocation,
+    updateLocation,
     getUVLevel,
     getUVColor,
     getUVMessage,
@@ -248,6 +249,10 @@ const UVIndex: React.FC = () => {
           latitude={latitude}
           longitude={longitude}
           className="w-full h-full"
+          onMapClick={(lat, lon) => {
+            console.log(`Map clicked at: ${lat}, ${lon}`);
+            updateLocation(lat, lon);
+          }}
         />
       </motion.div>
     </div>
