@@ -1,7 +1,54 @@
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
+import maplibregl from 'maplibre-gl';
+import Navbar from "../components/navbar";
+import Footer from "../components/footer";
+
 const Contact: React.FC = () => {
+  const mapContainer = useRef<HTMLDivElement>(null);
+  const map = useRef<maplibregl.Map | null>(null);
+  const [coordinates, setCoordinates] = useState<{ lng: number; lat: number } | null>(null);
+
+  useEffect(() => {
+    if (map.current || !mapContainer.current) return; // initialize map only once
+
+    // Initialize map
+    map.current = new maplibregl.Map({
+      container: mapContainer.current,
+      style: 'https://demotiles.maplibre.org/style.json', // Demo tile style
+      center: [106.7, 10.8], // Ho Chi Minh City coordinates
+      zoom: 12
+    });
+
+    // Create draggable marker
+    const marker = new maplibregl.Marker({ draggable: true })
+      .setLngLat([106.7, 10.8])
+      .addTo(map.current);
+
+    function onDragEnd() {
+      const lngLat = marker.getLngLat();
+      setCoordinates({
+        lng: parseFloat(lngLat.lng.toFixed(6)),
+        lat: parseFloat(lngLat.lat.toFixed(6))
+      });
+    }
+
+    marker.on('dragend', onDragEnd);
+
+    // Set initial coordinates
+    setCoordinates({
+      lng: 106.7,
+      lat: 10.8
+    });
+
+    return () => {
+      map.current?.remove();
+    };
+  }, []);
+
   return (
     <div className="bg-white min-h-screen">
+      {/* Navbar */}
+      <Navbar />
 
       {/* Banner */}
       <div className="relative w-full h-64 bg-gray-200 flex items-center justify-center">
@@ -18,17 +65,18 @@ const Contact: React.FC = () => {
 
       {/* Bản đồ + Form liên hệ */}
       <div className="container mx-auto px-4 py-12 grid md:grid-cols-2 gap-8">
-        {/* Google Map */}
-        <div className="w-full h-[400px]">
-          <iframe
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3919.9654069380636!2d106.72187861526066!3d10.729257492352708!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x317525408c5820a3%3A0xc57a52e96aa0b8a1!2zUXXhuq1uIDcsIFRQLiBIQ00!5e0!3m2!1svi!2s!4v1692872390030!5m2!1svi!2s"
-            width="100%"
-            height="100%"
-            style={{ border: 0 }}
-            allowFullScreen={true}
-            loading="lazy"
-            title="Google Map Quận 7"
-          ></iframe>
+        {/* MapLibre GL Map */}
+        <div className="w-full h-[400px] relative">
+          <div ref={mapContainer} className="w-full h-full rounded-lg" />
+          {coordinates && (
+            <div className="absolute top-4 left-4 bg-white p-3 rounded-lg shadow-md border">
+              <div className="text-sm font-semibold text-gray-700 mb-1">Vị trí hiện tại:</div>
+              <div className="text-xs text-gray-600">
+                Longitude: {coordinates.lng}<br />
+                Latitude: {coordinates.lat}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Form liên hệ */}
@@ -82,6 +130,8 @@ const Contact: React.FC = () => {
           <p>+84 28 1234 5678</p>
         </div>
       </div>
+      
+      <Footer />
     </div>
   );
 };
