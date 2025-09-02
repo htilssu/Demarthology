@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Edit3, Save, X, Heart, Pill, AlertTriangle, Activity, Users, FileText, User, FolderOpen } from 'lucide-react';
+import { Edit3, Save, X, Heart, Pill, AlertTriangle, Activity, Users, FileText, User, FolderOpen, MapPin, Navigation } from 'lucide-react';
 import useProfileController from '../controllers/useProfileController';
 import useMedicalHistoryController from '../controllers/useMedicalHistoryController';
 
@@ -35,7 +35,10 @@ function Profile() {
         startEdit, 
         cancelEdit, 
         saveProfile, 
-        updateEditForm 
+        updateEditForm,
+        locationLoading,
+        locationError,
+        setCurrentLocation
     } = useProfileController();
 
     const { medicalHistory, loadMedicalHistory } = useMedicalHistoryController();
@@ -248,17 +251,61 @@ function Profile() {
                                                         </div>
 
                                                         <div className="border-b border-gray-200 pb-2">
-                                                            <label className="text-xs font-medium text-gray-600 uppercase tracking-wide">Địa chỉ</label>
+                                                            <label className="text-xs font-medium text-gray-600 uppercase tracking-wide flex items-center">
+                                                                <MapPin size={12} className="mr-1" />
+                                                                Địa chỉ
+                                                            </label>
                                                             {isEditing ? (
-                                                                <input
-                                                                    type="text"
-                                                                    value={editForm.location || ''}
-                                                                    onChange={(e) => updateEditForm('location', e.target.value)}
-                                                                    className="mt-1 w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-[#145566]"
-                                                                    placeholder="Nhập địa chỉ"
-                                                                />
+                                                                <div className="space-y-2">
+                                                                    <input
+                                                                        type="text"
+                                                                        value={editForm.location || ''}
+                                                                        onChange={(e) => updateEditForm('location', e.target.value)}
+                                                                        className="mt-1 w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-[#145566]"
+                                                                        placeholder="Nhập địa chỉ"
+                                                                    />
+                                                                    <div className="grid grid-cols-2 gap-2">
+                                                                        <input
+                                                                            type="number"
+                                                                            step="any"
+                                                                            value={editForm.latitude || ''}
+                                                                            onChange={(e) => updateEditForm('latitude', parseFloat(e.target.value) || 0)}
+                                                                            className="px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-[#145566]"
+                                                                            placeholder="Vĩ độ (Latitude)"
+                                                                        />
+                                                                        <input
+                                                                            type="number"
+                                                                            step="any"
+                                                                            value={editForm.longitude || ''}
+                                                                            onChange={(e) => updateEditForm('longitude', parseFloat(e.target.value) || 0)}
+                                                                            className="px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-[#145566]"
+                                                                            placeholder="Kinh độ (Longitude)"
+                                                                        />
+                                                                    </div>
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={setCurrentLocation}
+                                                                        disabled={locationLoading}
+                                                                        className="flex items-center space-x-1 px-3 py-1 bg-[#145566] text-white rounded text-sm hover:bg-[#0f3f44] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                                                    >
+                                                                        <Navigation size={12} />
+                                                                        <span>{locationLoading ? 'Đang lấy vị trí...' : 'Lấy vị trí hiện tại'}</span>
+                                                                    </button>
+                                                                    {locationError && (
+                                                                        <div className="text-red-500 text-xs">
+                                                                            Lỗi: {locationError.message}
+                                                                        </div>
+                                                                    )}
+                                                                </div>
                                                             ) : (
-                                                                <div className="mt-1 text-gray-900">{profile.location || 'Chưa cập nhật'}</div>
+                                                                <div className="mt-1 space-y-1">
+                                                                    <div className="text-gray-900">{profile.location || 'Chưa cập nhật'}</div>
+                                                                    {(profile.latitude && profile.longitude) && (
+                                                                        <div className="text-xs text-gray-500">
+                                                                            Tọa độ: {profile.latitude.toFixed(6)}, {profile.longitude.toFixed(6)}
+                                                                        </div>
+                                                                    )}
+                                                                </div>
                                                             )}
                                                         </div>
                                                     </div>

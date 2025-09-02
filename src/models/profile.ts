@@ -6,4 +6,6 @@ export interface UserProfile {
     avatarUrl?: string;
     bio?: string;
     location?: string;
+    latitude?: number;
+    longitude?: number;
 }
