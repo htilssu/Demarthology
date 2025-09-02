@@ -45,7 +45,7 @@ const Navbar: React.FC = () => {
         { name: "Chẩn đoán bệnh", path: "/diagnosis" },
         { name: "Theo dõi tiến trình", path: "/" },
         { name: "Cảnh báo UV", path: "/uv" },
-        { name: "Tìm kiếm thông tin", path: "/" },
+        { name: "Tìm kiếm thông tin", path: "/disease-knowledge" },
         { name: "Gợi ý bệnh viện", path: "/hospital" },
       ]
     },
