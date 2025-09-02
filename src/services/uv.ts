@@ -41,21 +41,14 @@ export class UVService {
     } catch (error: any) {
       console.error('❌ Failed to fetch UV index:', error);
       
-      // Return mock data as fallback for development
+      // Return mock data matching the expected API response format for development
       console.log('⚠️ Using mock UV data as fallback');
-      const mockUVValue = parseFloat((Math.random() * 12).toFixed(1));
+      
+      // Use the exact format from the API response example
       return {
-        uv_value: mockUVValue,
-        message: mockUVValue <= 2 ? "🟢 UV thấp, an toàn để ra ngoài." :
-                 mockUVValue <= 5 ? "🟡 UV trung bình, cần bảo vệ da khi ra ngoài." :
-                 mockUVValue <= 7 ? "🟠 UV cao! Giảm thời gian ngoài trời giữa trưa." :
-                 mockUVValue <= 10 ? "🔴 UV rất cao! Tránh ra ngoài, bảo vệ tối đa." :
-                 "🟣 UV cực kỳ nguy hiểm! Tránh ra ngoài và mặc kín toàn thân.",
-        level_uv: mockUVValue <= 2 ? "Thấp" :
-                  mockUVValue <= 5 ? "Trung bình" :
-                  mockUVValue <= 7 ? "Cao" :
-                  mockUVValue <= 10 ? "Rất cao" :
-                  "Nguy hiểm"
+        uv_value: 13.44,
+        message: "🟣 Mức UV cực kỳ nguy hiểm! Tránh ra ngoài và mặc kín toàn thân.",
+        level_uv: "Nguy hiểm"
       };
     }
   }

@@ -207,7 +207,7 @@ const UVIndex: React.FC = () => {
             ) : (
               <AlertCircle className="w-8 h-8 text-red-500 animate-pulse" />
             )}
-            <p className="text-slate-700 font-medium">{uvNote}</p>
+            <p className="text-slate-700 font-medium">{message || uvNote}</p>
           </motion.div>
 
           {/* Location Info */}
