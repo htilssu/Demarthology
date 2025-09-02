@@ -321,6 +321,15 @@ const Navbar: React.FC = () => {
               >
                 <History className="w-4 h-4 mr-2" /> Lịch sử bệnh án
               </Link>
+              <Link
+                to="/forgot-password"
+                className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100"
+              >
+                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-3a1 1 0 011-1h2.586l6.243-6.243A6 6 0 0121 9z" />
+                </svg>
+                Quên mật khẩu
+              </Link>
               <button
                 className="w-full text-left flex items-center px-4 py-2 text-gray-700 hover:bg-red-50 hover:text-red-600 rounded-b-xl"
               >
