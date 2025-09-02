@@ -20,14 +20,14 @@ export class DiseaseKnowledgeService {
   }
 
   /**
-   * Search for disease information by name
+   * Search for disease information by name with translation
    * @param params Disease search parameters
-   * @returns Promise with disease information
+   * @returns Promise with disease information including translated name
    */
   async searchDisease(params: DiseaseSearchParams): Promise<DiseaseKnowledgeResponse> {
     try {
       const response = await this.apiService.get<DiseaseKnowledgeResponse>(
-        '/api/knowledge',
+        '/api/knowledge/translate',
         {
           disease_name: params.disease_name
         }

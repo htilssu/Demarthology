@@ -11,6 +11,7 @@ export default function DiseaseKnowledge() {
   const {
     searchQuery,
     diseaseInfo,
+    translatedName,
     loading,
     error,
     hasSearched,
@@ -220,6 +221,12 @@ export default function DiseaseKnowledge() {
               <div className="text-center">
                 <p className="text-gray-600">
                   Tìm thấy {diseaseInfo.length} kết quả cho "{searchQuery}"
+                  {translatedName && (
+                    <span className="block mt-2 text-sm">
+                      <span className="text-gray-500">Tên tiếng Anh: </span>
+                      <span className="font-semibold text-[#145566]">{translatedName}</span>
+                    </span>
+                  )}
                 </p>
               </div>
               

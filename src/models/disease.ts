@@ -27,6 +27,7 @@ export interface DiseaseInfo {
  * API response for disease knowledge lookup
  */
 export interface DiseaseKnowledgeResponse {
+  translated_name?: string;
   disease_info: DiseaseInfo[];
 }
 
