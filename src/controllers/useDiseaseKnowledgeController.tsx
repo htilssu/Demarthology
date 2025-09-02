@@ -8,6 +8,7 @@ import { DiseaseKnowledgeService } from '../services/disease-knowledge';
 export function useDiseaseKnowledgeController() {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [diseaseInfo, setDiseaseInfo] = useState<DiseaseInfo[]>([]);
+  const [translatedName, setTranslatedName] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [hasSearched, setHasSearched] = useState<boolean>(false);
@@ -36,13 +37,16 @@ export function useDiseaseKnowledgeController() {
       
       if (response.disease_info && response.disease_info.length > 0) {
         setDiseaseInfo(response.disease_info);
+        setTranslatedName(response.translated_name || null);
       } else {
         setDiseaseInfo([]);
+        setTranslatedName(null);
         setError('Không tìm thấy thông tin về bệnh này. Vui lòng thử với tên bệnh khác.');
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Có lỗi xảy ra khi tìm kiếm');
       setDiseaseInfo([]);
+      setTranslatedName(null);
     } finally {
       setLoading(false);
     }
@@ -62,6 +66,7 @@ export function useDiseaseKnowledgeController() {
   const clearSearch = useCallback(() => {
     setSearchQuery('');
     setDiseaseInfo([]);
+    setTranslatedName(null);
     setError(null);
     setHasSearched(false);
   }, []);
@@ -70,6 +75,7 @@ export function useDiseaseKnowledgeController() {
     // State
     searchQuery,
     diseaseInfo,
+    translatedName,
     loading,
     error,
     hasSearched,
