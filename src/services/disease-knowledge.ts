@@ -29,9 +29,7 @@ export class DiseaseKnowledgeService {
       const response = await this.apiService.get<DiseaseKnowledgeResponse>(
         '/api/knowledge',
         {
-          params: {
-            disease_name: params.disease_name
-          }
+          disease_name: params.disease_name
         }
       );
       return response;
