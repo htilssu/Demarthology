@@ -17,20 +17,13 @@ export class DiagnosisService {
   }
 
   async startDiagnosis(userId: string, image: File): Promise<InitialDiagnosisResponse> {
-    const formData = new FormData();
-    formData.append('image', image);
-
     try {
-      const response = await fetch(`/api/diagnosis/start?user_id=${userId}`, {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      return await response.json();
+      const response = await this.apiService.uploadFile<InitialDiagnosisResponse>(
+        `/api/diagnosis/start?user_id=${userId}`,
+        image,
+        'image'
+      );
+      return response;
     } catch (error) {
       console.error('Error starting diagnosis:', error);
       // Return mock data for development/testing
@@ -61,18 +54,10 @@ export class DiagnosisService {
 
   async submitAnswers(userId: string, answers: string[]): Promise<FinalDiagnosisResponse> {
     try {
-      const response = await fetch(`/api/diagnosis/${userId}/submit?user_answers=${JSON.stringify(answers)}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      return await response.json();
+      const response = await this.apiService.post<FinalDiagnosisResponse>(
+        `/api/diagnosis/${userId}/submit?user_answers=${JSON.stringify(answers)}`
+      );
+      return response;
     } catch (error) {
       console.error('Error submitting answers:', error);
       // Return mock data for development/testing
