@@ -1,19 +1,57 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Navbar from '../components/navbar';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Upload, Camera, Loader2, CheckCircle, ArrowRight, ArrowLeft, AlertCircle } from 'lucide-react';
 import { DiagnosisService } from '../services/diagnosis';
 import { DiagnosisState, InitialDiagnosisResponse, FinalDiagnosisResponse } from '../models/diagnosis';
+import { AuthService } from '../services/auth';
 
 const diagnosisService = DiagnosisService.getInstance();
+const authService = AuthService.getInstance();
+
+// Helper function to generate or get user ID
+const generateUserId = async (): Promise<string> => {
+  try {
+    // First try to get authenticated user
+    const currentUser = await authService.getCurrentAuthUser();
+    if (currentUser && currentUser.id) {
+      return currentUser.id;
+    }
+  } catch (error) {
+    console.warn('Could not get authenticated user:', error);
+  }
+  
+  // Fallback: Generate a unique session ID for anonymous users
+  // Use a combination of timestamp and random string for uniqueness
+  const timestamp = Date.now();
+  const randomStr = Math.random().toString(36).substring(2, 8);
+  return `anonymous-${timestamp}-${randomStr}`;
+};
 
 const Diagnosis: React.FC = () => {
   const [state, setState] = useState<DiagnosisState>({
     step: 'upload',
-    userId: '123', // Could be generated or from auth context
+    userId: '', // Will be set on component mount
     loading: false,
     error: undefined
   });
+
+  // Initialize user ID on component mount
+  useEffect(() => {
+    const initializeUserId = async () => {
+      try {
+        const userId = await generateUserId();
+        setState(prev => ({ ...prev, userId }));
+      } catch (error) {
+        console.error('Failed to initialize user ID:', error);
+        // Fallback to timestamp-based ID if generation fails
+        const fallbackId = `user-${Date.now()}`;
+        setState(prev => ({ ...prev, userId: fallbackId }));
+      }
+    };
+
+    initializeUserId();
+  }, []);
 
   const handleImageUpload = async (file: File) => {
     if (!file || !state.userId) return;
@@ -112,12 +150,24 @@ const Diagnosis: React.FC = () => {
     }
   };
 
-  const resetDiagnosis = () => {
-    setState({
-      step: 'upload',
-      userId: '123',
-      loading: false
-    });
+  const resetDiagnosis = async () => {
+    try {
+      const userId = await generateUserId();
+      setState({
+        step: 'upload',
+        userId,
+        loading: false
+      });
+    } catch (error) {
+      console.error('Failed to reset with new user ID:', error);
+      // Fallback to timestamp-based ID if generation fails
+      const fallbackId = `user-${Date.now()}`;
+      setState({
+        step: 'upload',
+        userId: fallbackId,
+        loading: false
+      });
+    }
   };
 
   return (
