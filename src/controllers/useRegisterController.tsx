@@ -38,8 +38,12 @@ export const useRegisterController = () => {
             switch (field) {
                 case 'email':
                     const email = value.trim();
+                    // Check for Vietnamese characters first
+                    const vietnameseCharRegex = /[àáảãạăắằẳẵặâấầẩẫậèéẻẽẹêếềểễệìíỉĩịòóỏõọôốồổỗộơớờởỡợùúủũụưứừửữựỳýỷỹỵđÀÁẢÃẠĂẮẰẲẴẶÂẤẦẨẪẬÈÉẺẼẸÊẾỀỂỄỆÌÍỈĨỊÒÓỎÕỌÔỐỒỔỖỘƠỚỜỞỠỢÙÚỦŨỤƯỨỪỬỮỰỲÝỶỸỴĐ]/;
                     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                    if (email && !emailRegex.test(email)) {
+                    if (email && vietnameseCharRegex.test(email)) {
+                        newErrors.email = 'Email không được chứa ký tự tiếng Việt';
+                    } else if (email && !emailRegex.test(email)) {
                         newErrors.email = 'Email không hợp lệ';
                     }
                     break;
@@ -98,8 +102,12 @@ export const useRegisterController = () => {
             newErrors.email = 'Email là bắt buộc';
         } else {
             const email = formData.email.trim();
+            // Check for Vietnamese characters first
+            const vietnameseCharRegex = /[àáảãạăắằẳẵặâấầẩẫậèéẻẽẹêếềểễệìíỉĩịòóỏõọôốồổỗộơớờởỡợùúủũụưứừửữựỳýỷỹỵđÀÁẢÃẠĂẮẰẲẴẶÂẤẦẨẪẬÈÉẺẼẸÊẾỀỂỄỆÌÍỈĨỊÒÓỎÕỌÔỐỒỔỖỘƠỚỜỞỠỢÙÚỦŨỤƯỨỪỬỮỰỲÝỶỸỴĐ]/;
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailRegex.test(email)) {
+            if (vietnameseCharRegex.test(email)) {
+                newErrors.email = 'Email không được chứa ký tự tiếng Việt';
+            } else if (!emailRegex.test(email)) {
                 newErrors.email = 'Email không hợp lệ';
             } else if (email.length > 254) {
                 newErrors.email = 'Email quá dài';
