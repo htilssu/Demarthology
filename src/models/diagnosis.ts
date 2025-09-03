@@ -21,6 +21,9 @@ export interface DiagnosisState {
   answers?: string[];
   currentQuestionIndex?: number;
   finalResult?: FinalDiagnosisResponse;
+  diseaseInfo?: import('../models/disease').DiseaseInfo[];
+  diseaseInfoLoading?: boolean;
+  diseaseInfoError?: string;
   loading: boolean;
   error?: string;
 }
