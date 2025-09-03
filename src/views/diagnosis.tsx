@@ -144,43 +144,16 @@ const Diagnosis: React.FC = () => {
     setState(prev => ({ ...prev, loading: true }));
 
     try {
-      // First, get the diagnosis result
+      // Get the diagnosis result
       const result = await diagnosisService.submitAnswers(state.userId, state.answers);
       
-      // Update state with diagnosis result
+      // Update state with diagnosis result and move to final step
       setState(prev => ({
         ...prev,
         finalResult: result,
         loading: false,
-        diseaseInfoLoading: true // Start loading disease info
+        step: 'final'
       }));
-
-      // Immediately fetch disease information
-      try {
-        const params: DiseaseSearchParams = {
-          disease_name: result.final_diagnosis.trim()
-        };
-
-        const diseaseResponse = await diseaseKnowledgeService.searchDisease(params);
-        
-        setState(prev => ({
-          ...prev,
-          diseaseInfo: diseaseResponse.disease_info || [],
-          diseaseInfoLoading: false,
-          diseaseInfoError: diseaseResponse.disease_info && diseaseResponse.disease_info.length > 0 
-            ? undefined 
-            : 'Không tìm thấy thông tin chi tiết về bệnh này.',
-          step: 'final'
-        }));
-      } catch (diseaseError: any) {
-        // If disease info fails, still show diagnosis result but with error
-        setState(prev => ({
-          ...prev,
-          diseaseInfoLoading: false,
-          diseaseInfoError: diseaseError?.message || 'Có lỗi xảy ra khi tải thông tin bệnh',
-          step: 'final'
-        }));
-      }
     } catch (error: any) {
       // Use the actual error message from the API if available
       const errorMessage = error?.message || 'Không thể gửi câu trả lời. Vui lòng thử lại.';
@@ -216,9 +189,40 @@ const Diagnosis: React.FC = () => {
     }
   };
 
-  // Function to show disease information modal
-  const handleViewDiseaseInfo = () => {
+  // Function to show disease information modal and load disease info
+  const handleViewDiseaseInfo = async () => {
+    if (!state.finalResult) return;
+
+    // Show modal and start loading
     setShowDiseaseInfo(true);
+    setState(prev => ({ 
+      ...prev, 
+      diseaseInfoLoading: true,
+      diseaseInfoError: undefined 
+    }));
+
+    try {
+      const params: DiseaseSearchParams = {
+        disease_name: state.finalResult.final_diagnosis.trim()
+      };
+
+      const diseaseResponse = await diseaseKnowledgeService.searchDisease(params);
+      
+      setState(prev => ({
+        ...prev,
+        diseaseInfo: diseaseResponse.disease_info || [],
+        diseaseInfoLoading: false,
+        diseaseInfoError: diseaseResponse.disease_info && diseaseResponse.disease_info.length > 0 
+          ? undefined 
+          : 'Không tìm thấy thông tin chi tiết về bệnh này.'
+      }));
+    } catch (diseaseError: any) {
+      setState(prev => ({
+        ...prev,
+        diseaseInfoLoading: false,
+        diseaseInfoError: diseaseError?.message || 'Có lỗi xảy ra khi tải thông tin bệnh'
+      }));
+    }
   };
 
   return (
@@ -269,7 +273,6 @@ const Diagnosis: React.FC = () => {
                   result={state.finalResult}
                   onReset={resetDiagnosis}
                   onViewDiseaseInfo={handleViewDiseaseInfo}
-                  diseaseInfoLoading={state.diseaseInfoLoading}
                 />
               )}
             </AnimatePresence>
@@ -579,8 +582,7 @@ const FinalResultStep: React.FC<{
   result: FinalDiagnosisResponse;
   onReset: () => void;
   onViewDiseaseInfo: () => void;
-  diseaseInfoLoading?: boolean;
-}> = ({ result, onReset, onViewDiseaseInfo, diseaseInfoLoading = false }) => (
+}> = ({ result, onReset, onViewDiseaseInfo }) => (
   <motion.div
     key="final"
     initial={{ opacity: 0, y: 20 }}
@@ -616,22 +618,12 @@ const FinalResultStep: React.FC<{
         
         <motion.button
           onClick={onViewDiseaseInfo}
-          disabled={diseaseInfoLoading}
-          whileHover={{ scale: !diseaseInfoLoading ? 1.02 : 1 }}
-          whileTap={{ scale: !diseaseInfoLoading ? 0.98 : 1 }}
-          className="px-6 py-3 bg-gradient-to-r from-[#145566] to-[#1c6b84] text-white rounded-lg font-semibold hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          className="px-6 py-3 bg-gradient-to-r from-[#145566] to-[#1c6b84] text-white rounded-lg font-semibold hover:shadow-lg transition-all flex items-center justify-center gap-2"
         >
-          {diseaseInfoLoading ? (
-            <>
-              <Loader2 className="w-5 h-5 animate-spin" />
-              Đang tải thông tin...
-            </>
-          ) : (
-            <>
-              <BookOpen className="w-5 h-5" />
-              Xem thông tin bệnh
-            </>
-          )}
+          <BookOpen className="w-5 h-5" />
+          Xem thông tin bệnh
         </motion.button>
       </div>
     </div>
