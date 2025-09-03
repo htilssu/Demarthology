@@ -100,10 +100,12 @@ const Diagnosis: React.FC = () => {
         step: 'questions',
         loading: false
       }));
-    } catch (error) {
+    } catch (error: any) {
+      // Use the actual error message from the API if available
+      const errorMessage = error?.message || 'Không thể tải câu hỏi. Vui lòng thử lại.';
       setState(prev => ({
         ...prev,
-        error: 'Không thể tải câu hỏi. Vui lòng thử lại.',
+        error: errorMessage,
         loading: false
       }));
     }
@@ -143,10 +145,12 @@ const Diagnosis: React.FC = () => {
         step: 'final',
         loading: false
       }));
-    } catch (error) {
+    } catch (error: any) {
+      // Use the actual error message from the API if available
+      const errorMessage = error?.message || 'Không thể gửi câu trả lời. Vui lòng thử lại.';
       setState(prev => ({
         ...prev,
-        error: 'Không thể gửi câu trả lời. Vui lòng thử lại.',
+        error: errorMessage,
         loading: false
       }));
     }

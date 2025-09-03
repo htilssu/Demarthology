@@ -39,7 +39,7 @@ export class DiagnosisService {
       return response;
     } catch (error: any) {
       console.error('Error fetching questions:', error);
-      // Extract and throw the actual error message from API
+      // Extract the exact error detail from API response first
       const errorMessage = error?.details?.detail || error?.message || 'Không thể tải câu hỏi. Vui lòng thử lại.';
       throw new Error(errorMessage);
     }
