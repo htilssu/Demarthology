@@ -67,10 +67,12 @@ const Diagnosis: React.FC = () => {
         step: 'initial',
         loading: false
       }));
-    } catch (error) {
+    } catch (error: any) {
+      // Use the actual error message from the API if available
+      const errorMessage = error?.message || 'Có lỗi xảy ra khi phân tích ảnh. Vui lòng thử lại.';
       setState(prev => ({
         ...prev,
-        error: 'Có lỗi xảy ra khi phân tích ảnh. Vui lòng thử lại.',
+        error: errorMessage,
         loading: false
       }));
     }

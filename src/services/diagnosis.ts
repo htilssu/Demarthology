@@ -24,9 +24,17 @@ export class DiagnosisService {
         'image'
       );
       return response;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error starting diagnosis:', error);
-      // Return mock data for development/testing
+      
+      // Check if the error is about unsupported disease group
+      const errorMessage = error?.details?.detail || error?.message || '';
+      if (errorMessage.includes('chưa hỗ trợ') || errorMessage.includes('không thể chẩn đoán')) {
+        // Re-throw the error so it can be handled properly in the UI
+        throw new Error(errorMessage);
+      }
+      
+      // For other errors, return mock data for development/testing
       return {
         description: "Trên vùng da lưng và vai có nhiều tổn thương riêng lẻ phân bố rải rác. Các tổn thương là những sẩn gồ hoặc mụn nước nhỏ, kích thước khoảng 1 đến 3 mm, có màu hồng đỏ. Một số tổn thương có đỉnh lõm hoặc chứa dịch lỏng bên trong, một số khác có dấu hiệu đóng mày. Bờ của từng tổn thương tròn và rõ, tách biệt với vùng da xung quanh. Không quan sát thấy hiện tượng sưng nề lan tỏa, chảy mủ hay lở loét trên vùng da trong ảnh.",
         disease_primary: ["chickenpox", "sarampion", "herpes"],
