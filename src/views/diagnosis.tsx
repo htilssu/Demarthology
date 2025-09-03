@@ -12,13 +12,13 @@ const authService = AuthService.getInstance();
 // Helper function to generate or get user ID
 const generateUserId = async (): Promise<string> => {
   try {
-    // First try to get authenticated user
-    const currentUser = await authService.getCurrentAuthUser();
-    if (currentUser && currentUser.id) {
-      return currentUser.id;
+    // First try to get user profile directly from localStorage to access _id field
+    const userProfile = await authService.getCurrentUser();
+    if (userProfile && userProfile._id) {
+      return userProfile._id;
     }
   } catch (error) {
-    console.warn('Could not get authenticated user:', error);
+    console.warn('Could not get user profile from localStorage:', error);
   }
   
   // Fallback: Generate a unique session ID for anonymous users
