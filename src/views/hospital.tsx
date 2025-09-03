@@ -2,6 +2,7 @@ import React, { useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { HospitalIcon } from "lucide-react";
 import useHospitalController, { Hospital as APIHospital } from "../controllers/useHospitalController";
+import { ApiService } from "../utils/api";
 
 interface Hospital {
   id: string;
@@ -195,21 +196,12 @@ const HospitalView: React.FC = () => {
     try {
       console.log(`Fetching nearby hospitals for location: ${lat}, ${lng}`);
       
-      // Call API directly here instead of using controller
-      const url = `/api/hospital`;
-      let data;
-      
-      try {
-        // First try: using correct params format
-        const response = await fetch(`${process.env.REACT_APP_API_URL}${url}?lat=${lat}&lng=${lng}`);
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        data = await response.json();
-      } catch (firstError) {
-        console.warn('First attempt failed:', firstError);
-        throw firstError;
-      }
+      // Use ApiService instead of fetch
+      const apiService = ApiService.getInstance();
+      const data = await apiService.get<Array<{name: string, address: string}>>(
+        `/api/hospital`,
+        { lat, lng }
+      );
       
       console.log('API Response:', data);
       

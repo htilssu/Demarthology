@@ -1,501 +1,829 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import {
-  Bot,
-  User,
-  Send,
-  Paperclip,
-  Sparkles,
-  Mic,
-  Image as ImageIcon,
-  Loader2,
-  Menu,
-  X,
-} from "lucide-react";
-import ChatSidebar from "../components/chatSidebar";
+import React, { useState, useEffect } from 'react';
+import Navbar from '../components/navbar';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Upload, Camera, Loader2, CheckCircle, ArrowRight, ArrowLeft, AlertCircle, X, BookOpen, MapPin, Bug, Target, Stethoscope, Heart, Shield, Pill, Microscope } from 'lucide-react';
+import { DiagnosisService } from '../services/diagnosis';
+import { DiagnosisState, InitialDiagnosisResponse, FinalDiagnosisResponse } from '../models/diagnosis';
+import { AuthService } from '../services/auth';
+import { DiseaseKnowledgeService } from '../services/disease-knowledge';
+import { DiseaseInfo, DiseaseSearchParams } from '../models/disease';
 
-// Types
-interface ChatMessage {
-  id: string;
-  role: "user" | "assistant" | "system";
-  content: string;
-  time?: string;
-}
+const diagnosisService = DiagnosisService.getInstance();
+const authService = AuthService.getInstance();
+const diseaseKnowledgeService = DiseaseKnowledgeService.getInstance();
 
-interface ChatHistory {
-  id: string;
-  title: string;
-  time: string;
-  messages: ChatMessage[];
-}
+// Helper function to generate or get user ID
+const generateUserId = async (): Promise<string> => {
+  try {
+    // First try to get user profile directly from localStorage to access _id field
+    const userProfile = await authService.getCurrentUser();
+    if (userProfile && userProfile._id) {
+      return userProfile._id;
+    }
+  } catch (error) {
+    console.warn('Could not get user profile from localStorage:', error);
+  }
+  
+  // Fallback: Generate a unique session ID for anonymous users
+  // Use a combination of timestamp and random string for uniqueness
+  const timestamp = Date.now();
+  const randomStr = Math.random().toString(36).substring(2, 8);
+  return `anonymous-${timestamp}-${randomStr}`;
+};
 
-const INITIAL_MESSAGES: ChatMessage[] = [
-  {
-    id: crypto.randomUUID(),
-    role: "assistant",
-    content:
-      "Xin chào! Mình là trợ lý chẩn đoán. Bạn mô tả triệu chứng hoặc đính kèm ảnh da liễu để mình hỗ trợ nhé ✨",
-    time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-  },
-];
+const Diagnosis: React.FC = () => {
+  const [state, setState] = useState<DiagnosisState>({
+    step: 'upload',
+    userId: '', // Will be set on component mount
+    loading: false,
+    error: undefined
+  });
 
-const DUMMY_HISTORY: ChatHistory[] = [
-  {
-    id: "1",
-    title: "Ngứa rát khi đổ mồ hôi",
-    time: "10:45",
-    messages: [
-      { id: "1-1", role: "user", content: "Tôi bị ngứa rát khi đổ mồ hôi", time: "10:45" },
-      { id: "1-2", role: "assistant", content: "Mình đã nhận được mô tả của bạn. Hãy kiểm tra lại:\n- Triệu chứng bắt đầu khi nào?\n- Có ngứa/rát/đau không?\n- Đã dùng thuốc/bôi gì chưa?", time: "10:46" }
-    ]
-  },
-  {
-    id: "2",
-    title: "Mẩn đỏ quanh miệng",
-    time: "09:30",
-    messages: [
-      { id: "2-1", role: "user", content: "Tôi có mẩn đỏ quanh miệng", time: "09:30" },
-      { id: "2-2", role: "assistant", content: "Có thể bạn bị viêm da tiếp xúc. Hãy cho mình biết thêm:\n- Triệu chứng xuất hiện từ khi nào?\n- Có tiếp xúc với chất gì mới không?", time: "09:31" }
-    ]
-  },
-  {
-    id: "3",
-    title: "Bong tróc da tay",
-    time: "Hôm qua",
-    messages: [
-      { id: "3-1", role: "user", content: "Da tay tôi bị bong tróc", time: "Hôm qua" },
-      { id: "3-2", role: "assistant", content: "Đây có thể là dấu hiệu của bệnh chàm. Mình cần thêm thông tin:\n- Vùng da nào bị ảnh hưởng?\n- Có ngứa không?\n- Có tiền sử bệnh da liễu không?", time: "Hôm qua" }
-    ]
-  },
-];
+  // Disease information modal state
+  const [showDiseaseInfo, setShowDiseaseInfo] = useState(false);
 
-const formatTime = () => new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  // Initialize user ID on component mount
+  useEffect(() => {
+    const initializeUserId = async () => {
+      try {
+        const userId = await generateUserId();
+        setState(prev => ({ ...prev, userId }));
+      } catch (error) {
+        console.error('Failed to initialize user ID:', error);
+        // Fallback to timestamp-based ID if generation fails
+        const fallbackId = `user-${Date.now()}`;
+        setState(prev => ({ ...prev, userId: fallbackId }));
+      }
+    };
 
-// FloatingOrbs with subtle 3D rotation and layered gradients
-const FloatingOrbs: React.FC = () => {
-  const orbs = useMemo(
-    () =>
-      new Array(6).fill(0).map((_, i) => ({
-        id: i,
-        size: 140 + Math.random() * 220,
-        x: Math.random() * 100,
-        y: Math.random() * 100,
-        duration: 25 + Math.random() * 30,
-        delay: Math.random() * 6,
-        rotate: Math.random() * 360,
-      })),
-    []
-  );
+    initializeUserId();
+  }, []);
+
+  const handleImageUpload = async (file: File) => {
+    if (!file || !state.userId) return;
+
+    setState(prev => ({ ...prev, loading: true, error: undefined }));
+
+    try {
+      const result = await diagnosisService.startDiagnosis(state.userId, file);
+      setState(prev => ({
+        ...prev,
+        uploadedImage: file,
+        initialResult: result,
+        step: 'initial',
+        loading: false
+      }));
+    } catch (error: any) {
+      // Use the actual error message from the API if available
+      const errorMessage = error?.message || 'Có lỗi xảy ra khi phân tích ảnh. Vui lòng thử lại.';
+      setState(prev => ({
+        ...prev,
+        error: errorMessage,
+        loading: false
+      }));
+    }
+  };
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      handleImageUpload(file);
+    }
+  };
+
+  const handleContinueToQuestions = async () => {
+    if (!state.userId) return;
+
+    setState(prev => ({ ...prev, loading: true }));
+
+    try {
+      const result = await diagnosisService.getQuestions(state.userId);
+      setState(prev => ({
+        ...prev,
+        questions: result.questions,
+        answers: new Array(result.questions.length).fill(''),
+        currentQuestionIndex: 0,
+        step: 'questions',
+        loading: false
+      }));
+    } catch (error: any) {
+      // Use the actual error message from the API if available
+      const errorMessage = error?.message || 'Không thể tải câu hỏi. Vui lòng thử lại.';
+      setState(prev => ({
+        ...prev,
+        error: errorMessage,
+        loading: false
+      }));
+    }
+  };
+
+  const handleAnswerChange = (index: number, value: string) => {
+    setState(prev => ({
+      ...prev,
+      answers: prev.answers?.map((answer, i) => i === index ? value : answer)
+    }));
+  };
+
+  const handleNextQuestion = () => {
+    setState(prev => ({
+      ...prev,
+      currentQuestionIndex: (prev.currentQuestionIndex || 0) + 1
+    }));
+  };
+
+  const handlePreviousQuestion = () => {
+    setState(prev => ({
+      ...prev,
+      currentQuestionIndex: Math.max(0, (prev.currentQuestionIndex || 0) - 1)
+    }));
+  };
+
+  const handleSubmitAnswers = async () => {
+    if (!state.userId || !state.answers) return;
+
+    setState(prev => ({ ...prev, loading: true }));
+
+    try {
+      // First, get the diagnosis result
+      const result = await diagnosisService.submitAnswers(state.userId, state.answers);
+      
+      // Update state with diagnosis result
+      setState(prev => ({
+        ...prev,
+        finalResult: result,
+        loading: false,
+        diseaseInfoLoading: true // Start loading disease info
+      }));
+
+      // Immediately fetch disease information
+      try {
+        const params: DiseaseSearchParams = {
+          disease_name: result.final_diagnosis.trim()
+        };
+
+        const diseaseResponse = await diseaseKnowledgeService.searchDisease(params);
+        
+        setState(prev => ({
+          ...prev,
+          diseaseInfo: diseaseResponse.disease_info || [],
+          diseaseInfoLoading: false,
+          diseaseInfoError: diseaseResponse.disease_info && diseaseResponse.disease_info.length > 0 
+            ? undefined 
+            : 'Không tìm thấy thông tin chi tiết về bệnh này.',
+          step: 'final'
+        }));
+      } catch (diseaseError: any) {
+        // If disease info fails, still show diagnosis result but with error
+        setState(prev => ({
+          ...prev,
+          diseaseInfoLoading: false,
+          diseaseInfoError: diseaseError?.message || 'Có lỗi xảy ra khi tải thông tin bệnh',
+          step: 'final'
+        }));
+      }
+    } catch (error: any) {
+      // Use the actual error message from the API if available
+      const errorMessage = error?.message || 'Không thể gửi câu trả lời. Vui lòng thử lại.';
+      setState(prev => ({
+        ...prev,
+        error: errorMessage,
+        loading: false
+      }));
+    }
+  };
+
+  const resetDiagnosis = async () => {
+    try {
+      const userId = await generateUserId();
+      setState({
+        step: 'upload',
+        userId,
+        loading: false
+      });
+      // Reset disease info modal state
+      setShowDiseaseInfo(false);
+    } catch (error) {
+      console.error('Failed to reset with new user ID:', error);
+      // Fallback to timestamp-based ID if generation fails
+      const fallbackId = `user-${Date.now()}`;
+      setState({
+        step: 'upload',
+        userId: fallbackId,
+        loading: false
+      });
+      // Reset disease info modal state
+      setShowDiseaseInfo(false);
+    }
+  };
+
+  // Function to show disease information modal
+  const handleViewDiseaseInfo = () => {
+    setShowDiseaseInfo(true);
+  };
 
   return (
-    <div className="pointer-events-none absolute inset-0 overflow-hidden" style={{ perspective: 1200 }}>
-      {orbs.map((o) => (
-        <motion.div
-          key={o.id}
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 0.45, scale: 1 }}
-          transition={{ duration: 1.2, delay: o.delay }}
-          className="absolute rounded-full blur-3xl"
-          style={{
-            width: o.size,
-            height: o.size,
-            left: `${o.x}%`,
-            top: `${o.y}%`,
-            transformStyle: "preserve-3d",
-            background:
-              "radial-gradient(600px circle at 50% 50%, rgba(20,85,102,.36), rgba(28,107,132,.18), transparent 60%)",
-            filter: "saturate(110%)",
-          }}
-        >
-          <motion.div
-            className="w-full h-full"
-            animate={{ rotateY: [0 + o.rotate, 40 + o.rotate, 0 + o.rotate], y: [0, -20, 0], x: [0, 12, 0] }}
-            transition={{ duration: o.duration, repeat: Infinity, ease: "easeInOut" }}
-          />
-        </motion.div>
-      ))}
+    <div>
+      <Navbar />
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-100 pt-20">
+        <div className="container mx-auto px-4 py-8">
+          <div className="max-w-4xl mx-auto">
+            <div className="text-center mb-8">
+              <h1 className="text-4xl font-bold text-gray-800 mb-4">Chẩn đoán bệnh da liễu</h1>
+              <p className="text-gray-600">Tải ảnh lên để nhận được chẩn đoán chính xác từ AI</p>
+            </div>
 
-      {/* subtle global slow rotation */}
-      <motion.div
-        className="absolute inset-0"
-        style={{ pointerEvents: "none" }}
-        animate={{ rotate: 360 }}
-        transition={{ duration: 120, repeat: Infinity, ease: "linear" }}
-      />
+            <AnimatePresence mode="wait">
+              {state.step === 'upload' && (
+                <UploadStep
+                  loading={state.loading}
+                  error={state.error}
+                  onFileChange={handleFileChange}
+                />
+              )}
+
+              {state.step === 'initial' && state.initialResult && (
+                <InitialResultStep
+                  result={state.initialResult}
+                  uploadedImage={state.uploadedImage}
+                  loading={state.loading}
+                  onContinue={handleContinueToQuestions}
+                />
+              )}
+
+              {state.step === 'questions' && state.questions && (
+                <QuestionsStep
+                  questions={state.questions}
+                  answers={state.answers || []}
+                  currentQuestionIndex={state.currentQuestionIndex || 0}
+                  loading={state.loading}
+                  error={state.error}
+                  onAnswerChange={handleAnswerChange}
+                  onNextQuestion={handleNextQuestion}
+                  onPreviousQuestion={handlePreviousQuestion}
+                  onSubmit={handleSubmitAnswers}
+                />
+              )}
+
+              {state.step === 'final' && state.finalResult && (
+                <FinalResultStep
+                  result={state.finalResult}
+                  onReset={resetDiagnosis}
+                  onViewDiseaseInfo={handleViewDiseaseInfo}
+                  diseaseInfoLoading={state.diseaseInfoLoading}
+                />
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
+
+        {/* Disease Information Modal */}
+        <AnimatePresence>
+          {showDiseaseInfo && (
+            <DiseaseInfoModal
+              diseaseInfo={state.diseaseInfo || []}
+              loading={state.diseaseInfoLoading || false}
+              error={state.diseaseInfoError || null}
+              onClose={() => setShowDiseaseInfo(false)}
+            />
+          )}
+        </AnimatePresence>
+      </div>
     </div>
   );
 };
 
-const TypingDots: React.FC = () => (
-  <div className="flex items-center gap-1">
-    {[0, 1, 2].map((i) => (
-      <motion.span
-        key={i}
-        className="inline-block w-1.5 h-1.5 rounded-full bg-current/70"
-        animate={{ y: [0, -6, 0], opacity: [0.35, 1, 0.35] }}
-        transition={{ duration: 0.9, repeat: Infinity, delay: i * 0.12 }}
-      />
-    ))}
-  </div>
-);
+// Upload Step Component
+const UploadStep: React.FC<{
+  loading: boolean;
+  error?: string;
+  onFileChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+}> = ({ loading, error, onFileChange }) => (
+  <motion.div
+    key="upload"
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    exit={{ opacity: 0, y: -20 }}
+    className="bg-white rounded-xl shadow-lg p-8"
+  >
+    <div className="text-center">
+      <div className="mb-6">
+        <div className="mx-auto w-24 h-24 bg-blue-100 rounded-full flex items-center justify-center mb-4">
+          <Upload className="w-12 h-12 text-blue-600" />
+        </div>
+        <h2 className="text-2xl font-bold text-gray-800 mb-2">Tải ảnh da liễu</h2>
+        <p className="text-gray-600">Chọn ảnh vùng da cần chẩn đoán để bắt đầu</p>
+      </div>
 
-const Bubble: React.FC<{ m: ChatMessage }> = ({ m }) => {
-  const isUser = m.role === "user";
-  return (
-    <motion.div
-      layout
-      initial={{ opacity: 0, y: 12, scale: 0.98, rotateX: -6 }}
-      animate={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
-      exit={{ opacity: 0, y: -10, scale: 0.96 }}
-      transition={{ type: "spring", stiffness: 120, damping: 16 }}
-      className={`flex ${isUser ? "justify-end" : "justify-start"}`}
-    >
-      <div className={`flex items-end gap-3 max-w-[86%]`}>
-        {!isUser && (
-          <motion.div
-            whileHover={{ rotate: 10, scale: 1.06 }}
-            className="w-9 h-9 rounded-full bg-gradient-to-br from-[#145566] to-[#1b6b82] text-white grid place-items-center shadow-2xl"
-          >
-            <Bot className="w-4 h-4" />
-          </motion.div>
-        )}
+      {error && (
+        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2 text-red-700">
+          <AlertCircle className="w-5 h-5" />
+          {error}
+        </div>
+      )}
 
-        <motion.div
-          whileHover={isUser ? { rotateY: -6, scale: 1.02 } : { rotateY: 6, scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          className={`rounded-2xl px-4 py-3 shadow-xl backdrop-blur-md transform-gpu"
-            ${isUser
-              ? "bg-gradient-to-br from-[#145566] to-[#1c6b84] text-white shadow-[#145566]/40"
-              : "bg-white/95 border border-white/40 text-slate-800 shadow-lg"}
-          `}
-          style={{ perspective: 800, transformStyle: "preserve-3d" }}
-        >
-          <div className="whitespace-pre-wrap leading-relaxed text-sm">{m.content}</div>
-          {m.time && (
-            <div className={`text-xs mt-2 opacity-70 ${isUser ? "text-white/80" : "text-slate-500"}`}>
-              {m.time}
+      <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 hover:border-blue-400 transition-colors">
+        <input
+          type="file"
+          accept="image/*"
+          onChange={onFileChange}
+          className="hidden"
+          id="image-upload"
+          disabled={loading}
+        />
+        <label htmlFor="image-upload" className="cursor-pointer">
+          {loading ? (
+            <div className="flex items-center justify-center gap-2">
+              <Loader2 className="w-6 h-6 animate-spin text-blue-600" />
+              <span className="text-gray-600">Đang phân tích...</span>
+            </div>
+          ) : (
+            <div>
+              <Camera className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+              <p className="text-lg font-medium text-gray-700 mb-2">Nhấp để chọn ảnh</p>
+              <p className="text-sm text-gray-500">Hỗ trợ JPG, PNG (tối đa 10MB)</p>
             </div>
           )}
-        </motion.div>
+        </label>
+      </div>
+    </div>
+  </motion.div>
+);
 
-        {isUser && (
-          <motion.div
-            whileHover={{ rotate: -10, scale: 1.06 }}
-            className="w-9 h-9 rounded-full bg-gradient-to-br from-slate-200 to-slate-300 grid place-items-center shadow-xl"
+// Initial Result Step Component
+const InitialResultStep: React.FC<{
+  result: InitialDiagnosisResponse;
+  uploadedImage?: File;
+  loading: boolean;
+  onContinue: () => void;
+}> = ({ result, uploadedImage, loading, onContinue }) => (
+  <motion.div
+    key="initial"
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    exit={{ opacity: 0, y: -20 }}
+    className="bg-white rounded-xl shadow-lg p-8"
+  >
+    <div className="flex items-center gap-2 mb-6">
+      <CheckCircle className="w-6 h-6 text-green-600" />
+      <h2 className="text-2xl font-bold text-gray-800">Kết quả phân tích ban đầu</h2>
+    </div>
+
+    <div className="grid md:grid-cols-2 gap-8">
+      <div>
+        {uploadedImage && (
+          <div className="mb-6">
+            <h3 className="text-lg font-semibold text-gray-800 mb-3">Ảnh đã tải lên</h3>
+            <img
+              src={URL.createObjectURL(uploadedImage)}
+              alt="Uploaded"
+              className="w-full h-64 object-cover rounded-lg border"
+            />
+          </div>
+        )}
+      </div>
+
+      <div>
+        <div className="mb-6">
+          <h3 className="text-lg font-semibold text-gray-800 mb-3">Mô tả tổn thương</h3>
+          <p className="text-gray-600 leading-relaxed">{result.description}</p>
+        </div>
+
+        <div className="mb-6">
+          <h3 className="text-lg font-semibold text-gray-800 mb-3">Chẩn đoán sơ bộ</h3>
+          <div className="flex flex-wrap gap-2">
+            {result.disease_primary.map((disease, index) => (
+              <span
+                key={index}
+                className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium"
+              >
+                {disease}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        <div className="mb-8">
+          <h3 className="text-lg font-semibold text-gray-800 mb-3">Nhóm bệnh</h3>
+          <span className="px-4 py-2 bg-green-100 text-green-800 rounded-lg font-medium">
+            {result.normalized_group_name}
+          </span>
+        </div>
+
+        <motion.button
+          onClick={onContinue}
+          disabled={loading}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          className="w-full bg-gradient-to-r from-[#145566] to-[#1c6b84] text-white px-6 py-3 rounded-lg font-semibold flex items-center justify-center gap-2 hover:shadow-lg transition-all disabled:opacity-50"
+        >
+          {loading ? (
+            <>
+              <Loader2 className="w-5 h-5 animate-spin" />
+              Đang tải câu hỏi...
+            </>
+          ) : (
+            <>
+              Tiếp tục trả lời câu hỏi
+              <ArrowRight className="w-5 h-5" />
+            </>
+          )}
+        </motion.button>
+      </div>
+    </div>
+  </motion.div>
+);
+
+// Questions Step Component
+const QuestionsStep: React.FC<{
+  questions: string[];
+  answers: string[];
+  currentQuestionIndex: number;
+  loading: boolean;
+  error?: string;
+  onAnswerChange: (index: number, value: string) => void;
+  onNextQuestion: () => void;
+  onPreviousQuestion: () => void;
+  onSubmit: () => void;
+}> = ({ 
+  questions, 
+  answers, 
+  currentQuestionIndex, 
+  loading, 
+  error, 
+  onAnswerChange, 
+  onNextQuestion, 
+  onPreviousQuestion, 
+  onSubmit 
+}) => {
+  const currentQuestion = questions[currentQuestionIndex];
+  const currentAnswer = answers[currentQuestionIndex];
+  const isLastQuestion = currentQuestionIndex === questions.length - 1;
+  const isFirstQuestion = currentQuestionIndex === 0;
+  const hasAnswered = currentAnswer && currentAnswer.trim() !== '';
+  const allAnswered = answers.every(answer => answer.trim() !== '');
+
+  return (
+    <motion.div
+      key="questions"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      className="bg-white rounded-xl shadow-lg p-8"
+    >
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-2xl font-bold text-gray-800">Câu hỏi bổ sung</h2>
+        <div className="text-sm text-gray-500">
+          {currentQuestionIndex + 1} / {questions.length}
+        </div>
+      </div>
+      
+      <p className="text-gray-600 mb-8">Vui lòng trả lời các câu hỏi sau để có kết quả chẩn đoán chính xác hơn</p>
+
+      {error && (
+        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2 text-red-700">
+          <AlertCircle className="w-5 h-5" />
+          {error}
+        </div>
+      )}
+
+      {/* Progress Bar */}
+      <div className="mb-8">
+        <div className="w-full bg-gray-200 rounded-full h-2">
+          <div 
+            className="bg-gradient-to-r from-[#145566] to-[#1c6b84] h-2 rounded-full transition-all duration-300"
+            style={{ width: `${((currentQuestionIndex + 1) / questions.length) * 100}%` }}
+          ></div>
+        </div>
+      </div>
+
+      {/* Current Question */}
+      <motion.div
+        key={currentQuestionIndex}
+        initial={{ opacity: 0, x: 20 }}
+        animate={{ opacity: 1, x: 0 }}
+        exit={{ opacity: 0, x: -20 }}
+        className="border border-gray-200 rounded-lg p-6 mb-8"
+      >
+        <h3 className="text-lg font-medium text-gray-800 mb-6">
+          Câu {currentQuestionIndex + 1}: {currentQuestion}
+        </h3>
+        <div className="space-y-3">
+          {['Có', 'Không', 'Không chắc chắn'].map((option) => (
+            <label key={option} className="flex items-center gap-3 cursor-pointer p-3 rounded-lg hover:bg-gray-50 transition-colors">
+              <input
+                type="radio"
+                name={`question-${currentQuestionIndex}`}
+                value={option}
+                checked={currentAnswer === option}
+                onChange={(e) => onAnswerChange(currentQuestionIndex, e.target.value)}
+                className="w-4 h-4 text-blue-600"
+              />
+              <span className="text-gray-700 font-medium">{option}</span>
+            </label>
+          ))}
+        </div>
+      </motion.div>
+
+      {/* Navigation Buttons */}
+      <div className="flex justify-between">
+        <motion.button
+          onClick={onPreviousQuestion}
+          disabled={isFirstQuestion}
+          whileHover={{ scale: !isFirstQuestion ? 1.02 : 1 }}
+          whileTap={{ scale: !isFirstQuestion ? 0.98 : 1 }}
+          className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+        >
+          <ArrowLeft className="w-5 h-5" />
+          Câu trước
+        </motion.button>
+
+        {isLastQuestion ? (
+          <motion.button
+            onClick={onSubmit}
+            disabled={!allAnswered || loading}
+            whileHover={{ scale: allAnswered && !loading ? 1.02 : 1 }}
+            whileTap={{ scale: allAnswered && !loading ? 0.98 : 1 }}
+            className="px-6 py-3 bg-gradient-to-r from-[#145566] to-[#1c6b84] text-white rounded-lg font-semibold flex items-center gap-2 hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <User className="w-4 h-4" />
-          </motion.div>
+            {loading ? (
+              <>
+                <Loader2 className="w-5 h-5 animate-spin" />
+                Đang xử lý...
+              </>
+            ) : (
+              <>
+                Hoàn thành chẩn đoán
+                <CheckCircle className="w-5 h-5" />
+              </>
+            )}
+          </motion.button>
+        ) : (
+          <motion.button
+            onClick={onNextQuestion}
+            disabled={!hasAnswered}
+            whileHover={{ scale: hasAnswered ? 1.02 : 1 }}
+            whileTap={{ scale: hasAnswered ? 0.98 : 1 }}
+            className="px-6 py-3 bg-gradient-to-r from-[#145566] to-[#1c6b84] text-white rounded-lg font-semibold flex items-center gap-2 hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Câu tiếp theo
+            <ArrowRight className="w-5 h-5" />
+          </motion.button>
         )}
       </div>
     </motion.div>
   );
 };
 
-const Suggestion: React.FC<{ label: string; onPick: (v: string) => void }> = ({ label, onPick }) => (
-  <motion.button
-    onClick={() => onPick(label)}
-    whileHover={{ scale: 1.05, y: -2 }}
-    whileTap={{ scale: 0.95 }}
-    className="px-3 py-2 rounded-xl text-sm bg-white/90 border border-white/50 hover:bg-white transition-all duration-200 shadow-lg hover:shadow-xl font-medium text-slate-700 hover:border-[#145566]/30"
+// Final Result Step Component
+const FinalResultStep: React.FC<{
+  result: FinalDiagnosisResponse;
+  onReset: () => void;
+  onViewDiseaseInfo: () => void;
+  diseaseInfoLoading?: boolean;
+}> = ({ result, onReset, onViewDiseaseInfo, diseaseInfoLoading = false }) => (
+  <motion.div
+    key="final"
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    exit={{ opacity: 0, y: -20 }}
+    className="bg-white rounded-xl shadow-lg p-8"
   >
-    {label}
-  </motion.button>
-);
+    <div className="text-center">
+      <div className="mx-auto w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mb-6">
+        <CheckCircle className="w-12 h-12 text-green-600" />
+      </div>
+      
+      <h2 className="text-3xl font-bold text-gray-800 mb-4">Kết quả chẩn đoán</h2>
+      
+      <div className="bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 rounded-xl p-8 mb-8">
+        <h3 className="text-2xl font-bold text-green-800 mb-2">
+          {result.final_diagnosis}
+        </h3>
+        <p className="text-green-700">
+          Đây là kết quả chẩn đoán dựa trên phân tích ảnh và câu trả lời của bạn
+        </p>
+      </div>
 
-const Diagnosis: React.FC = () => {
-  const [messages, setMessages] = useState<ChatMessage[]>(INITIAL_MESSAGES);
-  const [input, setInput] = useState("");
-  const [isTyping, setIsTyping] = useState(false);
-  const [streaming, setStreaming] = useState<string | null>(null);
-  const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
-  const [chatHistory, setChatHistory] = useState<ChatHistory[]>(DUMMY_HISTORY);
-  const [currentChatId, setCurrentChatId] = useState<string | null>(null);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-
-  const handleSelect = (id: string) => {
-    setSelectedChatId(id);
-    const selectedChat = chatHistory.find(chat => chat.id === id);
-    if (selectedChat) {
-      setMessages(selectedChat.messages);
-      setCurrentChatId(id);
-    }
-  };
-
-  const handleClear = () => {
-    setChatHistory([]);
-    setMessages(INITIAL_MESSAGES);
-    setSelectedChatId(null);
-    setCurrentChatId(null);
-  };
-
-  const listRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    listRef.current?.scrollTo({ top: listRef.current.scrollHeight, behavior: "smooth" });
-  }, [messages, isTyping, streaming]);
-
-  const sendMessage = async (text: string) => {
-    if (!text.trim()) return;
-
-    const userMsg: ChatMessage = {
-      id: crypto.randomUUID(),
-      role: "user",
-      content: text.trim(),
-      time: formatTime()
-    };
-
-    const newMessages = [...messages, userMsg];
-    setMessages(newMessages);
-    setInput("");
-
-    // Update chat history if this is a new chat
-    if (!currentChatId) {
-      const newChatId = crypto.randomUUID();
-      const newChat: ChatHistory = {
-        id: newChatId,
-        title: text.trim().length > 30 ? text.trim().substring(0, 30) + "..." : text.trim(),
-        time: formatTime(),
-        messages: newMessages
-      };
-      setChatHistory(prev => [newChat, ...prev]);
-      setCurrentChatId(newChatId);
-      setSelectedChatId(newChatId);
-    } else {
-      // Update existing chat
-      setChatHistory(prev => prev.map(chat =>
-        chat.id === currentChatId
-          ? { ...chat, messages: newMessages }
-          : chat
-      ));
-    }
-
-    // quick UI typing feedback
-    setIsTyping(true);
-    await new Promise((r) => setTimeout(r, 450));
-    setIsTyping(false);
-
-    // Simulated streaming assistant
-    const answer =
-      "Mình đã nhận được mô tả của bạn. Hãy kiểm tra lại:\n- Triệu chứng bắt đầu khi nào?\n- Có ngứa/rát/đau không?\n- Đã dùng thuốc/bôi gì chưa?\n\nBạn có thể gửi kèm ảnh để phân tích ROI chuẩn hơn.";
-
-    setStreaming("");
-    for (let i = 0; i < answer.length; i++) {
-      await new Promise((r) => setTimeout(r, 8 + Math.random() * 10));
-      setStreaming((s) => (s ?? "") + answer[i]);
-    }
-
-    const assistantMsg: ChatMessage = {
-      id: crypto.randomUUID(),
-      role: "assistant",
-      content: answer,
-      time: formatTime(),
-    };
-
-    const finalMessages = [...newMessages, assistantMsg];
-    setMessages(finalMessages);
-    setStreaming(null);
-
-    // Update chat history with final messages
-    if (currentChatId) {
-      setChatHistory(prev => prev.map(chat =>
-        chat.id === currentChatId
-          ? { ...chat, messages: finalMessages }
-          : chat
-      ));
-    }
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    sendMessage(input);
-  };
-
-  const pickSuggestion = (text: string) => {
-    setInput(text);
-    sendMessage(text);
-  };
-
-  const clearChat = () => {
-    setMessages(INITIAL_MESSAGES);
-    setCurrentChatId(null);
-    setSelectedChatId(null);
-  };
-
-  const startNewChat = () => {
-    setMessages(INITIAL_MESSAGES);
-    setCurrentChatId(null);
-    setSelectedChatId(null);
-  };
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-100 text-slate-800 overflow-hidden">
-      <div className="flex h-screen">
-        <ChatSidebar
-          onSelect={handleSelect}
-          onClear={handleClear}
-          onNewChat={startNewChat}
-          selectedChatId={selectedChatId}
-          chatHistory={chatHistory}
-          isOpen={isSidebarOpen}
-          onToggle={() => setIsSidebarOpen(!isSidebarOpen)}
-        />
-
-        <div className="relative flex-1 flex flex-col">
-          <FloatingOrbs />
-
-          {/* Toggle button for sidebar */}
-          <motion.button
-            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            whileHover={{ scale: 1.05, rotate: 5 }}
-            whileTap={{ scale: 0.95 }}
-            className={`fixed z-40 p-2.5 rounded-full bg-white/90 backdrop-blur-xl border border-white/50 shadow-lg hover:shadow-xl transition-all duration-300 ${
-              isSidebarOpen ? 'top-20 left-[340px]' : 'top-20 left-4'
-            }`}
-          >
-            <motion.div
-              animate={{ rotate: isSidebarOpen ? 180 : 0 }}
-              transition={{ duration: 0.3 }}
-            >
-              <Menu className="w-4 h-4 text-slate-600" />
-            </motion.div>
-          </motion.button>
-
-          {/* Main container */}
-          <div className="flex-1 overflow-y-auto p-4 max-h-[calc(100vh-80px)]">
-            <motion.div
-              initial={{ scale: 0.995, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 0.45, ease: "easeOut" }}
-              className="relative rounded-3xl border border-white/50 bg-gradient-to-br from-white/95 to-white/90 backdrop-blur-xl shadow-2xl overflow-hidden h-full flex flex-col max-h-[calc(100vh-100px)]"
-            >
-              {/* Gradient border effect */}
-              <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-[#145566]/20 via-transparent to-[#1c6b84]/20 opacity-50" />
-              <div className="absolute inset-x-0 -top-px h-px bg-gradient-to-r from-transparent via-white/80 to-transparent" />
-
-              {/* Chat messages area */}
-              <div ref={listRef} className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 min-h-0 relative z-10">
-                <AnimatePresence initial={false} mode="popLayout">
-                  {messages.map((m) => (
-                    <Bubble key={m.id} m={m} />
-                  ))}
-
-                  {streaming !== null && (
-                    <motion.div layout initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="flex justify-start">
-                      <div className="flex items-end gap-3 max-w-[86%]">
-                        <motion.div
-                          whileHover={{ rotate: 10, scale: 1.06 }}
-                          className="w-9 h-9 rounded-full bg-gradient-to-br from-[#145566] to-[#1b6b82] text-white grid place-items-center shadow-2xl"
-                        >
-                          <Bot className="w-4 h-4" />
-                        </motion.div>
-                        <motion.div
-                          whileHover={{ rotateY: 6, scale: 1.02 }}
-                          className="bg-white/95 backdrop-blur-md border border-white/40 text-slate-800 rounded-2xl px-4 py-3 shadow-lg"
-                        >
-                          <div className="whitespace-pre-wrap leading-relaxed text-sm">{streaming.length === 0 ? <TypingDots /> : streaming}</div>
-                        </motion.div>
-                      </div>
-                    </motion.div>
-                  )}
-
-                  {isTyping && (
-                    <motion.div layout initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="flex justify-start">
-                      <div className="flex items-end gap-3 max-w-[86%]">
-                        <motion.div
-                          whileHover={{ rotate: 10, scale: 1.06 }}
-                          className="w-9 h-9 rounded-full bg-gradient-to-br from-[#145566] to-[#1b6b82] text-white grid place-items-center shadow-2xl"
-                        >
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                        </motion.div>
-                        <motion.div
-                          whileHover={{ rotateY: 6, scale: 1.02 }}
-                          className="bg-white/95 backdrop-blur-md border border-white/40 text-slate-800 rounded-2xl px-4 py-3 shadow-lg"
-                        >
-                          <TypingDots />
-                        </motion.div>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-
-              {/* Suggestions */}
-              <div className="px-4 sm:px-6 pb-3 flex flex-wrap gap-2 relative z-10">
-                <Suggestion label="Mẩn đỏ quanh miệng 3 ngày" onPick={pickSuggestion} />
-                <Suggestion label="Ngứa rát khi đổ mồ hôi" onPick={pickSuggestion} />
-                <Suggestion label="Bong tróc da ở khuỷu tay" onPick={pickSuggestion} />
-              </div>
-
-              {/* Input form */}
-              <form onSubmit={handleSubmit} className="border-t border-white/40 p-4 sm:p-6 bg-gradient-to-b from-white/95 to-white/90 backdrop-blur-xl relative z-10">
-                <div className="flex items-end gap-3">
-                  <div className="flex items-center gap-2">
-                    <motion.button
-                      type="button"
-                      whileHover={{ scale: 1.05, rotate: 5 }}
-                      whileTap={{ scale: 0.95 }}
-                      className="p-2.5 rounded-xl bg-white/90 border border-white/50 hover:bg-white transition-all duration-200 shadow-lg hover:shadow-xl"
-                      title="Đính kèm"
-                    >
-                      <Paperclip className="w-4 h-4 text-slate-600" />
-                    </motion.button>
-                    <motion.button
-                      type="button"
-                      whileHover={{ scale: 1.05, rotate: 5 }}
-                      whileTap={{ scale: 0.95 }}
-                      className="p-2.5 rounded-xl bg-white/90 border border-white/50 hover:bg-white transition-all duration-200 shadow-lg hover:shadow-xl"
-                      title="Gửi ảnh"
-                    >
-                      <ImageIcon className="w-4 h-4 text-slate-600" />
-                    </motion.button>
-                    <motion.button
-                      type="button"
-                      whileHover={{ scale: 1.05, rotate: 5 }}
-                      whileTap={{ scale: 0.95 }}
-                      className="p-2.5 rounded-xl bg-white/90 border border-white/50 hover:bg-white transition-all duration-200 shadow-lg hover:shadow-xl"
-                      title="Nói chuyện"
-                    >
-                      <Mic className="w-4 h-4 text-slate-600" />
-                    </motion.button>
-                  </div>
-
-                  <div className="flex-1">
-                    <div className="relative">
-                      <textarea
-                        value={input}
-                        onChange={(e) => setInput(e.target.value)}
-                        rows={1}
-                        placeholder="Nhập tin nhắn…"
-                        className="w-full resize-none rounded-2xl border border-white/50 bg-white/95 backdrop-blur px-4 py-3 pr-16 shadow-lg focus:outline-none focus:ring-2 focus:ring-[#145566]/60 focus:border-[#145566]/40 text-sm transition-all duration-200 text-slate-800 placeholder-slate-500"
-                        onInput={(e) => {
-                          const t = e.currentTarget;
-                          t.style.height = "auto";
-                          t.style.height = Math.min(t.scrollHeight, 100) + "px";
-                        }}
-                      />
-                      <div className="absolute right-3 bottom-2.5 flex items-center gap-1.5 text-xs text-slate-500">
-                        <Sparkles className="w-4 h-4 text-[#145566]" />
-                        <span className="font-medium">AI Ready</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <motion.button
-                    type="submit"
-                    whileHover={{ scale: 1.05, rotateX: -4, rotateY: 6 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="inline-flex items-center gap-2 px-5 py-3 rounded-2xl font-semibold bg-gradient-to-r from-[#145566] to-[#1c6b84] text-white shadow-xl hover:shadow-2xl active:scale-[0.98] transition-all duration-200"
-                  >
-                    <Send className="w-4 h-4" />
-                    Gửi
-                  </motion.button>
-                </div>
-              </form>
-            </motion.div>
-          </div>
-        </div>
+      <div className="flex flex-col sm:flex-row gap-4 justify-center">
+        <motion.button
+          onClick={onReset}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-colors"
+        >
+          Chẩn đoán mới
+        </motion.button>
+        
+        <motion.button
+          onClick={onViewDiseaseInfo}
+          disabled={diseaseInfoLoading}
+          whileHover={{ scale: !diseaseInfoLoading ? 1.02 : 1 }}
+          whileTap={{ scale: !diseaseInfoLoading ? 0.98 : 1 }}
+          className="px-6 py-3 bg-gradient-to-r from-[#145566] to-[#1c6b84] text-white rounded-lg font-semibold hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+        >
+          {diseaseInfoLoading ? (
+            <>
+              <Loader2 className="w-5 h-5 animate-spin" />
+              Đang tải thông tin...
+            </>
+          ) : (
+            <>
+              <BookOpen className="w-5 h-5" />
+              Xem thông tin bệnh
+            </>
+          )}
+        </motion.button>
       </div>
     </div>
+  </motion.div>
+);
+
+// Disease Information Modal Component
+const DiseaseInfoModal: React.FC<{
+  diseaseInfo: DiseaseInfo[];
+  loading: boolean;
+  error: string | null;
+  onClose: () => void;
+}> = ({ diseaseInfo, loading, error, onClose }) => {
+  
+  /**
+   * Render disease information card
+   */
+  const renderDiseaseInfo = (disease: DiseaseInfo, index: number) => (
+    <div key={index} className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-[#145566] to-[#1e6b7a] text-white p-6">
+        <h2 className="text-2xl font-bold mb-2">{disease["Tên bệnh"]}</h2>
+        <p className="text-blue-100 flex items-center">
+          <Microscope className="w-4 h-4 mr-2" />
+          {disease["Tên khoa học"]}
+        </p>
+      </div>
+
+      {/* Content */}
+      <div className="p-6 space-y-6">
+        {/* Symptoms */}
+        <div className="space-y-3">
+          <h3 className="flex items-center text-lg font-semibold text-gray-800">
+            <AlertCircle className="w-5 h-5 mr-2 text-red-500" />
+            Triệu chứng
+          </h3>
+          <p className="text-gray-700 leading-relaxed bg-red-50 p-4 rounded-lg border-l-4 border-red-200">
+            {disease["Triệu chứng"]}
+          </p>
+        </div>
+
+        {/* Location */}
+        <div className="space-y-3">
+          <h3 className="flex items-center text-lg font-semibold text-gray-800">
+            <MapPin className="w-5 h-5 mr-2 text-orange-500" />
+            Vị trí xuất hiện
+          </h3>
+          <p className="text-gray-700 leading-relaxed bg-orange-50 p-4 rounded-lg border-l-4 border-orange-200">
+            {disease["Vị trí xuất hiện"]}
+          </p>
+        </div>
+
+        {/* Causes */}
+        <div className="space-y-3">
+          <h3 className="flex items-center text-lg font-semibold text-gray-800">
+            <Bug className="w-5 h-5 mr-2 text-purple-500" />
+            Nguyên nhân
+          </h3>
+          <p className="text-gray-700 leading-relaxed bg-purple-50 p-4 rounded-lg border-l-4 border-purple-200">
+            {disease["Nguyên nhân"]}
+          </p>
+        </div>
+
+        {/* Diagnostic Criteria */}
+        <div className="space-y-3">
+          <h3 className="flex items-center text-lg font-semibold text-gray-800">
+            <Target className="w-5 h-5 mr-2 text-blue-500" />
+            Tiêu chí chẩn đoán
+          </h3>
+          <p className="text-gray-700 leading-relaxed bg-blue-50 p-4 rounded-lg border-l-4 border-blue-200">
+            {disease["Tiêu chí chẩn đoán"]}
+          </p>
+        </div>
+
+        {/* Differential Diagnosis */}
+        <div className="space-y-3">
+          <h3 className="flex items-center text-lg font-semibold text-gray-800">
+            <Stethoscope className="w-5 h-5 mr-2 text-indigo-500" />
+            Chẩn đoán phân biệt
+          </h3>
+          <p className="text-gray-700 leading-relaxed bg-indigo-50 p-4 rounded-lg border-l-4 border-indigo-200">
+            {disease["Chẩn đoán phân biệt"]}
+          </p>
+        </div>
+
+        {/* Treatment */}
+        <div className="space-y-3">
+          <h3 className="flex items-center text-lg font-semibold text-gray-800">
+            <Heart className="w-5 h-5 mr-2 text-green-500" />
+            Điều trị
+          </h3>
+          <p className="text-gray-700 leading-relaxed bg-green-50 p-4 rounded-lg border-l-4 border-green-200">
+            {disease["Điều trị"]}
+          </p>
+        </div>
+
+        {/* Prevention */}
+        <div className="space-y-3">
+          <h3 className="flex items-center text-lg font-semibold text-gray-800">
+            <Shield className="w-5 h-5 mr-2 text-teal-500" />
+            Phòng bệnh
+          </h3>
+          <p className="text-gray-700 leading-relaxed bg-teal-50 p-4 rounded-lg border-l-4 border-teal-200">
+            {disease["Phòng bệnh"]}
+          </p>
+        </div>
+
+        {/* Medications */}
+        {disease["Các loại thuốc"] && disease["Các loại thuốc"].length > 0 && (
+          <div className="space-y-3">
+            <h3 className="flex items-center text-lg font-semibold text-gray-800">
+              <Pill className="w-5 h-5 mr-2 text-pink-500" />
+              Các loại thuốc
+            </h3>
+            <div className="space-y-3">
+              {disease["Các loại thuốc"].map((medication, medIndex) => (
+                <div key={medIndex} className="bg-pink-50 border border-pink-200 rounded-lg p-4">
+                  <h4 className="font-semibold text-pink-800 mb-2">{medication["Tên thuốc"]}</h4>
+                  <div className="space-y-1 text-sm text-gray-700">
+                    <p><span className="font-medium">Liều lượng:</span> {medication["Liều lượng"]}</p>
+                    <p><span className="font-medium">Thời gian sử dụng:</span> {medication["Thời gian sử dụng"]}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
+      onClick={onClose}
+    >
+      <motion.div
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.9, opacity: 0 }}
+        className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Modal Header */}
+        <div className="flex items-center justify-between p-6 border-b border-gray-200">
+          <h2 className="text-2xl font-bold text-gray-800 flex items-center">
+            <BookOpen className="w-6 h-6 mr-2 text-[#145566]" />
+            Thông tin chi tiết bệnh
+          </h2>
+          <button
+            onClick={onClose}
+            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+          >
+            <X className="w-5 h-5 text-gray-500" />
+          </button>
+        </div>
+
+        {/* Modal Content */}
+        <div className="flex-1 overflow-y-auto p-6">
+          {loading && (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="w-8 h-8 animate-spin text-[#145566] mr-3" />
+              <span className="text-gray-600">Đang tải thông tin bệnh...</span>
+            </div>
+          )}
+
+          {error && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center">
+              <AlertCircle className="w-5 h-5 text-red-500 mr-2" />
+              <p className="text-red-700">{error}</p>
+            </div>
+          )}
+
+          {!loading && !error && diseaseInfo.length === 0 && (
+            <div className="text-center py-12">
+              <BookOpen className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-xl font-semibold text-gray-700 mb-2">Không tìm thấy thông tin</h3>
+              <p className="text-gray-500">Không tìm thấy thông tin chi tiết về bệnh này.</p>
+            </div>
+          )}
+
+          {!loading && diseaseInfo.length > 0 && (
+            <div className="space-y-6">
+              {diseaseInfo.map((disease, index) => renderDiseaseInfo(disease, index))}
+            </div>
+          )}
+        </div>
+      </motion.div>
+    </motion.div>
   );
 };
 
