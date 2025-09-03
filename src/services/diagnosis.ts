@@ -1,9 +1,13 @@
 import { InitialDiagnosisResponse, QuestionsResponse, FinalDiagnosisResponse } from '../models/diagnosis';
+import { ApiService } from '../utils/api';
 
 export class DiagnosisService {
   private static instance: DiagnosisService;
+  private apiService: ApiService;
   
-  private constructor() {}
+  private constructor() {
+    this.apiService = ApiService.getInstance();
+  }
   
   static getInstance(): DiagnosisService {
     if (!DiagnosisService.instance) {
@@ -40,13 +44,8 @@ export class DiagnosisService {
 
   async getQuestions(userId: string): Promise<QuestionsResponse> {
     try {
-      const response = await fetch(`/api/diagnosis/${userId}/questions`);
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      return await response.json();
+      const response = await this.apiService.get<QuestionsResponse>(`/api/diagnosis/${userId}/questions`);
+      return response;
     } catch (error) {
       console.error('Error fetching questions:', error);
       // Return mock data for development/testing
