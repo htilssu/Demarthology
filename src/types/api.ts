@@ -175,3 +175,18 @@ export interface UserUpdateRequest {
   role?: string;
   avatar?: File;
 }
+
+/**
+ * Forgot password request interface
+ */
+export interface ForgotPasswordRequest {
+  email: string;
+}
+
+/**
+ * Forgot password response interface
+ */
+export interface ForgotPasswordResponse {
+  message: string;
+  success: boolean;
+}
