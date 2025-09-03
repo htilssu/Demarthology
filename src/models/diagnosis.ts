@@ -19,6 +19,7 @@ export interface DiagnosisState {
   initialResult?: InitialDiagnosisResponse;
   questions?: string[];
   answers?: string[];
+  currentQuestionIndex?: number;
   finalResult?: FinalDiagnosisResponse;
   loading: boolean;
   error?: string;

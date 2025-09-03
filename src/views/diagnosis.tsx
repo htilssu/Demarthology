@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import Navbar from '../components/navbar';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Upload, Camera, Loader2, CheckCircle, ArrowRight, AlertCircle } from 'lucide-react';
+import { Upload, Camera, Loader2, CheckCircle, ArrowRight, ArrowLeft, AlertCircle } from 'lucide-react';
 import { DiagnosisService } from '../services/diagnosis';
 import { DiagnosisState, InitialDiagnosisResponse, FinalDiagnosisResponse } from '../models/diagnosis';
 
@@ -56,6 +56,7 @@ const Diagnosis: React.FC = () => {
         ...prev,
         questions: result.questions,
         answers: new Array(result.questions.length).fill(''),
+        currentQuestionIndex: 0,
         step: 'questions',
         loading: false
       }));
@@ -72,6 +73,20 @@ const Diagnosis: React.FC = () => {
     setState(prev => ({
       ...prev,
       answers: prev.answers?.map((answer, i) => i === index ? value : answer)
+    }));
+  };
+
+  const handleNextQuestion = () => {
+    setState(prev => ({
+      ...prev,
+      currentQuestionIndex: (prev.currentQuestionIndex || 0) + 1
+    }));
+  };
+
+  const handlePreviousQuestion = () => {
+    setState(prev => ({
+      ...prev,
+      currentQuestionIndex: Math.max(0, (prev.currentQuestionIndex || 0) - 1)
     }));
   };
 
@@ -138,9 +153,12 @@ const Diagnosis: React.FC = () => {
                 <QuestionsStep
                   questions={state.questions}
                   answers={state.answers || []}
+                  currentQuestionIndex={state.currentQuestionIndex || 0}
                   loading={state.loading}
                   error={state.error}
                   onAnswerChange={handleAnswerChange}
+                  onNextQuestion={handleNextQuestion}
+                  onPreviousQuestion={handlePreviousQuestion}
                   onSubmit={handleSubmitAnswers}
                 />
               )}
@@ -304,11 +322,29 @@ const InitialResultStep: React.FC<{
 const QuestionsStep: React.FC<{
   questions: string[];
   answers: string[];
+  currentQuestionIndex: number;
   loading: boolean;
   error?: string;
   onAnswerChange: (index: number, value: string) => void;
+  onNextQuestion: () => void;
+  onPreviousQuestion: () => void;
   onSubmit: () => void;
-}> = ({ questions, answers, loading, error, onAnswerChange, onSubmit }) => {
+}> = ({ 
+  questions, 
+  answers, 
+  currentQuestionIndex, 
+  loading, 
+  error, 
+  onAnswerChange, 
+  onNextQuestion, 
+  onPreviousQuestion, 
+  onSubmit 
+}) => {
+  const currentQuestion = questions[currentQuestionIndex];
+  const currentAnswer = answers[currentQuestionIndex];
+  const isLastQuestion = currentQuestionIndex === questions.length - 1;
+  const isFirstQuestion = currentQuestionIndex === 0;
+  const hasAnswered = currentAnswer && currentAnswer.trim() !== '';
   const allAnswered = answers.every(answer => answer.trim() !== '');
 
   return (
@@ -319,7 +355,13 @@ const QuestionsStep: React.FC<{
       exit={{ opacity: 0, y: -20 }}
       className="bg-white rounded-xl shadow-lg p-8"
     >
-      <h2 className="text-2xl font-bold text-gray-800 mb-6">Câu hỏi bổ sung</h2>
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-2xl font-bold text-gray-800">Câu hỏi bổ sung</h2>
+        <div className="text-sm text-gray-500">
+          {currentQuestionIndex + 1} / {questions.length}
+        </div>
+      </div>
+      
       <p className="text-gray-600 mb-8">Vui lòng trả lời các câu hỏi sau để có kết quả chẩn đoán chính xác hơn</p>
 
       {error && (
@@ -329,50 +371,90 @@ const QuestionsStep: React.FC<{
         </div>
       )}
 
-      <div className="space-y-6">
-        {questions.map((question, index) => (
-          <div key={index} className="border border-gray-200 rounded-lg p-6">
-            <h3 className="text-lg font-medium text-gray-800 mb-4">
-              Câu {index + 1}: {question}
-            </h3>
-            <div className="space-y-2">
-              {['Có', 'Không', 'Không chắc chắn'].map((option) => (
-                <label key={option} className="flex items-center gap-3 cursor-pointer">
-                  <input
-                    type="radio"
-                    name={`question-${index}`}
-                    value={option}
-                    checked={answers[index] === option}
-                    onChange={(e) => onAnswerChange(index, e.target.value)}
-                    className="w-4 h-4 text-blue-600"
-                  />
-                  <span className="text-gray-700">{option}</span>
-                </label>
-              ))}
-            </div>
-          </div>
-        ))}
+      {/* Progress Bar */}
+      <div className="mb-8">
+        <div className="w-full bg-gray-200 rounded-full h-2">
+          <div 
+            className="bg-gradient-to-r from-[#145566] to-[#1c6b84] h-2 rounded-full transition-all duration-300"
+            style={{ width: `${((currentQuestionIndex + 1) / questions.length) * 100}%` }}
+          ></div>
+        </div>
       </div>
 
-      <motion.button
-        onClick={onSubmit}
-        disabled={!allAnswered || loading}
-        whileHover={{ scale: allAnswered && !loading ? 1.02 : 1 }}
-        whileTap={{ scale: allAnswered && !loading ? 0.98 : 1 }}
-        className="w-full mt-8 bg-gradient-to-r from-[#145566] to-[#1c6b84] text-white px-6 py-3 rounded-lg font-semibold flex items-center justify-center gap-2 hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+      {/* Current Question */}
+      <motion.div
+        key={currentQuestionIndex}
+        initial={{ opacity: 0, x: 20 }}
+        animate={{ opacity: 1, x: 0 }}
+        exit={{ opacity: 0, x: -20 }}
+        className="border border-gray-200 rounded-lg p-6 mb-8"
       >
-        {loading ? (
-          <>
-            <Loader2 className="w-5 h-5 animate-spin" />
-            Đang xử lý...
-          </>
+        <h3 className="text-lg font-medium text-gray-800 mb-6">
+          Câu {currentQuestionIndex + 1}: {currentQuestion}
+        </h3>
+        <div className="space-y-3">
+          {['Có', 'Không', 'Không chắc chắn'].map((option) => (
+            <label key={option} className="flex items-center gap-3 cursor-pointer p-3 rounded-lg hover:bg-gray-50 transition-colors">
+              <input
+                type="radio"
+                name={`question-${currentQuestionIndex}`}
+                value={option}
+                checked={currentAnswer === option}
+                onChange={(e) => onAnswerChange(currentQuestionIndex, e.target.value)}
+                className="w-4 h-4 text-blue-600"
+              />
+              <span className="text-gray-700 font-medium">{option}</span>
+            </label>
+          ))}
+        </div>
+      </motion.div>
+
+      {/* Navigation Buttons */}
+      <div className="flex justify-between">
+        <motion.button
+          onClick={onPreviousQuestion}
+          disabled={isFirstQuestion}
+          whileHover={{ scale: !isFirstQuestion ? 1.02 : 1 }}
+          whileTap={{ scale: !isFirstQuestion ? 0.98 : 1 }}
+          className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+        >
+          <ArrowLeft className="w-5 h-5" />
+          Câu trước
+        </motion.button>
+
+        {isLastQuestion ? (
+          <motion.button
+            onClick={onSubmit}
+            disabled={!allAnswered || loading}
+            whileHover={{ scale: allAnswered && !loading ? 1.02 : 1 }}
+            whileTap={{ scale: allAnswered && !loading ? 0.98 : 1 }}
+            className="px-6 py-3 bg-gradient-to-r from-[#145566] to-[#1c6b84] text-white rounded-lg font-semibold flex items-center gap-2 hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {loading ? (
+              <>
+                <Loader2 className="w-5 h-5 animate-spin" />
+                Đang xử lý...
+              </>
+            ) : (
+              <>
+                Hoàn thành chẩn đoán
+                <CheckCircle className="w-5 h-5" />
+              </>
+            )}
+          </motion.button>
         ) : (
-          <>
-            Hoàn thành chẩn đoán
+          <motion.button
+            onClick={onNextQuestion}
+            disabled={!hasAnswered}
+            whileHover={{ scale: hasAnswered ? 1.02 : 1 }}
+            whileTap={{ scale: hasAnswered ? 0.98 : 1 }}
+            className="px-6 py-3 bg-gradient-to-r from-[#145566] to-[#1c6b84] text-white rounded-lg font-semibold flex items-center gap-2 hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Câu tiếp theo
             <ArrowRight className="w-5 h-5" />
-          </>
+          </motion.button>
         )}
-      </motion.button>
+      </div>
     </motion.div>
   );
 };
