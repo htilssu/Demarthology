@@ -157,6 +157,7 @@ export interface AuthUser {
  * User profile interface matching the actual API response format
  */
 export interface UserProfile {
+  _id: string;
   dateOfBirth: string;
   email: string;
   name: string;

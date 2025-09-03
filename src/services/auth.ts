@@ -76,6 +76,7 @@ export class AuthService {
 
     // Create mock user profile matching the API format
     const userProfile: LoginResponse = {
+      _id: `user-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`,
       dateOfBirth: "1990-01-01",
       email: credentials.email,
       name: credentials.email.split('@')[0] || 'User',
@@ -156,6 +157,7 @@ export class AuthService {
     
     // Create user profile matching the API format
     const userProfile: RegisterResponse = {
+      _id: `user-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`,
       dateOfBirth: userData.dateOfBirth,
       email: userData.email,
       name: userData.name,
@@ -198,7 +200,7 @@ export class AuthService {
    */
   convertUserProfileToAuthUser(userProfile: UserProfile): AuthUser {
     return {
-      id: 'user-' + userProfile.email.replace('@', '_').replace('.', '_'),
+      id: userProfile._id,
       email: userProfile.email,
       name: userProfile.name,
       role: 'user',
