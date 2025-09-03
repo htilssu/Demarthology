@@ -154,6 +154,36 @@ const Diagnosis: React.FC = () => {
         loading: false,
         step: 'final'
       }));
+
+      // Immediately start loading disease info in background after showing results
+      setState(prev => ({ 
+        ...prev, 
+        diseaseInfoLoading: true,
+        diseaseInfoError: undefined 
+      }));
+
+      try {
+        const params: DiseaseSearchParams = {
+          disease_name: result.final_diagnosis.trim()
+        };
+
+        const diseaseResponse = await diseaseKnowledgeService.searchDisease(params);
+        
+        setState(prev => ({
+          ...prev,
+          diseaseInfo: diseaseResponse.disease_info || [],
+          diseaseInfoLoading: false,
+          diseaseInfoError: diseaseResponse.disease_info && diseaseResponse.disease_info.length > 0 
+            ? undefined 
+            : 'Không tìm thấy thông tin chi tiết về bệnh này.'
+        }));
+      } catch (diseaseError: any) {
+        setState(prev => ({
+          ...prev,
+          diseaseInfoLoading: false,
+          diseaseInfoError: diseaseError?.message || 'Có lỗi xảy ra khi tải thông tin bệnh'
+        }));
+      }
     } catch (error: any) {
       // Use the actual error message from the API if available
       const errorMessage = error?.message || 'Không thể gửi câu trả lời. Vui lòng thử lại.';
@@ -189,40 +219,12 @@ const Diagnosis: React.FC = () => {
     }
   };
 
-  // Function to show disease information modal and load disease info
+  // Function to show disease information modal (data already loaded in background)
   const handleViewDiseaseInfo = async () => {
     if (!state.finalResult) return;
 
-    // Show modal and start loading
+    // Just show modal - disease info is already loading/loaded in background
     setShowDiseaseInfo(true);
-    setState(prev => ({ 
-      ...prev, 
-      diseaseInfoLoading: true,
-      diseaseInfoError: undefined 
-    }));
-
-    try {
-      const params: DiseaseSearchParams = {
-        disease_name: state.finalResult.final_diagnosis.trim()
-      };
-
-      const diseaseResponse = await diseaseKnowledgeService.searchDisease(params);
-      
-      setState(prev => ({
-        ...prev,
-        diseaseInfo: diseaseResponse.disease_info || [],
-        diseaseInfoLoading: false,
-        diseaseInfoError: diseaseResponse.disease_info && diseaseResponse.disease_info.length > 0 
-          ? undefined 
-          : 'Không tìm thấy thông tin chi tiết về bệnh này.'
-      }));
-    } catch (diseaseError: any) {
-      setState(prev => ({
-        ...prev,
-        diseaseInfoLoading: false,
-        diseaseInfoError: diseaseError?.message || 'Có lỗi xảy ra khi tải thông tin bệnh'
-      }));
-    }
   };
 
   return (
