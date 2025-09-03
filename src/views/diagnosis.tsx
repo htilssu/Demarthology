@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from '../components/navbar';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Upload, Camera, Loader2, CheckCircle, ArrowRight, ArrowLeft, AlertCircle } from 'lucide-react';
+import { Upload, Camera, Loader2, CheckCircle, ArrowRight, ArrowLeft, AlertCircle, X, BookOpen, MapPin, Bug, Target, Stethoscope, Heart, Shield, Pill, Microscope } from 'lucide-react';
 import { DiagnosisService } from '../services/diagnosis';
 import { DiagnosisState, InitialDiagnosisResponse, FinalDiagnosisResponse } from '../models/diagnosis';
 import { AuthService } from '../services/auth';
+import { DiseaseKnowledgeService } from '../services/disease-knowledge';
+import { DiseaseInfo, DiseaseSearchParams } from '../models/disease';
 
 const diagnosisService = DiagnosisService.getInstance();
 const authService = AuthService.getInstance();
+const diseaseKnowledgeService = DiseaseKnowledgeService.getInstance();
 
 // Helper function to generate or get user ID
 const generateUserId = async (): Promise<string> => {
@@ -35,6 +38,12 @@ const Diagnosis: React.FC = () => {
     loading: false,
     error: undefined
   });
+
+  // Disease information modal state
+  const [showDiseaseInfo, setShowDiseaseInfo] = useState(false);
+  const [diseaseInfo, setDiseaseInfo] = useState<DiseaseInfo[]>([]);
+  const [diseaseLoading, setDiseaseLoading] = useState(false);
+  const [diseaseError, setDiseaseError] = useState<string | null>(null);
 
   // Initialize user ID on component mount
   useEffect(() => {
@@ -164,6 +173,10 @@ const Diagnosis: React.FC = () => {
         userId,
         loading: false
       });
+      // Reset disease info modal state
+      setShowDiseaseInfo(false);
+      setDiseaseInfo([]);
+      setDiseaseError(null);
     } catch (error) {
       console.error('Failed to reset with new user ID:', error);
       // Fallback to timestamp-based ID if generation fails
@@ -173,6 +186,37 @@ const Diagnosis: React.FC = () => {
         userId: fallbackId,
         loading: false
       });
+      // Reset disease info modal state
+      setShowDiseaseInfo(false);
+      setDiseaseInfo([]);
+      setDiseaseError(null);
+    }
+  };
+
+  // Function to fetch disease information
+  const handleViewDiseaseInfo = async (diseaseName: string) => {
+    setDiseaseLoading(true);
+    setDiseaseError(null);
+    setShowDiseaseInfo(true);
+
+    try {
+      const params: DiseaseSearchParams = {
+        disease_name: diseaseName.trim()
+      };
+
+      const response = await diseaseKnowledgeService.searchDisease(params);
+      
+      if (response.disease_info && response.disease_info.length > 0) {
+        setDiseaseInfo(response.disease_info);
+      } else {
+        setDiseaseInfo([]);
+        setDiseaseError('Không tìm thấy thông tin chi tiết về bệnh này.');
+      }
+    } catch (err) {
+      setDiseaseError(err instanceof Error ? err.message : 'Có lỗi xảy ra khi tải thông tin bệnh');
+      setDiseaseInfo([]);
+    } finally {
+      setDiseaseLoading(false);
     }
   };
 
@@ -223,11 +267,24 @@ const Diagnosis: React.FC = () => {
                 <FinalResultStep
                   result={state.finalResult}
                   onReset={resetDiagnosis}
+                  onViewDiseaseInfo={handleViewDiseaseInfo}
                 />
               )}
             </AnimatePresence>
           </div>
         </div>
+
+        {/* Disease Information Modal */}
+        <AnimatePresence>
+          {showDiseaseInfo && (
+            <DiseaseInfoModal
+              diseaseInfo={diseaseInfo}
+              loading={diseaseLoading}
+              error={diseaseError}
+              onClose={() => setShowDiseaseInfo(false)}
+            />
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );
@@ -519,7 +576,8 @@ const QuestionsStep: React.FC<{
 const FinalResultStep: React.FC<{
   result: FinalDiagnosisResponse;
   onReset: () => void;
-}> = ({ result, onReset }) => (
+  onViewDiseaseInfo: (diseaseName: string) => void;
+}> = ({ result, onReset, onViewDiseaseInfo }) => (
   <motion.div
     key="final"
     initial={{ opacity: 0, y: 20 }}
@@ -554,6 +612,7 @@ const FinalResultStep: React.FC<{
         </motion.button>
         
         <motion.button
+          onClick={() => onViewDiseaseInfo(result.final_diagnosis)}
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
           className="px-6 py-3 bg-gradient-to-r from-[#145566] to-[#1c6b84] text-white rounded-lg font-semibold hover:shadow-lg transition-all"
@@ -564,5 +623,194 @@ const FinalResultStep: React.FC<{
     </div>
   </motion.div>
 );
+
+// Disease Information Modal Component
+const DiseaseInfoModal: React.FC<{
+  diseaseInfo: DiseaseInfo[];
+  loading: boolean;
+  error: string | null;
+  onClose: () => void;
+}> = ({ diseaseInfo, loading, error, onClose }) => {
+  
+  /**
+   * Render disease information card
+   */
+  const renderDiseaseInfo = (disease: DiseaseInfo, index: number) => (
+    <div key={index} className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-[#145566] to-[#1e6b7a] text-white p-6">
+        <h2 className="text-2xl font-bold mb-2">{disease["Tên bệnh"]}</h2>
+        <p className="text-blue-100 flex items-center">
+          <Microscope className="w-4 h-4 mr-2" />
+          {disease["Tên khoa học"]}
+        </p>
+      </div>
+
+      {/* Content */}
+      <div className="p-6 space-y-6">
+        {/* Symptoms */}
+        <div className="space-y-3">
+          <h3 className="flex items-center text-lg font-semibold text-gray-800">
+            <AlertCircle className="w-5 h-5 mr-2 text-red-500" />
+            Triệu chứng
+          </h3>
+          <p className="text-gray-700 leading-relaxed bg-red-50 p-4 rounded-lg border-l-4 border-red-200">
+            {disease["Triệu chứng"]}
+          </p>
+        </div>
+
+        {/* Location */}
+        <div className="space-y-3">
+          <h3 className="flex items-center text-lg font-semibold text-gray-800">
+            <MapPin className="w-5 h-5 mr-2 text-orange-500" />
+            Vị trí xuất hiện
+          </h3>
+          <p className="text-gray-700 leading-relaxed bg-orange-50 p-4 rounded-lg border-l-4 border-orange-200">
+            {disease["Vị trí xuất hiện"]}
+          </p>
+        </div>
+
+        {/* Causes */}
+        <div className="space-y-3">
+          <h3 className="flex items-center text-lg font-semibold text-gray-800">
+            <Bug className="w-5 h-5 mr-2 text-purple-500" />
+            Nguyên nhân
+          </h3>
+          <p className="text-gray-700 leading-relaxed bg-purple-50 p-4 rounded-lg border-l-4 border-purple-200">
+            {disease["Nguyên nhân"]}
+          </p>
+        </div>
+
+        {/* Diagnostic Criteria */}
+        <div className="space-y-3">
+          <h3 className="flex items-center text-lg font-semibold text-gray-800">
+            <Target className="w-5 h-5 mr-2 text-blue-500" />
+            Tiêu chí chẩn đoán
+          </h3>
+          <p className="text-gray-700 leading-relaxed bg-blue-50 p-4 rounded-lg border-l-4 border-blue-200">
+            {disease["Tiêu chí chẩn đoán"]}
+          </p>
+        </div>
+
+        {/* Differential Diagnosis */}
+        <div className="space-y-3">
+          <h3 className="flex items-center text-lg font-semibold text-gray-800">
+            <Stethoscope className="w-5 h-5 mr-2 text-indigo-500" />
+            Chẩn đoán phân biệt
+          </h3>
+          <p className="text-gray-700 leading-relaxed bg-indigo-50 p-4 rounded-lg border-l-4 border-indigo-200">
+            {disease["Chẩn đoán phân biệt"]}
+          </p>
+        </div>
+
+        {/* Treatment */}
+        <div className="space-y-3">
+          <h3 className="flex items-center text-lg font-semibold text-gray-800">
+            <Heart className="w-5 h-5 mr-2 text-green-500" />
+            Điều trị
+          </h3>
+          <p className="text-gray-700 leading-relaxed bg-green-50 p-4 rounded-lg border-l-4 border-green-200">
+            {disease["Điều trị"]}
+          </p>
+        </div>
+
+        {/* Prevention */}
+        <div className="space-y-3">
+          <h3 className="flex items-center text-lg font-semibold text-gray-800">
+            <Shield className="w-5 h-5 mr-2 text-teal-500" />
+            Phòng bệnh
+          </h3>
+          <p className="text-gray-700 leading-relaxed bg-teal-50 p-4 rounded-lg border-l-4 border-teal-200">
+            {disease["Phòng bệnh"]}
+          </p>
+        </div>
+
+        {/* Medications */}
+        {disease["Các loại thuốc"] && disease["Các loại thuốc"].length > 0 && (
+          <div className="space-y-3">
+            <h3 className="flex items-center text-lg font-semibold text-gray-800">
+              <Pill className="w-5 h-5 mr-2 text-pink-500" />
+              Các loại thuốc
+            </h3>
+            <div className="space-y-3">
+              {disease["Các loại thuốc"].map((medication, medIndex) => (
+                <div key={medIndex} className="bg-pink-50 border border-pink-200 rounded-lg p-4">
+                  <h4 className="font-semibold text-pink-800 mb-2">{medication["Tên thuốc"]}</h4>
+                  <div className="space-y-1 text-sm text-gray-700">
+                    <p><span className="font-medium">Liều lượng:</span> {medication["Liều lượng"]}</p>
+                    <p><span className="font-medium">Thời gian sử dụng:</span> {medication["Thời gian sử dụng"]}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
+      onClick={onClose}
+    >
+      <motion.div
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.9, opacity: 0 }}
+        className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Modal Header */}
+        <div className="flex items-center justify-between p-6 border-b border-gray-200">
+          <h2 className="text-2xl font-bold text-gray-800 flex items-center">
+            <BookOpen className="w-6 h-6 mr-2 text-[#145566]" />
+            Thông tin chi tiết bệnh
+          </h2>
+          <button
+            onClick={onClose}
+            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+          >
+            <X className="w-5 h-5 text-gray-500" />
+          </button>
+        </div>
+
+        {/* Modal Content */}
+        <div className="flex-1 overflow-y-auto p-6">
+          {loading && (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="w-8 h-8 animate-spin text-[#145566] mr-3" />
+              <span className="text-gray-600">Đang tải thông tin bệnh...</span>
+            </div>
+          )}
+
+          {error && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center">
+              <AlertCircle className="w-5 h-5 text-red-500 mr-2" />
+              <p className="text-red-700">{error}</p>
+            </div>
+          )}
+
+          {!loading && !error && diseaseInfo.length === 0 && (
+            <div className="text-center py-12">
+              <BookOpen className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-xl font-semibold text-gray-700 mb-2">Không tìm thấy thông tin</h3>
+              <p className="text-gray-500">Không tìm thấy thông tin chi tiết về bệnh này.</p>
+            </div>
+          )}
+
+          {!loading && diseaseInfo.length > 0 && (
+            <div className="space-y-6">
+              {diseaseInfo.map((disease, index) => renderDiseaseInfo(disease, index))}
+            </div>
+          )}
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+};
 
 export default Diagnosis;
