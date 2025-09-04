@@ -153,20 +153,13 @@ const Diagnosis: React.FC = () => {
       // Get the diagnosis result
       const result = await diagnosisService.submitAnswers(state.userId, state.answers);
       
-      // Update state with diagnosis result
+      // Store the result but keep loading state - we need to wait for translated name
       setState(prev => ({
         ...prev,
-        finalResult: result,
-        diagnosisLoading: false
+        finalResult: result
       }));
 
-      // Immediately start loading disease info in background after showing results
-      setState(prev => ({ 
-        ...prev, 
-        diseaseInfoLoading: true,
-        diseaseInfoError: undefined 
-      }));
-
+      // Get translated disease name before showing final results
       try {
         const params: DiseaseSearchParams = {
           disease_name: result.final_diagnosis.trim()
@@ -174,18 +167,23 @@ const Diagnosis: React.FC = () => {
 
         const diseaseResponse = await diseaseKnowledgeService.searchDisease(params);
         
+        // Now we have the translated name, we can show the final results
         setState(prev => ({
           ...prev,
           translatedName: diseaseResponse.translated_name,
           diseaseInfo: diseaseResponse.disease_info || [],
+          diagnosisLoading: false, // Stop loading now that we have translated name
           diseaseInfoLoading: false,
           diseaseInfoError: diseaseResponse.disease_info && diseaseResponse.disease_info.length > 0 
             ? undefined 
             : 'Không tìm thấy thông tin chi tiết về bệnh này.'
         }));
       } catch (diseaseError: any) {
+        // If translation fails, fallback to original name but still show results
         setState(prev => ({
           ...prev,
+          translatedName: result.final_diagnosis, // Fallback to original name
+          diagnosisLoading: false,
           diseaseInfoLoading: false,
           diseaseInfoError: diseaseError?.message || 'Có lỗi xảy ra khi tải thông tin bệnh'
         }));
@@ -281,7 +279,6 @@ const Diagnosis: React.FC = () => {
                   result={state.finalResult}
                   diagnosisLoading={state.diagnosisLoading || false}
                   translatedName={state.translatedName}
-                  diseaseNameLoading={state.diseaseInfoLoading || false}
                   error={state.error}
                   onReset={resetDiagnosis}
                   onViewDiseaseInfo={handleViewDiseaseInfo}
@@ -594,11 +591,10 @@ const FinalResultStep: React.FC<{
   result?: FinalDiagnosisResponse;
   diagnosisLoading: boolean;
   translatedName?: string;
-  diseaseNameLoading: boolean;
   error?: string;
   onReset: () => void;
   onViewDiseaseInfo: () => void;
-}> = ({ result, diagnosisLoading, translatedName, diseaseNameLoading, error, onReset, onViewDiseaseInfo }) => {
+}> = ({ result, diagnosisLoading, translatedName, error, onReset, onViewDiseaseInfo }) => {
   // Show loading state if diagnosis is still loading
   if (diagnosisLoading) {
     return (
@@ -657,8 +653,8 @@ const FinalResultStep: React.FC<{
     return null;
   }
 
-  // Use the raw disease name from the API result (not translated name)
-  const displayName = result.final_diagnosis;
+  // Use the translated disease name (Vietnamese) instead of raw English name
+  const displayName = translatedName || result.final_diagnosis;
   
   return (
     <motion.div
