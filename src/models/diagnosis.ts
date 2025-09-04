@@ -25,6 +25,7 @@ export interface DiagnosisState {
   diseaseInfo?: import('../models/disease').DiseaseInfo[];
   diseaseInfoLoading?: boolean;
   diseaseInfoError?: string;
+  diagnosisLoading?: boolean;
   loading: boolean;
   error?: string;
 }

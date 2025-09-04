@@ -141,18 +141,23 @@ const Diagnosis: React.FC = () => {
   const handleSubmitAnswers = async () => {
     if (!state.userId || !state.answers) return;
 
-    setState(prev => ({ ...prev, loading: true }));
+    // Immediately move to final step with diagnosis loading state
+    setState(prev => ({ 
+      ...prev, 
+      step: 'final',
+      diagnosisLoading: true,
+      error: undefined
+    }));
 
     try {
       // Get the diagnosis result
       const result = await diagnosisService.submitAnswers(state.userId, state.answers);
       
-      // Update state with diagnosis result and move to final step
+      // Update state with diagnosis result
       setState(prev => ({
         ...prev,
         finalResult: result,
-        loading: false,
-        step: 'final'
+        diagnosisLoading: false
       }));
 
       // Immediately start loading disease info in background after showing results
@@ -191,7 +196,7 @@ const Diagnosis: React.FC = () => {
       setState(prev => ({
         ...prev,
         error: errorMessage,
-        loading: false
+        diagnosisLoading: false
       }));
     }
   };
@@ -271,11 +276,13 @@ const Diagnosis: React.FC = () => {
                 />
               )}
 
-              {state.step === 'final' && state.finalResult && (
+              {state.step === 'final' && (
                 <FinalResultStep
                   result={state.finalResult}
+                  diagnosisLoading={state.diagnosisLoading || false}
                   translatedName={state.translatedName}
                   diseaseNameLoading={state.diseaseInfoLoading || false}
+                  error={state.error}
                   onReset={resetDiagnosis}
                   onViewDiseaseInfo={handleViewDiseaseInfo}
                 />
@@ -584,14 +591,74 @@ const QuestionsStep: React.FC<{
 
 // Final Result Step Component
 const FinalResultStep: React.FC<{
-  result: FinalDiagnosisResponse;
+  result?: FinalDiagnosisResponse;
+  diagnosisLoading: boolean;
   translatedName?: string;
   diseaseNameLoading: boolean;
+  error?: string;
   onReset: () => void;
   onViewDiseaseInfo: () => void;
-}> = ({ result, translatedName, diseaseNameLoading, onReset, onViewDiseaseInfo }) => {
-  // Use translated name if available, otherwise fall back to original diagnosis
-  const displayName = translatedName || result.final_diagnosis;
+}> = ({ result, diagnosisLoading, translatedName, diseaseNameLoading, error, onReset, onViewDiseaseInfo }) => {
+  // Show loading state if diagnosis is still loading
+  if (diagnosisLoading) {
+    return (
+      <motion.div
+        key="final-loading"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -20 }}
+        className="bg-white rounded-xl shadow-lg p-8"
+      >
+        <div className="text-center">
+          <div className="mx-auto w-24 h-24 bg-blue-100 rounded-full flex items-center justify-center mb-6">
+            <Loader2 className="w-12 h-12 text-blue-600 animate-spin" />
+          </div>
+          
+          <h2 className="text-3xl font-bold text-gray-800 mb-4">Đang xử lý kết quả...</h2>
+          <p className="text-gray-600">Vui lòng đợi trong giây lát để nhận kết quả chẩn đoán</p>
+        </div>
+      </motion.div>
+    );
+  }
+
+  // Show error state if there's an error
+  if (error) {
+    return (
+      <motion.div
+        key="final-error"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -20 }}
+        className="bg-white rounded-xl shadow-lg p-8"
+      >
+        <div className="text-center">
+          <div className="mx-auto w-24 h-24 bg-red-100 rounded-full flex items-center justify-center mb-6">
+            <AlertCircle className="w-12 h-12 text-red-600" />
+          </div>
+          
+          <h2 className="text-3xl font-bold text-gray-800 mb-4">Có lỗi xảy ra</h2>
+          <p className="text-red-600 mb-6">{error}</p>
+          
+          <motion.button
+            onClick={onReset}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            className="px-6 py-3 bg-gradient-to-r from-[#145566] to-[#1c6b84] text-white rounded-lg font-semibold hover:shadow-lg transition-all"
+          >
+            Thử lại
+          </motion.button>
+        </div>
+      </motion.div>
+    );
+  }
+
+  // Return early if no result yet
+  if (!result) {
+    return null;
+  }
+
+  // Use the raw disease name from the API result (not translated name)
+  const displayName = result.final_diagnosis;
   
   return (
     <motion.div
@@ -613,9 +680,6 @@ const FinalResultStep: React.FC<{
             <h3 className="text-2xl font-bold text-green-800">
               {displayName}
             </h3>
-            {diseaseNameLoading && !translatedName && (
-              <Loader2 className="w-5 h-5 animate-spin text-green-600" />
-            )}
           </div>
           <p className="text-green-700">
             Đây là kết quả chẩn đoán dựa trên phân tích ảnh và câu trả lời của bạn
