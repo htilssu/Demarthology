@@ -652,9 +652,6 @@ const FinalResultStep: React.FC<{
   if (!result) {
     return null;
   }
-
-  // Use the translated disease name (Vietnamese) instead of raw English name
-  const displayName = translatedName || result.final_diagnosis;
   
   return (
     <motion.div
@@ -674,7 +671,7 @@ const FinalResultStep: React.FC<{
         <div className="bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 rounded-xl p-8 mb-8">
           <div className="flex items-center justify-center gap-2 mb-2">
             <h3 className="text-2xl font-bold text-green-800">
-              {displayName}
+              {translatedName || result.final_diagnosis}
             </h3>
           </div>
           <p className="text-green-700">
