@@ -171,6 +171,7 @@ const Diagnosis: React.FC = () => {
         
         setState(prev => ({
           ...prev,
+          translatedName: diseaseResponse.translated_name,
           diseaseInfo: diseaseResponse.disease_info || [],
           diseaseInfoLoading: false,
           diseaseInfoError: diseaseResponse.disease_info && diseaseResponse.disease_info.length > 0 
@@ -273,6 +274,8 @@ const Diagnosis: React.FC = () => {
               {state.step === 'final' && state.finalResult && (
                 <FinalResultStep
                   result={state.finalResult}
+                  translatedName={state.translatedName}
+                  diseaseNameLoading={state.diseaseInfoLoading || false}
                   onReset={resetDiagnosis}
                   onViewDiseaseInfo={handleViewDiseaseInfo}
                 />
@@ -582,55 +585,67 @@ const QuestionsStep: React.FC<{
 // Final Result Step Component
 const FinalResultStep: React.FC<{
   result: FinalDiagnosisResponse;
+  translatedName?: string;
+  diseaseNameLoading: boolean;
   onReset: () => void;
   onViewDiseaseInfo: () => void;
-}> = ({ result, onReset, onViewDiseaseInfo }) => (
-  <motion.div
-    key="final"
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-    exit={{ opacity: 0, y: -20 }}
-    className="bg-white rounded-xl shadow-lg p-8"
-  >
-    <div className="text-center">
-      <div className="mx-auto w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mb-6">
-        <CheckCircle className="w-12 h-12 text-green-600" />
-      </div>
-      
-      <h2 className="text-3xl font-bold text-gray-800 mb-4">Kết quả chẩn đoán</h2>
-      
-      <div className="bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 rounded-xl p-8 mb-8">
-        <h3 className="text-2xl font-bold text-green-800 mb-2">
-          {result.final_diagnosis}
-        </h3>
-        <p className="text-green-700">
-          Đây là kết quả chẩn đoán dựa trên phân tích ảnh và câu trả lời của bạn
-        </p>
-      </div>
-
-      <div className="flex flex-col sm:flex-row gap-4 justify-center">
-        <motion.button
-          onClick={onReset}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-colors"
-        >
-          Chẩn đoán mới
-        </motion.button>
+}> = ({ result, translatedName, diseaseNameLoading, onReset, onViewDiseaseInfo }) => {
+  // Use translated name if available, otherwise fall back to original diagnosis
+  const displayName = translatedName || result.final_diagnosis;
+  
+  return (
+    <motion.div
+      key="final"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      className="bg-white rounded-xl shadow-lg p-8"
+    >
+      <div className="text-center">
+        <div className="mx-auto w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mb-6">
+          <CheckCircle className="w-12 h-12 text-green-600" />
+        </div>
         
-        <motion.button
-          onClick={onViewDiseaseInfo}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          className="px-6 py-3 bg-gradient-to-r from-[#145566] to-[#1c6b84] text-white rounded-lg font-semibold hover:shadow-lg transition-all flex items-center justify-center gap-2"
-        >
-          <BookOpen className="w-5 h-5" />
-          Xem thông tin bệnh
-        </motion.button>
+        <h2 className="text-3xl font-bold text-gray-800 mb-4">Kết quả chẩn đoán</h2>
+        
+        <div className="bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 rounded-xl p-8 mb-8">
+          <div className="flex items-center justify-center gap-2 mb-2">
+            <h3 className="text-2xl font-bold text-green-800">
+              {displayName}
+            </h3>
+            {diseaseNameLoading && !translatedName && (
+              <Loader2 className="w-5 h-5 animate-spin text-green-600" />
+            )}
+          </div>
+          <p className="text-green-700">
+            Đây là kết quả chẩn đoán dựa trên phân tích ảnh và câu trả lời của bạn
+          </p>
+        </div>
+
+        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <motion.button
+            onClick={onReset}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-colors"
+          >
+            Chẩn đoán mới
+          </motion.button>
+          
+          <motion.button
+            onClick={onViewDiseaseInfo}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            className="px-6 py-3 bg-gradient-to-r from-[#145566] to-[#1c6b84] text-white rounded-lg font-semibold hover:shadow-lg transition-all flex items-center justify-center gap-2"
+          >
+            <BookOpen className="w-5 h-5" />
+            Xem thông tin bệnh
+          </motion.button>
+        </div>
       </div>
-    </div>
-  </motion.div>
-);
+    </motion.div>
+  );
+};
 
 // Disease Information Modal Component
 const DiseaseInfoModal: React.FC<{
