@@ -280,6 +280,9 @@ const Diagnosis: React.FC = () => {
                   diagnosisLoading={state.diagnosisLoading || false}
                   translatedName={state.translatedName}
                   error={state.error}
+                  diseaseInfo={state.diseaseInfo || []}
+                  loading={state.diseaseInfoLoading || false}
+                  diseaseInfoError={state.diseaseInfoError || null}
                   onReset={resetDiagnosis}
                   onViewDiseaseInfo={handleViewDiseaseInfo}
                 />
@@ -592,9 +595,12 @@ const FinalResultStep: React.FC<{
   diagnosisLoading: boolean;
   translatedName?: string;
   error?: string;
+  diseaseInfo: DiseaseInfo[];
+  loading: boolean;
+  diseaseInfoError: string | null;
   onReset: () => void;
   onViewDiseaseInfo: () => void;
-}> = ({ result, diagnosisLoading, translatedName, error, onReset, onViewDiseaseInfo }) => {
+}> = ({ result, diagnosisLoading, translatedName, error, diseaseInfo, loading, diseaseInfoError, onReset, onViewDiseaseInfo }) => {
   // Show loading state if diagnosis is still loading
   if (diagnosisLoading) {
     return (
