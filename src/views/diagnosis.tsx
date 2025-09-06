@@ -677,7 +677,7 @@ const FinalResultStep: React.FC<{
         <div className="bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 rounded-xl p-8 mb-8">
           <div className="flex items-center justify-center gap-2 mb-2">
             <h3 className="text-2xl font-bold text-green-800">
-              {translatedName || result.final_diagnosis}
+              {diseaseInfo[0]?.["Tên bệnh"] || result.final_diagnosis}
             </h3>
           </div>
           <p className="text-green-700">
