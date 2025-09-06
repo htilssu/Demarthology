@@ -88,7 +88,7 @@ const BeforeAfter: React.FC = () => {
     const x = e.clientX - rect.left;
     const percentage = Math.max(0, Math.min(100, (x / rect.width) * 100));
     setSliderPosition(percentage);
-  }, [isDragging]);
+  }, [isDragging, setSliderPosition]);
 
   // Handle mouse up to stop dragging
   const handleMouseUp = useCallback(() => {
@@ -121,7 +121,7 @@ const BeforeAfter: React.FC = () => {
     const x = e.touches[0].clientX - rect.left;
     const percentage = Math.max(0, Math.min(100, (x / rect.width) * 100));
     setSliderPosition(percentage);
-  }, [isDragging]);
+  }, [isDragging, setSliderPosition]);
 
   const handleTouchEnd = useCallback(() => {
     setIsDragging(false);
@@ -171,7 +171,7 @@ const BeforeAfter: React.FC = () => {
           <div className="flex space-x-4">
             <button
               onClick={() => setShowHistory(!showHistory)}
-              className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              className="flex items-center px-4 py-2 bg-[#145566] text-white rounded-lg hover:bg-[#0f3f44] transition-colors"
             >
               <History className="h-4 w-4 mr-2" />
               Lịch sử ({state.history.length})
@@ -231,7 +231,7 @@ const BeforeAfter: React.FC = () => {
                             loadHistoryItem(item);
                             setShowHistory(false);
                           }}
-                          className="flex-1 px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 transition-colors"
+                          className="flex-1 px-3 py-1 bg-[#145566] text-white text-sm rounded hover:bg-[#0f3f44] transition-colors"
                         >
                           Xem
                         </button>
@@ -257,15 +257,15 @@ const BeforeAfter: React.FC = () => {
           {/* Step Indicator */}
           <div className="p-6 bg-gray-50 border-b">
             <div className="flex items-center justify-center space-x-8">
-              <div className={`flex items-center ${isStep1Complete ? 'text-green-600' : 'text-gray-400'}`}>
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center mr-3 ${isStep1Complete ? 'bg-green-600 text-white' : 'bg-gray-300 text-gray-600'}`}>
+              <div className={`flex items-center ${isStep1Complete ? 'text-[#145566]' : 'text-gray-400'}`}>
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center mr-3 ${isStep1Complete ? 'bg-[#145566] text-white' : 'bg-gray-300 text-gray-600'}`}>
                   {isStep1Complete ? <CheckCircle className="h-5 w-5" /> : '1'}
                 </div>
                 <span className="font-medium">Tải ảnh đầu tiên</span>
               </div>
-              <div className={`w-16 h-1 ${isStep1Complete ? 'bg-green-600' : 'bg-gray-300'}`}></div>
-              <div className={`flex items-center ${isStep2Complete ? 'text-green-600' : 'text-gray-400'}`}>
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center mr-3 ${isStep2Complete ? 'bg-green-600 text-white' : 'bg-gray-300 text-gray-600'}`}>
+              <div className={`w-16 h-1 ${isStep1Complete ? 'bg-[#145566]' : 'bg-gray-300'}`}></div>
+              <div className={`flex items-center ${isStep2Complete ? 'text-[#145566]' : 'text-gray-400'}`}>
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center mr-3 ${isStep2Complete ? 'bg-[#145566] text-white' : 'bg-gray-300 text-gray-600'}`}>
                   {isStep2Complete ? <CheckCircle className="h-5 w-5" /> : '2'}
                 </div>
                 <span className="font-medium">Tải ảnh thứ hai</span>
@@ -283,7 +283,7 @@ const BeforeAfter: React.FC = () => {
                   <p className="text-gray-600 mb-8">Tải lên ảnh trước điều trị hoặc ảnh cần theo dõi</p>
                   
                   <div 
-                    className="border-2 border-dashed border-gray-300 rounded-lg p-12 hover:border-blue-400 transition-colors cursor-pointer"
+                    className="border-2 border-dashed border-gray-300 rounded-lg p-12 hover:border-[#145566] transition-colors cursor-pointer"
                     onClick={() => firstImageInputRef.current?.click()}
                   >
                     <Camera className="h-16 w-16 text-gray-400 mx-auto mb-4" />
@@ -308,7 +308,7 @@ const BeforeAfter: React.FC = () => {
                   <p className="text-gray-600 mb-8">Tải lên ảnh sau điều trị để so sánh</p>
                   
                   <div 
-                    className="border-2 border-dashed border-gray-300 rounded-lg p-12 hover:border-blue-400 transition-colors cursor-pointer"
+                    className="border-2 border-dashed border-gray-300 rounded-lg p-12 hover:border-[#145566] transition-colors cursor-pointer"
                     onClick={() => secondImageInputRef.current?.click()}
                   >
                     <Upload className="h-16 w-16 text-gray-400 mx-auto mb-4" />
@@ -325,9 +325,9 @@ const BeforeAfter: React.FC = () => {
                   />
 
                   {state.currentProcess && (
-                    <div className="mt-8 p-4 bg-blue-50 rounded-lg">
-                      <p className="text-blue-800">✅ Ảnh đầu tiên đã được tải lên thành công!</p>
-                      <p className="text-blue-600 text-sm">ID quá trình: {state.currentProcess.id}</p>
+                    <div className="mt-8 p-4 bg-teal-50 rounded-lg">
+                      <p className="text-teal-800">✅ Ảnh đầu tiên đã được tải lên thành công!</p>
+                      <p className="text-teal-600 text-sm">ID quá trình: {state.currentProcess.id}</p>
                     </div>
                   )}
                 </div>
@@ -336,7 +336,7 @@ const BeforeAfter: React.FC = () => {
               {/* Loading State */}
               {state.isLoading && (
                 <div className="text-center py-8">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#145566] mx-auto mb-4"></div>
                   <p className="text-gray-600">Đang xử lý ảnh...</p>
                 </div>
               )}
@@ -355,7 +355,7 @@ const BeforeAfter: React.FC = () => {
                   className="w-full h-full object-cover"
                   draggable={false}
                 />
-                <div className="absolute bottom-4 right-4 bg-green-500 text-white px-3 py-1 rounded-lg text-sm font-semibold">
+                <div className="absolute bottom-4 right-4 bg-[#145566] text-white px-3 py-1 rounded-lg text-sm font-semibold">
                   SAU
                 </div>
               </div>
@@ -409,7 +409,7 @@ const BeforeAfter: React.FC = () => {
                   <span>Trước điều trị</span>
                 </div>
                 <div className="flex items-center">
-                  <div className="w-4 h-4 bg-green-500 rounded mr-2"></div>
+                  <div className="w-4 h-4 bg-[#145566] rounded mr-2"></div>
                   <span>Sau điều trị</span>
                 </div>
               </div>
